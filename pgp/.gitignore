@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Django
+*.sqlite3
+/db.sqlite3
+*.log
+/staticfiles/
+media/
+*.pot
+*.pyc
+*.pyd
+*.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# MacOS files
+.DS_Store
+
+# Python-related
+*.egg-info/
+dist/
+build/
+
+# Secret files
+*.env
