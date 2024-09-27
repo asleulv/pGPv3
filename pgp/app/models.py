@@ -12,7 +12,7 @@ class Round(models.Model):
     end_date = models.DateTimeField()
     playlist_released = models.BooleanField(default=False)
     organizer = models.ForeignKey(User, on_delete=models.CASCADE)
-    playlist_url = models.URLField(blank=True, null=True)
+    playlist_url = models.URLField(default='', blank=True)
     release_time = models.DateTimeField(null=True, blank=True)
     round_finished = models.BooleanField(default=False) 
 

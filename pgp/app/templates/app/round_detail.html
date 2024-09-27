@@ -61,6 +61,7 @@
             {% endif %}
         </p>
     </div>
+    {% load i18n %}
 
     {% if round.playlist_released %}
     <h2 class="text-2xl font-bold bg-purple-500 text-white p-2 shadow-md">pGP-liste:</h2>
@@ -95,7 +96,14 @@
         <p>Du har ikke sendt inn noe bidrag ennå.</p>
     {% endif %}
 {% else %}
-<h2 class="text-2xl font-bold bg-green-500 text-white p-2 shadow-md">
+{% if round.start_date < now %}
+    <div class="p-4 mb-4 bg-red-500 text-white font-bold text-center shadow-md">
+        😖 Fristen for å levere bidrag er passert
+    </div>
+{% endif %}
+
+{% if round.start_date >= now %}
+    <h2 class="text-2xl font-bold bg-green-500 text-white p-2 shadow-md">
         {% if player_song %}Endre bidrag:{% else %}Send inn bidrag:{% endif %}
     </h2>
     <div class="p-4 mb-8 bg-white shadow-lg">
@@ -111,6 +119,9 @@
                 {% if player_song %}🤠 Endre bidrag{% else %}😎 Send inn bidrag{% endif %}
             </button>
         </form>
+    </div>
+{% endif %}
+
         
         {% if player_song %}
         <form method="post" action="{% url 'delete_song' pk=round.pk %}" id="delete-form">
@@ -223,7 +234,7 @@
         <table class="table-auto w-full border-collapse border border-gray-400">
             <thead>
                 <tr class="bg-gray-200">
-                    <th class="border border-gray-400 p-2">Innsendar</th> <!-- New column for player name -->
+                    <th class="border border-gray-400 p-2">Innsendar</th>
                     <th class="border border-gray-400 p-2">Sang</th>
                     {% for player in players %}
                         <th class="border border-gray-400 p-2">{{ player.nickname }}</th>
@@ -257,7 +268,7 @@
                             </td>
                         {% endfor %}
                         <td class="border border-gray-400 p-2">
-                            {{ song.total_score }} <!-- Directly display total score -->
+                            {{ song.aggregated_score }} <!-- Display the aggregated score -->
                         </td>
                     </tr>
                 {% endfor %}
@@ -265,16 +276,6 @@
         </table>
     </div>
 </div>
-
-
-
-
-
-
-
-
-
-
 
         <hr class="my-4 border-red-300">
         <button id="copy-urls-button" class="bg-red-500 text-white px-4 py-1 hover:bg-blue-700">
@@ -291,9 +292,16 @@
                    value="{{ round.playlist_url }}" 
                    class="w-full p-2 text-base border" 
                    placeholder="Skriv inn Spotify-liste URL" />
-            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
-                {% if round.playlist_released %}🔄 Oppdater liste{% else %}📤 Publiser liste{% endif %}
-            </button>
+                   
+            {% if round.start_date > now %}
+                <button type="submit" class="bg-gray-400 text-white font-bold py-1 px-2 rounded" disabled>
+                    📤 Venter på bidragsfrist
+                </button>
+            {% else %}
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
+                    {% if round.playlist_released %}🔄 Oppdater liste{% else %}📤 Publiser liste{% endif %}
+                </button>
+            {% endif %}
         </form>
         {% if not round_finished %}
         <div class="border-t-4 border-red-600 my-4"></div>
@@ -330,26 +338,42 @@ function openModal() {
     }
 }
 
-document.getElementById('copy-urls-button').addEventListener('click', function() {
-    const songLinks = [];
-    const songs = document.querySelectorAll('#songs-list li');
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('copy-urls-button').addEventListener('click', function() {
+        const songLinks = [];
+        const rows = document.querySelectorAll('table tbody tr'); // Select all table rows in the tbody
 
-    songs.forEach(function(song) {
-        const link = song.querySelector('a'); // Select the anchor tag inside the list item
-        if (link) {
-            songLinks.push(link.href); // Get the href attribute (Spotify URL)
+        rows.forEach(function(row) {
+            const link = row.querySelector('td:nth-child(2) a'); // Get the link in the second cell
+            if (link) {
+                songLinks.push(link.href); 
+            }
+        });
+
+        if (songLinks.length === 0) {
+            alert('Ingen Spotify-lenker å kopiere!');
+            return; // Exit the function if there are no links
         }
-    });
 
-    // Shuffle the songLinks array
-    songLinks.sort(() => Math.random() - 0.5);
+        // Shuffle the songLinks array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
 
-    navigator.clipboard.writeText(songLinks.join('\n')).then(function() {
-        alert('Spotify-lenkene er kopiert til utklippstavlen!');
-    }).catch(function(error) {
-        console.error('Feil ved kopiering: ', error);
+        shuffleArray(songLinks);
+
+        navigator.clipboard.writeText(songLinks.join('\n')).then(function() {
+            alert('Spotify-lenkene er kopiert til utklippstavlen!');
+        }).catch(function(error) {
+            console.error('Feil ved kopiering: ', error);
+        });
     });
 });
+
 
 document.getElementById('exportButton').addEventListener('click', function () {
     // Get the table element
@@ -362,6 +386,85 @@ document.getElementById('exportButton').addEventListener('click', function () {
 
     // Export the workbook to a file
     XLSX.writeFile(workbook, 'exported_table.xlsx'); // Set the file name
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const startDateSelect = document.getElementById('start_date');
+    const endDateSelect = document.getElementById('end_date');
+    const startTimeSelect = document.getElementById('start_time');
+    const endTimeSelect = document.getElementById('end_time');
+
+    // Function to format date as "3. september 2024" in Norwegian
+    function formatDate(date) {
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        return new Intl.DateTimeFormat('nb-NO', options).format(date);
+    }
+
+    // Function to generate dates based on a start date
+    function getNext10Dates(startDate) {
+        const dates = [];
+        const start = new Date(startDate);
+        for (let i = 0; i < 10; i++) {
+            const nextDate = new Date(start);
+            nextDate.setDate(start.getDate() + i);
+            dates.push(nextDate);
+        }
+        return dates;
+    }
+
+    // Populate the start date options
+    function populateStartDateOptions() {
+        const today = new Date();
+        const next10Dates = getNext10Dates(today);
+        next10Dates.forEach(date => {
+            const option = document.createElement('option');
+            option.value = date.toISOString().slice(0, 10);
+            option.textContent = formatDate(date);
+            startDateSelect.appendChild(option);
+        });
+    }
+
+    // Update end date options based on selected start date
+    function updateEndDateOptions() {
+        const selectedStartDate = startDateSelect.value;
+        endDateSelect.innerHTML = ''; // Clear existing options
+        if (selectedStartDate) {
+            const next10Dates = getNext10Dates(selectedStartDate);
+            next10Dates.forEach(date => {
+                const option = document.createElement('option');
+                option.value = date.toISOString().slice(0, 10);
+                option.textContent = formatDate(date);
+                endDateSelect.appendChild(option);
+            });
+        }
+    }
+
+    // Generate time options (1-24 hours)
+    function populateTimeOptions() {
+        for (let hour = 1; hour <= 24; hour++) {
+            const option = document.createElement('option');
+            const hourString = hour < 10 ? `0${hour}` : `${hour}`;
+            option.value = `${hourString}:00`;
+            option.textContent = `${hourString}:00`;
+            startTimeSelect.appendChild(option);
+            endTimeSelect.appendChild(option.cloneNode(true));
+        }
+    }
+
+    // Set default time for both start and end time dropdowns
+    function setDefaultTimes() {
+        startTimeSelect.value = '10:00';
+        endTimeSelect.value = '10:00';
+    }
+
+    // Attach change event listener to the start date select
+    startDateSelect.addEventListener('change', updateEndDateOptions);
+
+    // Initial population of start and end date options
+    populateStartDateOptions();
+    updateEndDateOptions();
+    populateTimeOptions();
+    setDefaultTimes(); // Set default time
 });
 
 </script>

@@ -12,6 +12,8 @@ from .spotify_views import get_spotify_client
 from urllib.parse import urlparse
 from django import forms
 from docx.shared import Pt
+from django.db.models import Sum, Value
+from django.db.models.functions import Coalesce
 import re
 from docx import Document
 import logging
@@ -97,13 +99,17 @@ def round_detail(request, pk):
 
     # Calculate total scores for songs in this round
     all_submitted_songs = Song.objects.filter(round=round_instance).annotate(
-        aggregated_score=models.Sum('vote__score')  # Use a different name
-    ).order_by('-aggregated_score')  # Sort by the new field name
+        aggregated_score=Coalesce(Sum('vote__score'), Value(0))  # Default to 0 if no votes
+    ).order_by('-aggregated_score')
+
+    submitted_player_ids = all_submitted_songs.values_list('player_id', flat=True).distinct()
 
     if is_organizer and request.method == "POST" and 'finish_round' in request.POST:
         round_instance.round_finished = True
         round_instance.save()
         return redirect('round_detail', pk=round_instance.pk)
+    
+
 
     # Update the context to include all necessary data for both organizers and players
     context = {
@@ -119,7 +125,7 @@ def round_detail(request, pk):
         'countdown': countdown,
         'all_submitted_songs': all_submitted_songs,
         'num_submitted_songs': all_submitted_songs.count(),
-        'players': Player.objects.all(),  # Get all players for the context
+        'players': Player.objects.filter(id__in=submitted_player_ids), # Get all players for the context
         'votes_dict': {
             song.id: {
                 vote.player.id: vote.score for vote in song.vote_set.all()
@@ -339,4 +345,58 @@ def export_to_word(request, round_id):
     
     doc.save(response)  # Save the document to the response
     return response
+
+from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
+from datetime import datetime
+from .models import Round
+from .forms import RoundForm
+
+@login_required
+def update_round_times(request, round_id):
+    round_instance = get_object_or_404(Round, pk=round_id)
+
+    # Check if the user is the organizer
+    if request.user != round_instance.organizer:
+        messages.error(request, 'You are not authorized to update this round.')
+        return redirect('round_detail', round_id=round_instance.id)
+
+    if request.method == "POST":
+        form = RoundForm(request.POST, instance=round_instance)
+        if form.is_valid():
+            start_date_str = request.POST.get('start_date')
+            end_date_str = request.POST.get('end_date')
+            start_time_str = request.POST.get('start_time', '00:00')
+            end_time_str = request.POST.get('end_time', '00:00')
+
+            try:
+                start_datetime = datetime.combine(
+                    datetime.strptime(start_date_str, '%Y-%m-%d').date(),
+                    datetime.strptime(start_time_str, '%H:%M').time()
+                )
+                end_datetime = datetime.combine(
+                    datetime.strptime(end_date_str, '%Y-%m-%d').date(),
+                    datetime.strptime(end_time_str, '%H:%M').time()
+                )
+
+                # Check if end time is after start time
+                if end_datetime <= start_datetime:
+                    messages.error(request, 'End time must be after start time.')
+                    return render(request, 'rounds/update_round_times.html', {'round': round_instance, 'form': form})
+
+                # Update round times
+                round_instance.start_date = start_datetime
+                round_instance.end_date = end_datetime
+                round_instance.save()
+
+                messages.success(request, 'Round times updated successfully!')
+                return redirect('round_detail', round_id=round_instance.id)
+
+            except ValueError:
+                messages.error(request, 'Invalid date or time format.')
+                return render(request, 'rounds/update_round_times.html', {'round': round_instance, 'form': form})
+    else:
+        form = RoundForm(instance=round_instance)
+
+    return render(request, 'rounds/update_round_times.html', {'round': round_instance, 'form': form})
 
