@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}My Django App{% endblock %}</title>
+    <!-- Tailwind CSS via CDN -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body class="bg-gray-100">
+    <nav class="bg-blue-600 p-4 text-white">
+      <div class="container mx-auto flex items-center justify-between">
+        <a href="/" class="font-bold text-lg">pGP beta1</a>
+        <ul class="flex items-center space-x-4">
+          <li>
+            <a href="{% url 'create_round' %}" class="hover:underline"
+              >Ny pGP-runde</a
+            >
+          </li>
+          <li>
+            <a href="{% url 'round_list' %}" class="hover:underline"
+              >pGP-runder</a
+            >
+          </li>
+          {% if user.is_authenticated %}
+          <li class="relative">
+            <button
+              id="user-menu"
+              class="flex items-center space-x-2 focus:outline-none"
+            >
+              <span>👻{{ user.username }}</span>
+              <svg
+                class="w-4 h-4 ml-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                ></path>
+              </svg>
+            </button>
+            <div
+              id="dropdown-menu"
+              class="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-lg hidden"
+            >
+              <a
+                href="{% url 'logout' %}"
+                class="block px-4 py-2 text-sm hover:bg-gray-100"
+                >Logg ut</a
+              >
+            </div>
+          </li>
+          {% else %}
+          <li>
+            <a href="{% url 'login' %}" class="hover:underline">Logg inn</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container mx-auto my-8">
+      {% if messages %}
+      <div class="container mx-auto my-8">
+        {% for message in messages %} {% if message.tags == 'error' %}
+        <div class="p-4 mb-4 text-white bg-red-500">{{ message }}</div>
+        {% elif message.tags == 'success' %}
+        <div class="p-4 mb-4 text-white bg-green-500">{{ message }}</div>
+        {% elif message.tags == 'info' %}
+        <div class="p-4 mb-4 text-white bg-blue-500">{{ message }}</div>
+        {% endif %} {% endfor %}
+      </div>
+      {% endif %} {% block content %} {% endblock %}
+    </div>
+
+    <footer class="text-center py-4 bg-blue-600 text-white">
+      &copy; Megadik
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const userMenuButton = document.getElementById("user-menu");
+        const dropdownMenu = document.getElementById("dropdown-menu");
+
+        userMenuButton.addEventListener("click", () => {
+          dropdownMenu.classList.toggle("hidden");
+        });
+
+        document.addEventListener("click", (event) => {
+          if (
+            !userMenuButton.contains(event.target) &&
+            !dropdownMenu.contains(event.target)
+          ) {
+            dropdownMenu.classList.add("hidden");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

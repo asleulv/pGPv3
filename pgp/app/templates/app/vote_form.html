@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-md"><br>
+  <div id="all-songs" class="box">
+    <h4>pGP-bidrag:</h4>
+    <form method="post">
+      {% csrf_token %}
+
+      {% for song in songs %}
+      <pre>{{ song.votes }}</pre>
+
+      <div class="field-with-border {% cycle 'bg-gray-100' 'bg-white' %} p-2">
+        <div>
+          <div class="flex justify-between items-center">
+            <label for="track-{{ song.id }}">{{ song.title }} - {{ song.artist }}</label>
+            <select name="track-{{ song.id }}" data-song-name="{{ song.title }}" class="ml-auto">
+              <option value="">Poeng?</option>
+              {% for i in score_range %}
+              <option value="{{ i }}">{{ i }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          {% if form.track_id.errors %}
+          <ul>
+            {% for error in form.track_id.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      <div id="selected-values" class="box">
+        <h4>Dine poeng:</h4>
+        <ul id="selected-list"></ul>
+        <button id="copy-btn" class="btn btn-primary" style="display: none;">🐼Kopier til utklippstavle</button>
+      </div>
+
+      <!-- New "Lever Stemmer" button -->
+      <div id="submit-section" class="box" style="display: none;">
+        <button type="submit" class="btn btn-success">Lever Stemmer</button>
+      </div>
+    </form>
+  </div>
+
+  {% for line in new_order %}
+  {% with song_title=line.0 song_artist=line.1 score=line.2 %}
+  <output>{{ score }}: {{ song_artist }} - {{ song_title }}</output><br>
+  {% endwith %}
+  {% endfor %}
+</div>
+
+<style>
+  .select-option-disabled {
+    color: #ccc;
+    font-style: italic;
+  }
+
+  .box {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 20px;
+    background-color: #f9f9f9;
+  }
+
+  #selected-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  #selected-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+  }
+
+  #selected-list li:last-child {
+    border-bottom: none;
+  }
+
+  .field-with-border {
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .field-with-border:last-child {
+    border-bottom: none;
+  }
+
+  .info-text {
+    font-size: 14px;
+    color: #555;
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 768px) {
+    .box {
+      padding: 12px;
+    }
+
+    form div {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 10px;
+    }
+
+    label {
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    select {
+      font-size: 14px;
+      padding: 8px;
+      width: 100%; /* Make dropdown full width on mobile */
+    }
+
+    .song-item {
+      flex-direction: column; /* Stack items vertically on mobile */
+      align-items: flex-start;
+    }
+
+    #selected-list li {
+      font-size: 14px;
+    }
+
+    h4 {
+      font-size: 18px;
+    }
+
+    #copy-btn {
+      width: 100%;
+      margin-top: 10px;
+    }
+  }
+</style>
+
+<script type="text/javascript">
+(() => {
+    const elems = document.querySelectorAll('select[name^="track-"]');
+    const selectedList = document.getElementById('selected-list');
+    const copyBtn = document.getElementById('copy-btn');
+    const submitSection = document.getElementById('submit-section');
+    const submitBtn = document.getElementById('submit-btn');
+
+    // This array keeps track of all selected values globally
+    const selectedScores = {};
+
+    const updateSelectedList = () => {
+      const selectedItems = Array.from(elems)
+        .map(e => {
+          const selectedOption = e.options[e.selectedIndex];
+          return {
+            value: selectedOption?.value || '',
+            name: e.dataset.songName || 'Unknown'
+          };
+        })
+        .filter(item => item.value !== '')
+        .sort((a, b) => b.value - a.value); // Sort in descending order
+
+      selectedList.innerHTML = '';
+      selectedItems.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.value}: ${item.name}`;
+        selectedList.appendChild(li);
+      });
+
+      // Show copy button and "Lever Stemmer" button if exactly 10 points are selected
+      const allPointsSelected = selectedItems.length === 10;
+      copyBtn.style.display = allPointsSelected ? 'inline-block' : 'none';
+      submitSection.style.display = allPointsSelected ? 'block' : 'none';
+    };
+
+    const disableSelectedScores = () => {
+      // Reset all options first
+      elems.forEach(sel => {
+        Array.from(sel.options).forEach(opt => {
+          opt.disabled = false;
+          opt.classList.remove('select-option-disabled');
+        });
+      });
+
+      // Then disable the selected scores across all elements
+      Object.keys(selectedScores).forEach(selectedValue => {
+        elems.forEach(sel => {
+          const selectedSongId = sel.name.split('-')[1];
+          if (selectedScores[selectedValue] !== selectedSongId) {
+            Array.from(sel.options).forEach(opt => {
+              if (opt.value == selectedValue) {
+                opt.disabled = true;
+                opt.classList.add('select-option-disabled');
+              }
+            });
+          }
+        });
+      });
+    };
+
+    elems.forEach(elem => {
+      const songId = elem.name.split('-')[1]; // Get the song ID from the select name
+
+      elem.addEventListener('change', evt => {
+        const val = evt.target.value;
+
+        // Remove the previous selection for this song if one existed
+        const previousSelectedValue = Object.keys(selectedScores).find(key => selectedScores[key] === songId);
+        if (previousSelectedValue) {
+          delete selectedScores[previousSelectedValue];
+        }
+
+        // Add the new selection if a score is selected
+        if (val !== '') {
+          selectedScores[val] = songId;
+        }
+
+        // Disable selected scores globally and update the displayed list
+        disableSelectedScores();
+        updateSelectedList();
+      });
+    });
+
+    // Clipboard functionality
+    copyBtn.addEventListener('click', () => {
+      const textToCopy = Array.from(selectedList.children)
+        .map(li => li.textContent)
+        .join('\n');
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        alert('Poeng kopiert til utklippstavle');
+      }, (err) => {
+        console.error('Failed to copy: ', err);
+      });
+    });
+
+    // Submit button functionality
+    submitBtn.addEventListener('click', () => {
+      document.querySelector('form').submit(); // Submit the form when "Lever Stemmer" is clicked
+    });
+  })()
+</script>
+
+{% endblock %}
