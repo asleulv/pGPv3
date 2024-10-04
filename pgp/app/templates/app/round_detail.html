@@ -41,25 +41,59 @@
         <hr class="my-4 border-gray-300">
         
         <p class="mb-2">
-            <strong>Send inn stemmer:</strong> 
+            <strong>
+                {% if player_votes %}
+                    Dine poeng:
+                {% else %}
+                    Send inn stemmer:
+                {% endif %}
+            </strong>
             {% if round.playlist_released %}
                 {% if round.end_date > now %}
                     {% if countdown %}
                         ⌛️ Stemmeskjema blir lagt ut om {{ countdown }}
                     {% else %}
-                        {% if has_voted %}
-                            Du har allerede stemt.
+                        {% if player_votes %}
+                            <ul id="votes-list">
+                                {% for vote in player_votes %}
+                                    <li>{{ vote.score }}: {{ vote.song.artist }} - {{ vote.song.title }}</li>
+                                {% endfor %}
+                            </ul>
+                            <button 
+                                type="button" 
+                                class="bg-blue-500 text-white px-2 py-1" 
+                                onclick="copyVotesToClipboard()"
+                                aria-label="Kopier stemmer"
+                            >
+                                <i class="fas fa-copy"></i> <!-- Font Awesome copy icon -->
+                            </button>
                         {% else %}
-                            <a href="{% url 'vote_form' round.pk %}" class="text-blue-500 underline" target="_blank">Skjema</a>
+                            {% if has_submitted_song %}
+                                <a href="{% url 'vote_form' round.pk %}" class="text-blue-500 underline" target="_blank">Skjema</a>
+                            {% else %}
+                                Du deltar ikkje denne runden...
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 {% else %}
-                    📅 Stemmefristen er passert. Sorry, Tormod (evt andre)
+                    {% if player_votes %}
+                        
+                        <ul id="votes-list">
+                            {% for vote in player_votes %}
+                                <li>{{ vote.score }}: {{ vote.song.artist }} - {{ vote.song.title }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        📅 Stemmefristen har passert ☹️
+                    {% endif %}
                 {% endif %}
             {% else %}
                 ⏱
             {% endif %}
         </p>
+        
+        
+        
     </div>
     {% load i18n %}
 
@@ -158,6 +192,7 @@
 </h2>
 <div class="p-4 text-black bg-white shadow-lg">
     <p class="mb-4">Antall bidrag: {{ num_submitted_songs }}</p>
+</div>
     <button id="exportButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
         Excel-eksport
     </button>
@@ -221,11 +256,31 @@
 </h2>
 
 <div class="p-4 text-black bg-white shadow-lg">
-    <p class="mb-4">Antall bidrag: {{ num_submitted_songs }}</p>
-    <button id="exportButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+    <p class="mb-0 font-bold">Antall bidrag: {{ num_submitted_songs }}</p>
+
+    <h3 class="font-bold">Har stemt:</h3>
+    <p>
+        {% if players_with_votes %}
+            {{ players_with_votes|join:", " }}
+        {% else %}
+            No players have voted yet.
+        {% endif %}
+    </p>
+
+    <h3 class="font-bold">Manglar stemmer frå:</h3>
+    <p>
+        {% if players_without_votes %}
+            {{ players_without_votes|join:", " }}
+        {% else %}
+            All players have voted!
+        {% endif %}
+    </p>
+</div>
+</div>
+    <button id="exportExcelButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
         Excel-eksport
     </button>
-    <button id="exportButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+    <button id="exportWordButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
         <a href="{% url 'export_to_word' round_id=round.id %}" class="text-white">Word-eksport</a>
     </button>
     <hr class="border-red-300">
@@ -275,7 +330,7 @@
             </tbody>
         </table>
     </div>
-</div>
+
 
         <hr class="my-4 border-red-300">
         <button id="copy-urls-button" class="bg-red-500 text-white px-4 py-1 hover:bg-blue-700">
@@ -305,7 +360,7 @@
         </form>
         {% if not round_finished %}
         <div class="border-t-4 border-red-600 my-4"></div>
-<p class="text-red-600 font-bold mb-5">☢️ Tenk deg om no då...</p>
+<p class="text-red-600 font-bold mb-5">☢️ Tenk deg om no då... Resultata blir lagt ut så hugs å køyre sending først!</p>
 
         
     <form method="post" action="" onsubmit="return confirm('Er pGP-runden ferdig? Alle vil sjå resultata om du fortsetter...');">
@@ -321,7 +376,7 @@
 {% endif %}
     </div>
 {% endif %}
-
+</div>
 
     
 </div>
@@ -374,9 +429,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+const roundName = "{{ round.name|escapejs }}";
 
-document.getElementById('exportButton').addEventListener('click', function () {
-    // Get the table element
+// Excel Export Functionality
+document.getElementById('exportExcelButton').addEventListener('click', function () {
     const table = document.querySelector('table');
     const workbook = XLSX.utils.book_new(); // Create a new workbook
     const worksheet = XLSX.utils.table_to_sheet(table); // Convert the HTML table to a worksheet
@@ -384,88 +440,30 @@ document.getElementById('exportButton').addEventListener('click', function () {
     // Add the worksheet to the workbook
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Songs');
 
-    // Export the workbook to a file
-    XLSX.writeFile(workbook, 'exported_table.xlsx'); // Set the file name
+    // Sanitize the round name to remove invalid characters for file naming
+    const sanitizedRoundName = roundName.replace(/[<>:"/\\|?*]/g, '');
+
+    // Export the workbook to a file with the round name
+    XLSX.writeFile(workbook, `${sanitizedRoundName}_resultat.xlsx`); // Set the file name
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    const startDateSelect = document.getElementById('start_date');
-    const endDateSelect = document.getElementById('end_date');
-    const startTimeSelect = document.getElementById('start_time');
-    const endTimeSelect = document.getElementById('end_time');
 
-    // Function to format date as "3. september 2024" in Norwegian
-    function formatDate(date) {
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        return new Intl.DateTimeFormat('nb-NO', options).format(date);
-    }
+function copyVotesToClipboard() {
+    const votesList = document.getElementById('votes-list');
+    const votesText = Array.from(votesList.getElementsByTagName('li'))
+        .map(li => li.textContent)
+        .join('\n');
 
-    // Function to generate dates based on a start date
-    function getNext10Dates(startDate) {
-        const dates = [];
-        const start = new Date(startDate);
-        for (let i = 0; i < 10; i++) {
-            const nextDate = new Date(start);
-            nextDate.setDate(start.getDate() + i);
-            dates.push(nextDate);
-        }
-        return dates;
-    }
-
-    // Populate the start date options
-    function populateStartDateOptions() {
-        const today = new Date();
-        const next10Dates = getNext10Dates(today);
-        next10Dates.forEach(date => {
-            const option = document.createElement('option');
-            option.value = date.toISOString().slice(0, 10);
-            option.textContent = formatDate(date);
-            startDateSelect.appendChild(option);
+    navigator.clipboard.writeText(votesText)
+        .then(() => {
+            alert('Stemmer kopiert til utklippstavlen!');
+        })
+        .catch(err => {
+            console.error('Failed to copy: ', err);
         });
-    }
+}
 
-    // Update end date options based on selected start date
-    function updateEndDateOptions() {
-        const selectedStartDate = startDateSelect.value;
-        endDateSelect.innerHTML = ''; // Clear existing options
-        if (selectedStartDate) {
-            const next10Dates = getNext10Dates(selectedStartDate);
-            next10Dates.forEach(date => {
-                const option = document.createElement('option');
-                option.value = date.toISOString().slice(0, 10);
-                option.textContent = formatDate(date);
-                endDateSelect.appendChild(option);
-            });
-        }
-    }
 
-    // Generate time options (1-24 hours)
-    function populateTimeOptions() {
-        for (let hour = 1; hour <= 24; hour++) {
-            const option = document.createElement('option');
-            const hourString = hour < 10 ? `0${hour}` : `${hour}`;
-            option.value = `${hourString}:00`;
-            option.textContent = `${hourString}:00`;
-            startTimeSelect.appendChild(option);
-            endTimeSelect.appendChild(option.cloneNode(true));
-        }
-    }
-
-    // Set default time for both start and end time dropdowns
-    function setDefaultTimes() {
-        startTimeSelect.value = '10:00';
-        endTimeSelect.value = '10:00';
-    }
-
-    // Attach change event listener to the start date select
-    startDateSelect.addEventListener('change', updateEndDateOptions);
-
-    // Initial population of start and end date options
-    populateStartDateOptions();
-    updateEndDateOptions();
-    populateTimeOptions();
-    setDefaultTimes(); // Set default time
-});
 
 </script>
 

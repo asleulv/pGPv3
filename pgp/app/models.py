@@ -55,6 +55,9 @@ class Vote(models.Model):
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
     score = models.IntegerField()
 
+    class Meta:
+        unique_together = ('player', 'song')
+
     def __str__(self):
         return f"{self.player.nickname} -> {self.song.title}: {self.score}"
     

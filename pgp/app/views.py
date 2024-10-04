@@ -104,13 +104,29 @@ def round_detail(request, pk):
 
     submitted_player_ids = all_submitted_songs.values_list('player_id', flat=True).distinct()
 
+    player_votes = Vote.objects.filter(player=player, song__round=round_instance) \
+        .select_related('song') \
+        .order_by('-score')  # Sort votes by score
+    
+    all_players = Player.objects.filter(id__in=submitted_player_ids)
+
+    # Get the list of players who have voted
+    players_with_votes = Vote.objects.filter(song__round=round_instance).values_list('player_id', flat=True).distinct()
+    players_with_votes_ids = set(players_with_votes)
+
+    # Get players who have not voted
+    players_without_votes = all_players.exclude(id__in=players_with_votes_ids)
+    
+    has_submitted_song = player_song is not None
+
     if is_organizer and request.method == "POST" and 'finish_round' in request.POST:
         round_instance.round_finished = True
         round_instance.save()
         return redirect('round_detail', pk=round_instance.pk)
     
-
-
+    print(f"Players with votes: {players_with_votes}")
+    print(f"Players without votes: {players_without_votes}")
+    
     # Update the context to include all necessary data for both organizers and players
     context = {
         'round': round_instance,
@@ -125,14 +141,18 @@ def round_detail(request, pk):
         'countdown': countdown,
         'all_submitted_songs': all_submitted_songs,
         'num_submitted_songs': all_submitted_songs.count(),
-        'players': Player.objects.filter(id__in=submitted_player_ids), # Get all players for the context
+        'players': Player.objects.filter(id__in=submitted_player_ids), 
+        'players_with_votes': Player.objects.filter(id__in=players_with_votes_ids),  # Players who have voted
+        'players_without_votes': players_without_votes,  # Players who have not voted
         'votes_dict': {
             song.id: {
                 vote.player.id: vote.score for vote in song.vote_set.all()
             }
             for song in all_submitted_songs
         },
+        'player_votes': player_votes, 
         'organizer_data': organizer_data,  # Include organizer data if the user is the organizer
+        'has_submitted_song': has_submitted_song, 
     }
 
     return render(request, 'app/round_detail.html', context)
@@ -265,7 +285,6 @@ def vote_view(request, pk):
     player_song = Song.objects.filter(round=round_instance, player=player).first()
     songs = Song.objects.filter(round=round_instance).exclude(player=player)
 
-
     if request.method == 'POST':
         form = DynamicVoteForm(request.POST, songs=songs)
         logger.debug("Form data: %s", request.POST)
@@ -278,17 +297,21 @@ def vote_view(request, pk):
                 if score:
                     song_id = field_name.split('-')[1]
                     song = get_object_or_404(Song, pk=song_id)
-                    Vote.objects.create(player=player, song=song, score=int(score))
-                    logger.debug(f"Vote saved: Player {player.nickname}, Song {song.title}, Score {score}")
+                    
+                    # Check if the player has already voted for this song
+                    if not Vote.objects.filter(player=player, song=song).exists():
+                        Vote.objects.create(player=player, song=song, score=int(score))
+                        logger.debug(f"Vote saved: Player {player.nickname}, Song {song.title}, Score {score}")
+                    else:
+                        logger.warning(f"Duplicate vote attempt: Player {player.nickname}, Song {song.title}, Score {score}")
             
-            messages.success(request, 'Your votes have been submitted successfully!')
+            messages.success(request, '🤩 Poenga dine er registrert!!')
             return redirect('round_detail', pk=pk)
         else:
             logger.error("Form is invalid")
             logger.debug("Form errors: %s", form.errors)
     else:
         form = DynamicVoteForm(songs=songs)
-
 
     return render(request, 'app/vote_form.html', {
         'round': round_instance,
@@ -305,46 +328,77 @@ def export_to_word(request, round_id):
     # Get all submitted songs for this round, ordered by total_score (ascending)
     all_submitted_songs = Song.objects.filter(round=round_instance).order_by('total_score')
     
-    # Get players for the round
-    players = Player.objects.all()  # Get all players (adjust if you need to filter by round)
+    # Get all players who submitted songs in the current round
+    submitted_players = all_submitted_songs.values_list('player', flat=True).distinct()  # Get unique players who submitted songs
     
+    # Get players who voted
+    voted_players = Vote.objects.filter(song__round=round_instance).values_list('player', flat=True).distinct()
+    voted_players_set = set(voted_players)  # Unique players who have voted
+
+    # Identify disqualified players (those who haven't voted)
+    disqualified_players = [player for player in submitted_players if player not in voted_players_set]
+
     # Create a new Document
     doc = Document()
 
+    doc.add_heading(f"Oppsummering av runden: {round_instance.name}", level=1)
+
+    # Add Disqualified players section
+    if disqualified_players:
+        doc.add_heading("🤢 Diska:", level=2)
+        for player_id in disqualified_players:
+            player_nickname = Player.objects.get(id=player_id).nickname  # Get the player's nickname
+            
+            # Get the song details for the player (assuming one song per player for simplicity)
+            song = all_submitted_songs.filter(player_id=player_id).first()  # Get the first song submitted by the player
+            if song:
+                total_score = song.total_score
+                artist = song.artist  # Adjust if you need to access the artist differently
+                # Add the player nickname with song details in parentheses
+                doc.add_paragraph(f"{player_nickname} ({artist} - {song.title}, {total_score} poeng)")
+
+    # Add a blank line before the summary
+    doc.add_paragraph("") 
+
+    # Now only include players who have voted in the summary
     for song in all_submitted_songs:
         total_score = song.total_score
         player_nickname = song.player.nickname  # The player who submitted the song
         
-        # Write song details to the document
-        header_paragraph = doc.add_paragraph()
-        run = header_paragraph.add_run(f"{song.title} - {total_score} poeng totalt")
-        run.bold = True
-        run.font.size = Pt(14)  # Set font size for title
-        run.font.name = 'Arial'  # Change font family
-        
-        # Create a new paragraph for "Levert av"
-        delivered_paragraph = doc.add_paragraph()
-        delivered_run = delivered_paragraph.add_run(f"Levert av: {player_nickname}")
-        delivered_run.bold = True
-        delivered_run.font.size = Pt(12)  # Set font size for "Levert av"
-        delivered_run.font.name = 'Arial'  # Change font family for consistency
-        
-        doc.add_paragraph("Poeng:")
-        
-        # Get the votes for the song
-        votes = Vote.objects.filter(song=song)  # Get all votes for the current song
-        for vote in votes:
-            doc.add_paragraph(f"{vote.score} poeng fra {vote.player.nickname}")
+        # Check if the player who submitted this song has voted
+        if song.player.id in voted_players_set:
+            # Write song details to the document
+            header_paragraph = doc.add_paragraph()
+            run = header_paragraph.add_run(f"{song.artist} - {song.title} ({total_score} poeng)")
+            run.bold = True
+            run.font.size = Pt(14)  # Set font size for title
+            run.font.name = 'Arial'  # Change font family
+            
+            # Create a new paragraph for "Levert av"
+            delivered_paragraph = doc.add_paragraph()
+            delivered_run = delivered_paragraph.add_run(f"Levert av: {player_nickname}")
+            delivered_run.bold = True
+            delivered_run.font.size = Pt(12)  # Set font size for "Levert av"
+            delivered_run.font.name = 'Arial'  # Change font family for consistency
+            
+            doc.add_paragraph("Poeng:")
+            
+            # Get the votes for the song
+            votes = Vote.objects.filter(song=song).order_by('-score')  # Get all votes for the current song, sorted by score descending
+            for vote in votes:
+                doc.add_paragraph(f"{vote.score} poeng fra {vote.player.nickname}")
 
-        # Add a blank line between songs
-        doc.add_paragraph("")  # This adds a line break
+            # Add a blank line between songs
+            doc.add_paragraph("")  # This adds a line break
 
     # Prepare the response
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = 'attachment; filename="songs_export.docx"'
+    response['Content-Disposition'] = f'attachment; filename="{round_instance.name}_export.docx"'
     
     doc.save(response)  # Save the document to the response
     return response
+
+
 
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404

@@ -12,7 +12,7 @@
       <div class="field-with-border {% cycle 'bg-gray-100' 'bg-white' %} p-2">
         <div>
           <div class="flex justify-between items-center">
-            <label for="track-{{ song.id }}">{{ song.title }} - {{ song.artist }}</label>
+            <label for="track-{{ song.id }}">{{ song.artist }} - {{ song.title }}</label>
             <select name="track-{{ song.id }}" data-song-name="{{ song.title }}" class="ml-auto">
               <option value="">Poeng?</option>
               {% for i in score_range %}
@@ -34,13 +34,14 @@
       <div id="selected-values" class="box">
         <h4>Dine poeng:</h4>
         <ul id="selected-list"></ul>
-        <button id="copy-btn" class="btn btn-primary" style="display: none;">🐼Kopier til utklippstavle</button>
       </div>
 
       <!-- New "Lever Stemmer" button -->
       <div id="submit-section" class="box" style="display: none;">
-        <button type="submit" class="btn btn-success">Lever Stemmer</button>
-      </div>
+        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-green-300">
+          🚀 Send inn stemmer
+        </button>
+    </div>
     </form>
   </div>
 
@@ -129,11 +130,6 @@
     h4 {
       font-size: 18px;
     }
-
-    #copy-btn {
-      width: 100%;
-      margin-top: 10px;
-    }
   }
 </style>
 
@@ -141,9 +137,7 @@
 (() => {
     const elems = document.querySelectorAll('select[name^="track-"]');
     const selectedList = document.getElementById('selected-list');
-    const copyBtn = document.getElementById('copy-btn');
     const submitSection = document.getElementById('submit-section');
-    const submitBtn = document.getElementById('submit-btn');
 
     // This array keeps track of all selected values globally
     const selectedScores = {};
@@ -167,9 +161,8 @@
         selectedList.appendChild(li);
       });
 
-      // Show copy button and "Lever Stemmer" button if exactly 10 points are selected
+      // Show "Lever Stemmer" button if exactly 10 points are selected
       const allPointsSelected = selectedItems.length === 10;
-      copyBtn.style.display = allPointsSelected ? 'inline-block' : 'none';
       submitSection.style.display = allPointsSelected ? 'block' : 'none';
     };
 
@@ -220,24 +213,7 @@
         updateSelectedList();
       });
     });
-
-    // Clipboard functionality
-    copyBtn.addEventListener('click', () => {
-      const textToCopy = Array.from(selectedList.children)
-        .map(li => li.textContent)
-        .join('\n');
-      navigator.clipboard.writeText(textToCopy).then(() => {
-        alert('Poeng kopiert til utklippstavle');
-      }, (err) => {
-        console.error('Failed to copy: ', err);
-      });
-    });
-
-    // Submit button functionality
-    submitBtn.addEventListener('click', () => {
-      document.querySelector('form').submit(); // Submit the form when "Lever Stemmer" is clicked
-    });
-  })()
+})();
 </script>
 
 {% endblock %}
