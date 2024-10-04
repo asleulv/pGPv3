@@ -38,5 +38,4 @@ build/
 
 # Secret files
 *.env
-settings.py
 
