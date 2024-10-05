@@ -198,14 +198,22 @@ def remove_playlist(request, pk):
         round.save()
     return redirect('round_detail', pk=pk)
 
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from .models import Round, Player, Song
+from .forms import SongSubmissionForm
+from .spotify import get_spotify_client  # Adjust the import based on your project structure
+from urllib.parse import urlparse
+
 @login_required
 def submit_song(request, pk):
-    round = get_object_or_404(Round, pk=pk)
+    round_instance = get_object_or_404(Round, pk=pk)
     player = Player.objects.get(user=request.user)
-    player_song = Song.objects.filter(round=round, player=player).first()
+    player_song = Song.objects.filter(round=round_instance, player=player).first()
 
     # Check if the current date and time is before the round's start_date
-    if timezone.now() > round.start_date:
+    if timezone.now() > round_instance.start_date:
         messages.error(request, 'Ikke registrert - Fristen har passert!')
         return redirect('round_detail', pk=pk)
 
@@ -213,7 +221,16 @@ def submit_song(request, pk):
         form = SongSubmissionForm(request.POST, instance=player_song)
         if form.is_valid():
             spotify_url = form.cleaned_data['spotify_url']
-            track_id = spotify_url.split('/')[-1].split('?')[0]
+            
+            # Validate and clean the Spotify URL
+            parsed_url = urlparse(spotify_url)
+            if parsed_url.netloc != 'open.spotify.com' or not parsed_url.path.startswith('/track/'):
+                messages.error(request, 'Dette er ikkje ei Spotify-låt-lenke, ditt nek!')
+                return redirect('round_detail', pk=pk)
+            
+            # Create the cleaned URL
+            cleaned_spotify_url = f"https://open.spotify.com{parsed_url.path}"
+            track_id = cleaned_spotify_url.split('/')[-1]
             sp = get_spotify_client()
 
             if sp:
@@ -224,10 +241,10 @@ def submit_song(request, pk):
 
                     # Check if the song already exists (same artist and title)
                     existing_song = Song.objects.filter(
-                        round=round,
+                        round=round_instance,
                         title=song_title,
                         artist=artist_name
-                    ).exclude(player=player).exists() 
+                    ).exclude(player=player).exists()
 
                     if existing_song:
                         messages.error(request, '🖐 Stopp! Nokon har allereie levert denne! Prøv igjen med anna låt...')
@@ -235,10 +252,10 @@ def submit_song(request, pk):
 
                     # If the checks pass, update or create the song
                     Song.objects.update_or_create(
-                        round=round,
+                        round=round_instance,
                         player=player,
                         defaults={
-                            'spotify_url': spotify_url,
+                            'spotify_url': cleaned_spotify_url,
                             'title': song_title,
                             'artist': artist_name
                         }
@@ -257,10 +274,11 @@ def submit_song(request, pk):
     form = SongSubmissionForm(instance=player_song)
 
     return render(request, 'app/round_detail.html', {
-        'round': round,
+        'round': round_instance,
         'form': form,
         'player_song': player_song,
     })
+
 
 # View to delete the player's song
 def delete_song(request, pk):
