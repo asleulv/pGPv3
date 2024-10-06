@@ -6,7 +6,7 @@
 {% block content %}
 <div class="bg-white shadow-md rounded p-6 mb-6">
     <h1 class="text-2xl font-bold mb-4">Velkommen, {{ user.username }}!</h1>
-    <p>🤞La oss krysse fingrane for at dette systemet funkar! </p>
+    <p>🤞La oss krysse fingrane for at dette systemet funkar!</p>
 </div>
 
 <div class="shadow-md rounded p-6 bg-white mb-6">
@@ -14,8 +14,9 @@
     {% if active_rounds %}
         <div class="space-y-2">
             {% for round in active_rounds %}
-                <div class="p-2 border-b border-gray-300 last:border-b-0">  {# Optional border for separation #}
-                    <a href="{% url 'round_detail' round.id %}" class="text-blue-600 hover:underline">{{ round.name }}</a> - arrangert av {{ round.organizer.username }}
+                <div class="p-2 border-b border-gray-300 last:border-b-0">
+                    <a href="{% url 'round_detail' round.id %}" class="text-blue-600 hover:underline">{{ round.name }}</a> arrangert av 
+                    <span class="font-semibold text-blue-700">👑{{ round.organizer.username }}</span> {# Styled organizer name #}
                 </div>
             {% endfor %}
         </div>
@@ -24,19 +25,26 @@
     {% endif %}
 </div>
 
-<div class="shadow-md rounded p-4 bg-white">  {# Reduced padding #}
-    <h2 class="text-xl font-bold mb-2">pGP-deltakarar:</h2>  {# Reduced margin bottom #}
+{% load custom_filters %}
+
+<div class="shadow-md rounded p-4 bg-white">
+    <h2 class="text-xl font-bold mb-2">pGP-deltakarar:</h2>
     {% if players %}
-        <div class="space-y-1">  {# Reduced space between players #}
+        <p class="text-black">
             {% for player in players %}
-                <div class="bg-gray-50 p-1 rounded">  {# Reduced padding and added rounded corners #}
-                    <span class="text-black">{{ player.nickname }}</span>
-                </div>
+                {{ random_emojis|get_item:player.id }} {{ player.nickname }}{% if not forloop.last %}, {% endif %}
             {% endfor %}
-        </div>
+        </p>
     {% else %}
-        <p class="text-gray-700">Ingen registrerte spillere.</p>
+        <p class="text-gray-700">Ingen registrerte spelarar.</p>
     {% endif %}
 </div>
+
+
+
+
+
+
+
 
 {% endblock %}

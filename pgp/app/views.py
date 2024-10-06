@@ -17,6 +17,7 @@ from django.db.models.functions import Coalesce
 import re
 from django.contrib.auth import logout
 from docx import Document
+import random
 import logging
 from django.http import HttpResponseForbidden
 from django.contrib.auth import login
@@ -28,12 +29,19 @@ def user_logout(request):
     messages.success(request, "Du er no logga ut. Snakkast!")
     return redirect('home')
 
+@login_required
 def home(request):
     players = Player.objects.all()
     active_rounds = Round.objects.filter(end_date__gte=timezone.now())  # Get current rounds
 
+    emojis = ['🎵', '🎤', '🎸', '🎧', '🎷', '💄', '👓', '🩲', '🌩', '🍓', '🎱', '🧩', '⚓️']
+    
+    # Assign one random emoji to each player
+    random_emojis = {player.id: random.choice(emojis) for player in players}
+
     return render(request, 'app/home.html', {
         'players': players,
+        'random_emojis': random_emojis,
         'active_rounds': active_rounds,
     })
 
