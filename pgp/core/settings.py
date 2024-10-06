@@ -21,6 +21,9 @@ SPOTIPY_CLIENT_ID = config('SPOTIPY_CLIENT_ID')
 SPOTIPY_CLIENT_SECRET = config('SPOTIPY_CLIENT_SECRET')
 REACT_APP_SPOTIPY_REDIRECT_URI = config('SPOTIPY_REDIRECT_URI')
 
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -78,7 +81,7 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, 'templates')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

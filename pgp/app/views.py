@@ -7,7 +7,7 @@ from datetime import timedelta
 from datetime import datetime
 from django.db import models
 from .models import Round, Song, Player, Vote
-from .forms import RoundForm, SongSubmissionForm, DynamicVoteForm
+from .forms import RoundForm, SongSubmissionForm, DynamicVoteForm, RegistrationForm
 from .spotify_views import get_spotify_client
 from urllib.parse import urlparse
 from django import forms
@@ -15,9 +15,18 @@ from docx.shared import Pt
 from django.db.models import Sum, Value
 from django.db.models.functions import Coalesce
 import re
+from django.contrib.auth import logout
 from docx import Document
 import logging
 from django.http import HttpResponseForbidden
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+
+def user_logout(request):
+    logout(request)
+    messages.success(request, "Du er no logga ut. Snakkast!")
+    return redirect('home')
 
 @login_required
 def home(request):
@@ -426,6 +435,28 @@ def export_to_word(request, round_id):
     return response
 
 
+
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        
+        if password1 != password2:
+            messages.error(request, "Passorda er ikkje like!")
+            return render(request, 'registration/register.html', {'form': form})
+
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # Log the user in immediately after registration
+            messages.success(request, "Velkommen ombord - du er no registrert!")
+            return redirect('home')  # Redirect to a home or success page
+
+    else:
+        form = UserCreationForm()
+    
+    return render(request, 'registration/register.html', {'form': form})
 
 
 

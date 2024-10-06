@@ -1,9 +1,11 @@
 from django.urls import path
 from . import views
-from . import spotify_views
+
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('logout/', views.user_logout, name='logout'),
+    path('register/', views.register, name='register'),
     path('create-round/', views.create_round, name='create_round'),
     path('round/<int:pk>/', views.round_detail, name='round_detail'),
     path('round/<int:pk>/submit-song/', views.submit_song, name='submit_song'),
@@ -13,7 +15,5 @@ urlpatterns = [
     path('round/<int:pk>/vote/', views.vote_view, name='vote_form'),  
     path('rounds/', views.round_list, name='round_list'),
     path('export/word/<int:round_id>/', views.export_to_word, name='export_to_word'),
-    
-    # Spotify routes
 
 ]

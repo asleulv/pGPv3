@@ -3,6 +3,8 @@ from django import forms
 from .models import Round, Song, Vote
 from datetime import timedelta
 from django.utils import timezone
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 class RoundForm(forms.ModelForm):
     class Meta:
@@ -74,3 +76,26 @@ class DynamicVoteForm(forms.Form):
                 else:
                     used_scores.append(score)
         return cleaned_data
+    
+class RegistrationForm(forms.ModelForm):
+    password1 = forms.CharField(widget=forms.PasswordInput())
+    password2 = forms.CharField(widget=forms.PasswordInput())
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password1', 'password2']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("password1")
+        password2 = cleaned_data.get("password2")
+
+        if password1 and password2 and password1 != password2:
+            raise ValidationError("Passwords do not match.")
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data['password1'])  # Hash the password
+        if commit:
+            user.save()
+        return user

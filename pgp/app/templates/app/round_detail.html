@@ -127,7 +127,9 @@
         </div>
     </div>
     {% else %}
+    {% if round.start_date >= now %}
         <p>Du har ikkje sendt inn noko bidrag enda.</p>
+        {% endif %}
     {% endif %}
 {% else %}
 {% if round.start_date < now %}
@@ -153,7 +155,7 @@
                 {% if player_song %}🤠 Endre bidrag{% else %}😎 Send inn bidrag{% endif %}
             </button>
         </form>
-    </div>
+    
 {% endif %}
 
         
@@ -246,7 +248,7 @@
             </tbody>
         </table>
     </div>
-</div>
+
 {% endif %}
 
 
@@ -263,7 +265,7 @@
         {% if players_with_votes %}
             {{ players_with_votes|join:", " }}
         {% else %}
-            No players have voted yet.
+            Ingen!
         {% endif %}
     </p>
 
@@ -272,10 +274,10 @@
         {% if players_without_votes %}
             {{ players_without_votes|join:", " }}
         {% else %}
-            All players have voted!
+            Ingen!
         {% endif %}
     </p>
-</div>
+
 <br>
     <button id="exportExcelButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
         Excel-eksport
@@ -359,17 +361,23 @@
                 </button>
             {% endif %}
         </form>
+    </div>
         {% if not round_finished %}
-        <div class="border-t-4 border-red-600 my-4"></div>
-<p class="text-red-600 font-bold mb-5">☢️ Tenk deg om no då... Resultata blir lagt ut så hugs å køyre sending først!</p>
-
+        <div class="bg-red-600 p-8 mt-6 rounded-lg text-center">
+            <div class="border-t-4 border-red-800 my-4"></div>
+            <p class="text-white font-bold text-xl mb-5 uppercase">
+                ☢️ Tenk deg om no då... Resultata blir lagt ut så hugs å køyre sending først!
+            </p>
         
-    <form method="post" action="" onsubmit="return confirm('Er pGP-runden ferdig? Alle vil sjå resultata om du fortsetter...');">
-        {% csrf_token %}
-        <button type="submit" name="finish_round" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4">
-            ⚠️ Avslutt runden
-        </button>
-    </form>
+            <form method="post" action="" onsubmit="return confirm('Er pGP-runden ferdig? Alle vil sjå resultata om du fortsetter...');">
+                {% csrf_token %}
+                <button type="submit" name="finish_round" class="bg-white text-red-600 border-2 border-red-800 hover:bg-red-500 hover:text-white font-bold py-3 px-6 rounded mt-4 transition-colors shadow-lg transform hover:scale-105">
+                    ⚠️ Avslutt runden
+                </button>
+            </form>
+        </div>
+        
+        
 {% else %}
 <div class="mt-10 text-center text-2xl font-bold">
     Runden er avlutta
@@ -378,7 +386,8 @@
     </div>
 {% endif %}
 </div>
-
+</div>
+</div>
     
 </div>
 </div>
