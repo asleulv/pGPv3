@@ -13,7 +13,6 @@ urlpatterns = [
     path('round/<int:pk>/vote/', views.vote_view, name='vote_form'),  
     path('rounds/', views.round_list, name='round_list'),
     path('export/word/<int:round_id>/', views.export_to_word, name='export_to_word'),
-    path('rounds/<int:round_id>/update-times/', views.update_round_times, name='update_round_times'),
     
     # Spotify routes
 

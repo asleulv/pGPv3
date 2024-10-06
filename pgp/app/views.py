@@ -232,13 +232,15 @@ def submit_song(request, pk):
                     if existing_song:
                         messages.error(request, '🖐 Stopp! Nokon har allereie levert denne! Prøv igjen med anna låt...')
                         return redirect('round_detail', pk=pk)
+                    
+                    clean_spotify_url = f"https://open.spotify.com/track/{track_id}"
 
                     # If the checks pass, update or create the song
                     Song.objects.update_or_create(
                         round=round,
                         player=player,
                         defaults={
-                            'spotify_url': spotify_url,
+                            'spotify_url': clean_spotify_url,
                             'title': song_title,
                             'artist': artist_name
                         }
@@ -325,9 +327,9 @@ def export_to_word(request, round_id):
     # Get the relevant round
     round_instance = Round.objects.get(id=round_id)
     
-    # Get all submitted songs for this round, ordered by total_score (ascending)
-    all_submitted_songs = Song.objects.filter(round=round_instance).order_by('total_score')
-    
+    # Get all submitted songs for this round
+    all_submitted_songs = Song.objects.filter(round=round_instance)
+
     # Get all players who submitted songs in the current round
     submitted_players = all_submitted_songs.values_list('player', flat=True).distinct()  # Get unique players who submitted songs
     
@@ -360,36 +362,61 @@ def export_to_word(request, round_id):
     # Add a blank line before the summary
     doc.add_paragraph("") 
 
-    # Now only include players who have voted in the summary
-    for song in all_submitted_songs:
+    # Get only the songs that have been submitted by players who voted
+    qualified_songs = all_submitted_songs.filter(player__in=voted_players_set)
+
+    # Sort the songs by total_score in ascending order for ranking
+    sorted_songs = qualified_songs.order_by('total_score')  # Change here to ascending order
+
+    # Initialize rank variables
+    total_songs = sorted_songs.count()
+    previous_score = None
+    current_rank = total_songs  # Start ranking from the highest score
+
+    for index, song in enumerate(sorted_songs):
         total_score = song.total_score
         player_nickname = song.player.nickname  # The player who submitted the song
         
-        # Check if the player who submitted this song has voted
-        if song.player.id in voted_players_set:
-            # Write song details to the document
-            header_paragraph = doc.add_paragraph()
-            run = header_paragraph.add_run(f"{song.artist} - {song.title} ({total_score} poeng)")
-            run.bold = True
-            run.font.size = Pt(14)  # Set font size for title
-            run.font.name = 'Arial'  # Change font family
-            
-            # Create a new paragraph for "Levert av"
-            delivered_paragraph = doc.add_paragraph()
-            delivered_run = delivered_paragraph.add_run(f"Levert av: {player_nickname}")
-            delivered_run.bold = True
-            delivered_run.font.size = Pt(12)  # Set font size for "Levert av"
-            delivered_run.font.name = 'Arial'  # Change font family for consistency
-            
-            doc.add_paragraph("Poeng:")
-            
-            # Get the votes for the song
-            votes = Vote.objects.filter(song=song).order_by('-score')  # Get all votes for the current song, sorted by score descending
-            for vote in votes:
-                doc.add_paragraph(f"{vote.score} poeng fra {vote.player.nickname}")
+        # Check if the score has changed to adjust the rank
+        if total_score != previous_score:
+            current_rank = total_songs - index  # Adjust rank based on total songs minus index
+        
+        # Write song details to the document with rank
+        header_paragraph = doc.add_paragraph()
+        run = header_paragraph.add_run(f"{current_rank}. {song.artist} - {song.title} ({total_score} poeng)")
+        run.bold = True
+        run.font.size = Pt(14)  # Set font size for title
+        run.font.name = 'Arial'  # Change font family
+        
+        # Create a new paragraph for "Levert av"
+        delivered_paragraph = doc.add_paragraph()
+        delivered_run = delivered_paragraph.add_run(f"Levert av: {player_nickname}")
+        delivered_run.bold = True
+        delivered_run.font.size = Pt(12)  # Set font size for "Levert av"
+        delivered_run.font.name = 'Arial'  # Change font family for consistency
+        
+        doc.add_paragraph("Poeng:")
+        
+        # Get the votes for the song and group them by score
+        votes = Vote.objects.filter(song=song)  # Get all votes for the current song
+        
+        # Create a dictionary to group player nicknames by score
+        score_dict = {}
+        for vote in votes:
+            score = vote.score
+            player_nickname = vote.player.nickname
+            if score not in score_dict:
+                score_dict[score] = []
+            score_dict[score].append(player_nickname)
 
-            # Add a blank line between songs
-            doc.add_paragraph("")  # This adds a line break
+        # Sort the scores in descending order and write votes to the document
+        for score in sorted(score_dict.keys(), reverse=True):  # Sort scores in descending order
+            players = score_dict[score]
+            players_str = ', '.join(players)  # Join player nicknames with commas
+            doc.add_paragraph(f"{score} poeng fra {players_str}")
+
+        # Add a blank line between songs
+        doc.add_paragraph("")  # This adds a line break
 
     # Prepare the response
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
@@ -400,57 +427,6 @@ def export_to_word(request, round_id):
 
 
 
-from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
-from datetime import datetime
-from .models import Round
-from .forms import RoundForm
 
-@login_required
-def update_round_times(request, round_id):
-    round_instance = get_object_or_404(Round, pk=round_id)
 
-    # Check if the user is the organizer
-    if request.user != round_instance.organizer:
-        messages.error(request, 'You are not authorized to update this round.')
-        return redirect('round_detail', round_id=round_instance.id)
-
-    if request.method == "POST":
-        form = RoundForm(request.POST, instance=round_instance)
-        if form.is_valid():
-            start_date_str = request.POST.get('start_date')
-            end_date_str = request.POST.get('end_date')
-            start_time_str = request.POST.get('start_time', '00:00')
-            end_time_str = request.POST.get('end_time', '00:00')
-
-            try:
-                start_datetime = datetime.combine(
-                    datetime.strptime(start_date_str, '%Y-%m-%d').date(),
-                    datetime.strptime(start_time_str, '%H:%M').time()
-                )
-                end_datetime = datetime.combine(
-                    datetime.strptime(end_date_str, '%Y-%m-%d').date(),
-                    datetime.strptime(end_time_str, '%H:%M').time()
-                )
-
-                # Check if end time is after start time
-                if end_datetime <= start_datetime:
-                    messages.error(request, 'End time must be after start time.')
-                    return render(request, 'rounds/update_round_times.html', {'round': round_instance, 'form': form})
-
-                # Update round times
-                round_instance.start_date = start_datetime
-                round_instance.end_date = end_datetime
-                round_instance.save()
-
-                messages.success(request, 'Round times updated successfully!')
-                return redirect('round_detail', round_id=round_instance.id)
-
-            except ValueError:
-                messages.error(request, 'Invalid date or time format.')
-                return render(request, 'rounds/update_round_times.html', {'round': round_instance, 'form': form})
-    else:
-        form = RoundForm(instance=round_instance)
-
-    return render(request, 'rounds/update_round_times.html', {'round': round_instance, 'form': form})
 

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
 
-{% block title %}Round Details{% endblock %}
+{% block title %}pGP: {{ round.name }}{% endblock %}
 
 {% block content %}
 
@@ -10,11 +10,11 @@
 
     <h2 class="text-2xl font-bold bg-blue-500 text-white p-2 shadow-md">Om runden:</h2>
     <div class="p-4 shadow-lg mb-8 bg-white">
-        <p class="mb-2"><strong>Oppgavetekst:</strong> {{ round.description }}</p>
+        <p class="mb-2"><strong>Oppgåvetekst:</strong> {{ round.description }}</p>
         
         <hr class="my-4 border-gray-300">
         
-        <p class="mb-2"><strong>Bidrag innen:</strong> {{ round.start_date|date:"d. F Y H:i" }}</p>
+        <p class="mb-2"><strong>Bidrag innan:</strong> {{ round.start_date|date:"d. F Y H:i" }}</p>
         
         <hr class="my-4 border-gray-300">
         
@@ -127,12 +127,12 @@
         </div>
     </div>
     {% else %}
-        <p>Du har ikke sendt inn noe bidrag ennå.</p>
+        <p>Du har ikkje sendt inn noko bidrag enda.</p>
     {% endif %}
 {% else %}
 {% if round.start_date < now %}
     <div class="p-4 mb-4 bg-red-500 text-white font-bold text-center shadow-md">
-        😖 Fristen for å levere bidrag er passert
+        😖 Fristen for å levere bidrag har passert
     </div>
 {% endif %}
 
@@ -186,14 +186,14 @@
     </div>
 {% endif %}
 
-{% if round.round_finished and not user == round.organizer %}
+{% if round.round_finished %}
 <h2 class="text-2xl font-bold bg-pink-500 text-white p-2 shadow-md">
     Oppsummering av runde:
 </h2>
 <div class="p-4 text-black bg-white shadow-lg">
     <p class="mb-4">Antall bidrag: {{ num_submitted_songs }}</p>
 </div>
-    <button id="exportButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+    <button id="exportExcelButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
         Excel-eksport
     </button>
     <button id="exportButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
@@ -250,7 +250,7 @@
 {% endif %}
 
 
-{% if is_organizer %}
+{% if is_organizer and not round.round_finished %}
 <h2 class="text-2xl font-bold bg-red-500 text-white mt-8 p-2 shadow-md">
     Kun for arrangør:
 </h2>
