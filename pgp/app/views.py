@@ -28,9 +28,14 @@ def user_logout(request):
     messages.success(request, "Du er no logga ut. Snakkast!")
     return redirect('home')
 
-@login_required
 def home(request):
-    return render(request, 'app/home.html')
+    players = Player.objects.all()
+    active_rounds = Round.objects.filter(end_date__gte=timezone.now())  # Get current rounds
+
+    return render(request, 'app/home.html', {
+        'players': players,
+        'active_rounds': active_rounds,
+    })
 
 @login_required
 def round_list(request):

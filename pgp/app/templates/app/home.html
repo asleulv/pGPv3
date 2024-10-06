@@ -4,8 +4,39 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<div class="bg-white shadow-md rounded p-6">
+<div class="bg-white shadow-md rounded p-6 mb-6">
     <h1 class="text-2xl font-bold mb-4">Velkommen, {{ user.username }}!</h1>
-    <p>Dette er ditt personlige pusterom på internett.</p>
+    <p>🤞La oss krysse fingrane for at dette systemet funkar! </p>
 </div>
+
+<div class="shadow-md rounded p-6 bg-white mb-6">
+    <h2 class="text-xl font-bold mb-4">Aktiv pGP-runde:</h2>
+    {% if active_rounds %}
+        <div class="space-y-2">
+            {% for round in active_rounds %}
+                <div class="p-2 border-b border-gray-300 last:border-b-0">  {# Optional border for separation #}
+                    <a href="{% url 'round_detail' round.id %}" class="text-blue-600 hover:underline">{{ round.name }}</a> - arrangert av {{ round.organizer.username }}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-700">Ingen aktive pGP-runder.</p>
+    {% endif %}
+</div>
+
+<div class="shadow-md rounded p-4 bg-white">  {# Reduced padding #}
+    <h2 class="text-xl font-bold mb-2">pGP-deltakarar:</h2>  {# Reduced margin bottom #}
+    {% if players %}
+        <div class="space-y-1">  {# Reduced space between players #}
+            {% for player in players %}
+                <div class="bg-gray-50 p-1 rounded">  {# Reduced padding and added rounded corners #}
+                    <span class="text-black">{{ player.nickname }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-700">Ingen registrerte spillere.</p>
+    {% endif %}
+</div>
+
 {% endblock %}
