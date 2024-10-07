@@ -8,7 +8,6 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('my_rounds/', views.my_rounds, name='my_rounds'),
     path('edit_round/<int:round_id>/', views.edit_round, name='edit_round'),
-    path('edit_round/<int:round_id>/', views.edit_round, name='edit_round'),
     path('create-round/', views.create_round, name='create_round'),
     path('round/<int:pk>/', views.round_detail, name='round_detail'),
     path('round/<int:pk>/submit-song/', views.submit_song, name='submit_song'),

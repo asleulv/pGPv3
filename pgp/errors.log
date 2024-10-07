@@ -8973,3 +8973,41 @@ Traceback (most recent call last):
   File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 606, in find_filter
     raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
 django.template.exceptions.TemplateSyntaxError: Invalid filter: 'add_class'
+Internal Server Error: /edit_round/29/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 491, in edit_round
+    return redirect('round_detail', round_id=round_instance.id)  # Redirect to the my_rounds view after saving
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\shortcuts.py", line 48, in redirect
+    return redirect_class(resolve_url(to, *args, **kwargs))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\shortcuts.py", line 145, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'round_detail' with keyword arguments '{'round_id': 29}' not found. 1 pattern(s) tried: ['round/(?P<pk>[0-9]+)/\\Z']
+Internal Server Error: /edit_round/29/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 491, in edit_round
+    return redirect('round_detail', round_id=round_instance.id)  # Redirect to the round detail page
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\shortcuts.py", line 48, in redirect
+    return redirect_class(resolve_url(to, *args, **kwargs))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\shortcuts.py", line 145, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'round_detail' with keyword arguments '{'round_id': 29}' not found. 1 pattern(s) tried: ['round/(?P<pk>[0-9]+)/\\Z']

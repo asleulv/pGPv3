@@ -488,11 +488,13 @@ def edit_round(request, round_id):
         form = RoundForm(request.POST, instance=round_instance)
         if form.is_valid():
             form.save()
-            return redirect('my_rounds')  # Redirect to the my_rounds view after saving
+            return redirect('round_detail', pk=round_instance.id)  # Ensure to use 'pk' here
     else:
         form = RoundForm(instance=round_instance)
 
     return render(request, 'app/edit_round.html', {'form': form, 'round': round_instance})
+
+
 
 
 

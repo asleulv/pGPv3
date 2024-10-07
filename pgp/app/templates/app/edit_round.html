@@ -22,7 +22,7 @@
         </div>
         <div class="flex justify-between">
             <button type="submit" class="bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-600">Lagre</button>
-            <a href="{% url 'my_rounds' %}" class="text-gray-500 hover:text-gray-700 font-semibold">Avbryt</a>
+            <a href="{% url 'round_detail' round.id %}" class="text-gray-500 hover:text-gray-700 font-semibold">Avbryt</a>
         </div>
     </form>
 </div>
