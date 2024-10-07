@@ -8783,3 +8783,193 @@ Traceback (most recent call last):
   File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 606, in find_filter
     raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
 django.template.exceptions.TemplateSyntaxError: Invalid filter: 'get_item'
+Internal Server Error: /edit_round/28/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 496, in edit_round
+    return render(request, 'app/edit_round.html', {'round': round_instance})
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: app/edit_round.html
+Internal Server Error: /my_rounds/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 479, in my_rounds
+    return render(request, 'app/my_rounds.html', {
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\defaulttags.py", line 238, in render
+    nodelist.append(node.render_annotated(context))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'delete_round' not found. 'delete_round' is not a valid view function or pattern name.
+Internal Server Error: /edit_round/28/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 495, in edit_round
+    return render(request, 'app/edit_round.html', {'form': form, 'round': round_instance})
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\backends\django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\defaulttags.py", line 853, in do_for
+    nodelist_loop = parser.parse(
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 484, in parse
+    raise self.error(token, e)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 482, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 698, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 606, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'add_class'
+Internal Server Error: /edit_round/28/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 495, in edit_round
+    return render(request, 'app/edit_round.html', {'form': form, 'round': round_instance})
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\backends\django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\defaulttags.py", line 853, in do_for
+    nodelist_loop = parser.parse(
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 484, in parse
+    raise self.error(token, e)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 482, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 698, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 606, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'add_class'

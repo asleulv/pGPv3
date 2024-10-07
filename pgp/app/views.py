@@ -471,6 +471,29 @@ def register(request):
     
     return render(request, 'registration/register.html', {'form': form})
 
+@login_required
+def my_rounds(request):
+    # Fetch rounds that the user is the organizer of
+    rounds = Round.objects.filter(organizer=request.user)
+
+    return render(request, 'app/my_rounds.html', {
+        'rounds': rounds,
+    })
+
+@login_required
+def edit_round(request, round_id):
+    round_instance = get_object_or_404(Round, id=round_id, organizer=request.user)
+
+    if request.method == 'POST':
+        form = RoundForm(request.POST, instance=round_instance)
+        if form.is_valid():
+            form.save()
+            return redirect('my_rounds')  # Redirect to the my_rounds view after saving
+    else:
+        form = RoundForm(instance=round_instance)
+
+    return render(request, 'app/edit_round.html', {'form': form, 'round': round_instance})
+
 
 
 

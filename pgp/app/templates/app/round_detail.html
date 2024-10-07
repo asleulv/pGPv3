@@ -30,13 +30,23 @@
             <hr class="my-4 border-gray-300">
         {% endif %}
         
-        <p class="mb-2"><strong>Arrangør:</strong> 
+
+        <p class="mb-2 mt-6">
+            <strong>Arrangør:</strong> 
             {% if user == round.organizer %}
                 <span class="bg-red-500 text-white font-bold py-1 px-2 rounded">DEG, {{ round.organizer.username }}💀</span>
             {% else %}
                 {{ round.organizer.username }}
             {% endif %}
         </p>
+        
+        {% if user == round.organizer and not round.round_finished %}
+        <hr class="my-4 border-gray-300">
+            <p class="mt-2">
+                <strong>Rediger runde:</strong> 
+                <a href="{% url 'edit_round' round.id %}" class="text-blue-500 hover:text-blue-700">⚙️</a>
+            </p>
+        {% endif %}
         
         <hr class="my-4 border-gray-300">
         
