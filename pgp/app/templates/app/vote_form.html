@@ -14,7 +14,7 @@
           <div class="flex justify-between items-center">
             <label for="track-{{ song.id }}">{{ song.artist }} - {{ song.title }}</label>
             <select name="track-{{ song.id }}" data-song-name="{{ song.title }}" class="ml-auto">
-              <option value="">Poeng?</option>
+              <option value="">0</option>
               {% for i in score_range %}
               <option value="{{ i }}">{{ i }}</option>
               {% endfor %}
@@ -146,9 +146,12 @@
       const selectedItems = Array.from(elems)
         .map(e => {
           const selectedOption = e.options[e.selectedIndex];
+          const songArtist = e.closest('.field-with-border').querySelector('label').textContent.split(' - ')[0]; // Get artist name from label
+          const songTitle = e.closest('.field-with-border').querySelector('label').textContent.split(' - ')[1]; // Get title from label
           return {
             value: selectedOption?.value || '',
-            name: e.dataset.songName || 'Unknown'
+            name: songTitle || 'Unknown',
+            artist: songArtist || 'Unknown'
           };
         })
         .filter(item => item.value !== '')
@@ -157,7 +160,7 @@
       selectedList.innerHTML = '';
       selectedItems.forEach(item => {
         const li = document.createElement('li');
-        li.textContent = `${item.value}: ${item.name}`;
+        li.textContent = `${item.value}: ${item.artist} - ${item.name}`; // Include both artist and title
         selectedList.appendChild(li);
       });
 
