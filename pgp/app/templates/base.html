@@ -18,58 +18,65 @@
     <nav class="bg-blue-600 p-4 text-white">
       <div class="container mx-auto flex items-center justify-between">
         <a href="/" class="font-bold text-lg">pGP beta1</a>
-        <ul class="flex items-center space-x-4">
-          <li>
-            <a href="{% url 'create_round' %}" class="hover:underline"
-              >Ny pGP-runde</a
+        <div class="md:hidden">
+          <button id="menu-button" class="flex items-center">
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
             >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+          </button>
+        </div>
+        <ul class="hidden md:flex items-center space-x-8">
+          <li>
+            <a href="{% url 'create_round' %}" class="hover:underline">Ny pGP-runde</a>
           </li>
           <li>
-            <a href="{% url 'round_list' %}" class="hover:underline"
-              >pGP-rundar</a
-            >
+            <a href="{% url 'round_list' %}" class="hover:underline">pGP-rundar</a>
           </li>
           <li>
-            <a href="{% url 'combined-songs' %}" class="hover:underline"
-              >Totallista</a
-            >
+            <a href="{% url 'combined-songs' %}" class="hover:underline">Totallista</a>
           </li>
           {% if user.is_authenticated %}
           <li class="relative">
-            <button
-              id="user-menu"
-              class="flex items-center space-x-2 focus:outline-none"
-            >
+            <button id="user-menu" class="flex items-center space-x-2 focus:outline-none">
               <span>👻{{ user.username }}</span>
-              <svg
-                class="w-4 h-4 ml-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 9l-7 7-7-7"
-                ></path>
+              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            <div
-              id="dropdown-menu"
-              class="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-lg hidden"
-            >
-              <a
-                href="{% url 'logout' %}"
-                class="block px-4 py-2 text-sm hover:bg-gray-100"
-                >Logg ut</a
-              >
+            <div id="dropdown-menu" class="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-lg hidden">
+              <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm hover:bg-gray-100">Logg ut</a>
             </div>
           </li>
           {% else %}
           <li>
             <a href="{% url 'login' %}" class="hover:underline">Logg inn</a>
+          </li>
+          {% endif %}
+        </ul>
+        <!-- Mobile Menu -->
+        <ul id="mobile-menu" class="absolute top-16 right-0 bg-white text-black rounded-lg shadow-lg hidden w-full">
+          <li class="w-full">
+            <a href="{% url 'create_round' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">Ny pGP-runde</a>
+          </li>
+          <li class="w-full">
+            <a href="{% url 'round_list' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">pGP-rundar</a>
+          </li>
+          <li class="w-full">
+            <a href="{% url 'combined-songs' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">Totallista</a>
+          </li>
+          {% if user.is_authenticated %}
+          <li class="w-full relative">
+            <a href="{% url 'logout' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">Logg ut</a>
+          </li>
+          {% else %}
+          <li class="w-full">
+            <a href="{% url 'login' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">Logg inn</a>
           </li>
           {% endif %}
         </ul>
@@ -79,15 +86,18 @@
     <div class="container mx-auto my-8">
       {% if messages %}
       <div class="container mx-auto my-8">
-        {% for message in messages %} {% if message.tags == 'error' %}
+        {% for message in messages %} 
+        {% if message.tags == 'error' %}
         <div class="p-4 mb-4 text-white bg-red-500">{{ message }}</div>
         {% elif message.tags == 'success' %}
         <div class="p-4 mb-4 text-white bg-green-500">{{ message }}</div>
         {% elif message.tags == 'info' %}
         <div class="p-4 mb-4 text-white bg-blue-500">{{ message }}</div>
-        {% endif %} {% endfor %}
+        {% endif %} 
+        {% endfor %}
       </div>
-      {% endif %} {% block content %} {% endblock %}
+      {% endif %} 
+      {% block content %} {% endblock %}
     </div>
 
     <footer class="text-center py-4 bg-blue-600 text-white">
@@ -98,9 +108,15 @@
       document.addEventListener("DOMContentLoaded", () => {
         const userMenuButton = document.getElementById("user-menu");
         const dropdownMenu = document.getElementById("dropdown-menu");
+        const menuButton = document.getElementById("menu-button");
+        const mobileMenu = document.getElementById("mobile-menu");
 
         userMenuButton.addEventListener("click", () => {
           dropdownMenu.classList.toggle("hidden");
+        });
+
+        menuButton.addEventListener("click", () => {
+          mobileMenu.classList.toggle("hidden");
         });
 
         document.addEventListener("click", (event) => {
@@ -110,8 +126,22 @@
           ) {
             dropdownMenu.classList.add("hidden");
           }
+
+          if (
+            !menuButton.contains(event.target) &&
+            !mobileMenu.contains(event.target)
+          ) {
+            mobileMenu.classList.add("hidden");
+          }
         });
       });
     </script>
   </body>
 </html>
+<style>
+#mobile-menu {
+  z-index: 50; /* or a value that suits your layout */
+}
+
+
+</style>

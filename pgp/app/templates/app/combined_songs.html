@@ -1,39 +1,42 @@
-<!-- templates/myapp/tailwind_table.html -->
-{% extends "base_without_tailwind.html" %}
+{% extends "base.html" %}
 
 {% block title %}Combined Songs List{% endblock %}
 
 {% block content %}
     <div class="container mx-auto my-8">
         <h1 class="text-2xl font-bold mb-4">Totallista</h1>
-        <table id="songsTable" class="display">
-            <thead>
-                <tr>
-                    <th>Dato</th>
-                    <th>Artist</th>
-                    <th>Tittel</th>
-                    <th>Levert av</th>
-                    <th>Tema</th>
-                    <th>Spotify</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for song in combined_songs %}
-                <tr>
-                    <td>{{ song.dato }}</td>
-                    <td>{{ song.artist }}</td>
-                    <td>{{ song.tittel }}</td>
-                    <td>{{ song.levert_av }}</td>
-                    <td>{{ song.tema }}</td>
-                    <td><a href="{{ song.spotify }}" target="_blank">Låt</a></td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center">No songs found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="overflow-x-auto"> <!-- Enable horizontal scrolling -->
+            <table id="songsTable" class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Dato</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Artist</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Tittel</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Levert av</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Tema</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Spotify</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for song in combined_songs %}
+                    <tr>
+                        <td class="px-4 py-2 text-sm text-gray-700">{{ song.dato }}</td>
+                        <td class="px-4 py-2 text-sm text-gray-700">{{ song.artist }}</td>
+                        <td class="px-4 py-2 text-sm text-gray-700">{{ song.tittel }}</td>
+                        <td class="px-4 py-2 text-sm text-gray-700">{{ song.levert_av }}</td>
+                        <td class="px-4 py-2 text-sm text-gray-700">{{ song.tema }}</td>
+                        <td class="px-4 py-2 text-sm text-gray-700">
+                            <a href="{{ song.spotify }}" target="_blank" class="text-blue-500 hover:underline">Låt</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-4 py-2 text-center text-gray-500">No songs found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
@@ -48,7 +51,6 @@
                 ordering: true,
                 pageLength: 10,
                 language: {
-                    // Translated texts
                     search: "Søk:",
                     lengthMenu: "Vis _MENU_ bidrag per side",
                     info: "Viser _START_ til _END_ av _TOTAL_ bidrag",
