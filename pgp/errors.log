@@ -9011,3 +9011,66 @@ Traceback (most recent call last):
   File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
     raise NoReverseMatch(msg)
 django.urls.exceptions.NoReverseMatch: Reverse for 'round_detail' with keyword arguments '{'round_id': 29}' not found. 1 pattern(s) tried: ['round/(?P<pk>[0-9]+)/\\Z']
+Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 42, in home
+    return render(request, 'app/home.html', {
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\defaulttags.py", line 853, in do_for
+    nodelist_loop = parser.parse(
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 484, in parse
+    raise self.error(token, e)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 482, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 703, in __init__
+    raise TemplateSyntaxError(
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: ' == 'error' and 'bg-red-500' or message.tags == 'success' and 'bg-green-500' or 'bg-blue-500'' from 'message.tags == 'error' and 'bg-red-500' or message.tags == 'success' and 'bg-green-500' or 'bg-blue-500''

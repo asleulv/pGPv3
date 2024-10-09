@@ -70,3 +70,24 @@ def update_song_scores_on_vote_save(sender, instance, **kwargs):
 def update_song_scores_on_vote_delete(sender, instance, **kwargs):
     round_instance = instance.song.round
     round_instance.calculate_total_scores()
+
+# THe old pGP-totallista
+
+class LegacySong(models.Model):
+    artist = models.CharField(max_length=150)
+    song = models.CharField(max_length=150)
+    album = models.CharField(max_length=150, blank=True)
+    release_year = models.CharField(max_length=4, blank=True)
+    date_added = models.CharField(max_length=10, blank=True)
+    spotify_url = models.URLField(blank=True)
+    pgp_num = models.CharField(max_length=10, blank=True, null=True)
+    pgp_tema = models.CharField(max_length=150, blank=True, null=True)
+    pgp_arr = models.CharField(max_length=150, blank=True, null=True)
+    pgp_plassering = models.CharField(max_length=10, blank=True, null=True)
+    pgp_levert_av = models.CharField(max_length=150, blank=True, null=True)
+
+    class Meta:
+        db_table = 'pgp'  # Ensure it uses the existing table name if it exists
+
+    def __str__(self):
+        return f"{self.song} by {self.artist}"
