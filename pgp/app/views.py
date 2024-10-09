@@ -23,6 +23,7 @@ from django.http import HttpResponseForbidden
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from .utils import get_combined_song_data
 
 def user_logout(request):
     logout(request)
@@ -494,7 +495,10 @@ def edit_round(request, round_id):
 
     return render(request, 'app/edit_round.html', {'form': form, 'round': round_instance})
 
-
+@login_required
+def combined_song_view(request):
+    combined_songs = get_combined_song_data()
+    return render(request, 'app/combined_songs.html', {'combined_songs': combined_songs})
 
 
 

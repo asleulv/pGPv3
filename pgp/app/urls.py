@@ -17,5 +17,6 @@ urlpatterns = [
     path('round/<int:pk>/vote/', views.vote_view, name='vote_form'),  
     path('rounds/', views.round_list, name='round_list'),
     path('export/word/<int:round_id>/', views.export_to_word, name='export_to_word'),
+    path('combined-songs/', views.combined_song_view, name='combined-songs'),
 
 ]
