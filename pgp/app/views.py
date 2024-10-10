@@ -486,6 +486,12 @@ def edit_round(request, round_id):
     round_instance = get_object_or_404(Round, id=round_id, organizer=request.user)
 
     if request.method == 'POST':
+        # Handle deletion
+        if 'delete_round' in request.POST:
+            round_instance.delete()
+            return redirect('round_list')  # Redirect to a view that lists rounds after deletion
+
+        # Handle form submission for editing the round
         form = RoundForm(request.POST, instance=round_instance)
         if form.is_valid():
             form.save()
