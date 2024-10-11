@@ -9169,3 +9169,410 @@ Traceback (most recent call last):
   File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader.py", line 19, in get_template
     raise TemplateDoesNotExist(template_name, chain=chain)
 django.template.exceptions.TemplateDoesNotExist: your_template.html
+Internal Server Error: /combined-songs/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 543, in combined_song_view
+    return render(request, 'app/combined_songs.html')
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'combined_song_view' not found. 'combined_song_view' is not a valid view function or pattern name.
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\paginator.py", line 48, in validate_number
+    number = int(number)
+ValueError: invalid literal for int() with base 10: 'NaN'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 518, in combined_song_data_view
+    songs_page = paginator.page(page)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\paginator.py", line 72, in page
+    number = self.validate_number(number)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\paginator.py", line 50, in validate_number
+    raise PageNotAnInteger(_("That page number is not an integer"))
+django.core.paginator.PageNotAnInteger: That page number is not an integer
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 519, in combined_song_data_view
+    combined_songs = combined_songs.filter(
+AttributeError: 'list' object has no attribute 'filter'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 519, in combined_song_data_view
+    combined_songs = combined_songs.filter(
+AttributeError: 'list' object has no attribute 'filter'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 513, in combined_song_data_view
+    combined_songs = get_combined_song_data(search_value)
+TypeError: get_combined_song_data() takes 0 positional arguments but 1 was given
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 513, in combined_song_data_view
+    combined_songs = get_combined_song_data(search_value)
+TypeError: get_combined_song_data() takes 0 positional arguments but 1 was given
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 513, in combined_song_data_view
+    combined_songs = get_combined_song_data(search_value)
+TypeError: get_combined_song_data() takes 0 positional arguments but 1 was given
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 525, in combined_song_data_view
+    total_filtered = combined_songs.count()
+TypeError: list.count() takes exactly one argument (0 given)
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 525, in combined_song_data_view
+    total_filtered = combined_songs.count()
+TypeError: list.count() takes exactly one argument (0 given)
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 534, in combined_song_data_view
+    combined_songs.sort(key=lambda x: x.dato, reverse=reverse)
+TypeError: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 534, in combined_song_data_view
+    combined_songs.sort(key=lambda x: x.dato, reverse=reverse)
+TypeError: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 534, in combined_song_data_view
+    combined_songs.sort(key=lambda x: x.dato, reverse=reverse)
+TypeError: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 532, in combined_song_data_view
+    combined_songs = combined_songs.order_by(order_column if order_dir == 'asc' else f'-{order_column}')
+AttributeError: 'list' object has no attribute 'order_by'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 534, in combined_song_data_view
+    combined_songs.sort(key=lambda x: x.dato, reverse=reverse)
+TypeError: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 532, in combined_song_data_view
+    combined_songs = combined_songs.order_by(order_column if order_dir == 'asc' else f'-{order_column}')
+AttributeError: 'list' object has no attribute 'order_by'
+Internal Server Error: /combined-songs/data/
+Internal Server Error: /combined-songs/data/
+Internal Server Error: /combined-songs/data/
+Internal Server Error: /combined-songs/data/
+Internal Server Error: /combined-songs/data/
+Internal Server Error: /combined-songs/data/
+Internal Server Error: /combined-songs/data/
+Internal Server Error: /combined-songs/data/
+Internal Server Error: /combined-songs/data/
+Internal Server Error: /combined-songs/data/
+Internal Server Error: /combined-songs/data/
+Internal Server Error: /combined-songs/data/
+Internal Server Error: /combined-songs/data/
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 532, in combined_song_data_view
+    combined_songs = combined_songs.order_by(order_column if order_dir == 'asc' else f'-{order_column}')
+AttributeError: 'list' object has no attribute 'order_by'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 534, in combined_song_data_view
+    combined_songs.sort(key=lambda x: x.dato, reverse=reverse)
+TypeError: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 539, in combined_song_data_view
+    songs_data = [
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 541, in <listcomp>
+    'dato': song.dato.strftime('%d-%m-%Y'),
+AttributeError: 'NoneType' object has no attribute 'strftime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 539, in combined_song_data_view
+    songs_data = [
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 541, in <listcomp>
+    'dato': song.dato.strftime('%d-%m-%Y'),
+AttributeError: 'NoneType' object has no attribute 'strftime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 539, in combined_song_data_view
+    songs_data = [
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 541, in <listcomp>
+    'dato': song.dato.strftime('%d-%m-%Y'),
+AttributeError: 'NoneType' object has no attribute 'strftime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 539, in combined_song_data_view
+    songs_data = [
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 541, in <listcomp>
+    'dato': song.dato.strftime('%d-%m-%Y'),
+AttributeError: 'str' object has no attribute 'strftime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 513, in combined_song_data_view
+    combined_songs = get_combined_song_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 31, in get_combined_song_data
+    dato=legacy_song.date_added.strftime('%d-%m-%Y') if legacy_song.date_added else None,
+AttributeError: 'str' object has no attribute 'strftime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 513, in combined_song_data_view
+    combined_songs = get_combined_song_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 31, in get_combined_song_data
+    dato=legacy_song.date_added.strftime('%d-%m-%Y') if legacy_song.date_added else None,
+AttributeError: 'str' object has no attribute 'strftime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 513, in combined_song_data_view
+    combined_songs = get_combined_song_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 31, in get_combined_song_data
+    dato=legacy_song.date_added.strftime('%d-%m-%Y') if legacy_song.date_added else None,
+AttributeError: 'str' object has no attribute 'strftime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 513, in combined_song_data_view
+    combined_songs = get_combined_song_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 31, in get_combined_song_data
+    dato=legacy_song.date_added.strftime('%d-%m-%Y') if legacy_song.date_added else None,
+AttributeError: 'str' object has no attribute 'strftime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 513, in combined_song_data_view
+    combined_songs = get_combined_song_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 31, in get_combined_song_data
+    dato=legacy_song.date_added.strftime('%d-%m-%Y') if legacy_song.date_added else None,
+AttributeError: 'str' object has no attribute 'strftime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 513, in combined_song_data_view
+    combined_songs = get_combined_song_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 31, in get_combined_song_data
+    dato=legacy_song.date_added.strftime('%d-%m-%Y') if legacy_song.date_added else None,
+AttributeError: 'str' object has no attribute 'strftime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 513, in combined_song_data_view
+    combined_songs = get_combined_song_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 31, in get_combined_song_data
+    dato=legacy_song.date_added.strftime('%d-%m-%Y') if legacy_song.date_added else None,
+AttributeError: 'str' object has no attribute 'strftime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 515, in combined_song_data_view
+    combined_songs = get_combined_song_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 20, in get_combined_song_data
+    if song.round and song.round.is_finished:  # Ensure the round exists and is finished
+AttributeError: 'Round' object has no attribute 'is_finished'

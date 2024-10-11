@@ -12,7 +12,7 @@ from .spotify_views import get_spotify_client
 from urllib.parse import urlparse
 from django import forms
 from docx.shared import Pt
-from django.db.models import Sum, Value
+from django.db.models import Sum, Value, Q
 from django.db.models.functions import Coalesce
 import re
 from django.contrib.auth import logout
@@ -24,6 +24,8 @@ from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .utils import get_combined_song_data
+from django.core.paginator import Paginator, EmptyPage
+from django.http import JsonResponse
 
 def user_logout(request):
     logout(request)
@@ -502,10 +504,63 @@ def edit_round(request, round_id):
     return render(request, 'app/edit_round.html', {'form': form, 'round': round_instance})
 
 @login_required
-def combined_song_view(request):
+def combined_song_data_view(request):
+    page = request.GET.get('page', 1)
+    page_size = int(request.GET.get('pageSize', 10))  # Default page size of 10
+    search_value = request.GET.get('search[value]', '')
+    order_column = request.GET.get('orderColumn', 'dato')  # Default column for ordering
+    order_dir = request.GET.get('orderDir', 'asc')         # Default order direction
+
+    # Get the combined song data (assumed to return a list)
     combined_songs = get_combined_song_data()
-    return render(request, 'app/combined_songs.html', {'combined_songs': combined_songs})
 
+    # Apply search filter if search_value is provided
+    if search_value:
+        combined_songs = [
+            song for song in combined_songs if (
+                search_value.lower() in song.artist.lower() or
+                search_value.lower() in song.tittel.lower() or
+                search_value.lower() in song.levert_av.lower() or
+                search_value.lower() in song.tema.lower()
+            )
+        ]
 
+    # Update total records after filtering
+    total_filtered = len(combined_songs)
 
+    # Sort the combined songs based on the order_column and order_dir
+    if order_column in ['dato', 'artist', 'tittel', 'levert_av', 'tema']:
+        combined_songs.sort(key=lambda x: getattr(x, order_column), reverse=(order_dir == 'desc'))
 
+    # Paginate the filtered combined songs (assuming it's a list)
+    paginator = Paginator(combined_songs, page_size)
+
+    # Handle potential pagination errors (e.g., page out of range)
+    try:
+        songs_page = paginator.page(page)
+    except EmptyPage:
+        songs_page = paginator.page(paginator.num_pages)  # Return last page if page is out of range
+
+    # Prepare the songs data for the response with formatted date
+    songs_data = [
+        {
+            'dato': song.dato,  # Already formatted in get_combined_song_data
+            'artist': song.artist,
+            'tittel': song.tittel,
+            'levert_av': song.levert_av,
+            'tema': song.tema,
+            'spotify': song.spotify,
+        }
+        for song in songs_page
+    ]
+
+    return JsonResponse({
+        'recordsTotal': len(get_combined_song_data()),  
+        'recordsFiltered': total_filtered,              
+        'draw': int(request.GET.get('draw', 1)),
+        'data': songs_data
+    })
+
+@login_required
+def combined_song_view(request):
+    return render(request, 'app/combined_songs.html')

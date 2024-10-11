@@ -1,70 +1,126 @@
 {% extends "base.html" %}
 
-{% block title %}Combined Songs List{% endblock %}
+{% block title %}Totalbasen{% endblock %}
 
 {% block content %}
-    <div class="container mx-auto my-8">
-        <h1 class="text-2xl font-bold mb-4">Totallista</h1>
-        <div class="overflow-x-auto"> <!-- Enable horizontal scrolling -->
-            <table id="songsTable" class="min-w-full divide-y divide-gray-200">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Dato</th>
-                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Artist</th>
-                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Tittel</th>
-                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Levert av</th>
-                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Tema</th>
-                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Spotify</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for song in combined_songs %}
-                    <tr>
-                        <td class="px-4 py-2 text-sm text-gray-700">{{ song.dato }}</td>
-                        <td class="px-4 py-2 text-sm text-gray-700">{{ song.artist }}</td>
-                        <td class="px-4 py-2 text-sm text-gray-700">{{ song.tittel }}</td>
-                        <td class="px-4 py-2 text-sm text-gray-700">{{ song.levert_av }}</td>
-                        <td class="px-4 py-2 text-sm text-gray-700">{{ song.tema }}</td>
-                        <td class="px-4 py-2 text-sm text-gray-700">
-                            <a href="{{ song.spotify }}" target="_blank" class="text-blue-500 hover:underline">Låt</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="px-4 py-2 text-center text-gray-500">No songs found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="container mx-auto my-8">
+    <div class="flex flex-col items-center mb-4"> <!-- Add flexbox for centering -->
+        <h1 class="text-2xl font-bold">Totallista</h1>
+        <div id="totalSongsDisplay" class="text-lg font-medium text-center"> <!-- Center text -->
+            <!-- Total songs display -->
         </div>
     </div>
+    
+    <!-- Reset Button -->
+    <div class="mb-4 text-center">
+        <button id="resetButton" class="bg-blue-500 text-white font-bold py-2 px-4 rounded">
+            Nullstill
+        </button>
+    </div>
+    
+    <div class="overflow-x-auto sm:rounded-lg">
+        <table id="songsTable" class="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Dato</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Artist</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Tittel</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Levert av</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Tema</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Spotify</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <!-- DataTables will populate these rows dynamically -->
+            </tbody>
+        </table>
+    </div>
+</div>
 
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 
-    <script>
-        $(document).ready(function() {
-            $('#songsTable').DataTable({
-                paging: true,
-                searching: true,
-                ordering: true,
-                pageLength: 10,
-                language: {
-                    search: "Søk:",
-                    lengthMenu: "Vis _MENU_ bidrag per side",
-                    info: "Viser _START_ til _END_ av _TOTAL_ bidrag",
-                    infoEmpty: "Ingen bidrag tilgjengeleg",
-                    infoFiltered: "(filtrert frå _MAX_ totale bidrag)",
-                    paginate: {
-                        first: "Første",
-                        last: "Siste",
-                        next: "Neste",
-                        previous: "Førre"
-                    },
-                    zeroRecords: "Ingen bidrag funne"
+<script>
+    $(document).ready(function() {
+        var table = $('#songsTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{% url 'combined_song_data_view' %}",
+                type: "GET",
+                data: function (d) {
+                    d.page = Math.ceil(d.start / d.length) + 1; // Set the page number
+                    d.pageSize = d.length;                      // Set the page size
+                    if (d.order && d.order.length > 0) {
+                        d.orderColumn = d.columns[d.order[0].column].data; // Get column name
+                        d.orderDir = d.order[0].dir;                       // Get sort direction (asc/desc)
+                    }
+                },
+                dataSrc: function(json) {
+                    return json.data; // Data source for DataTables
                 }
-            });
+            },
+            columns: [
+                { data: 'dato' },
+                { data: 'artist' },
+                { data: 'tittel' },
+                { data: 'levert_av' },
+                { data: 'tema' },
+                { data: 'spotify', render: function(data) {
+                    return `<a href="${data}" target="_blank" class="text-blue-500 hover:underline">Låt</a>`;
+                }}
+            ],
+            order: [[0, 'desc']],
+            paging: true,
+            searching: true,
+            ordering: true,
+            pageLength: 10, // Default page length
+            language: {
+                processing: "Behandler...",
+                search: "Søk:",
+                lengthMenu: "Vis _MENU_ bidrag per side",
+                info: "Viser _START_ til _END_ av _TOTAL_ bidrag", 
+                infoEmpty: "Ingen bidrag tilgjengeleg", 
+                infoFiltered: "(filtrert frå _MAX_ totale bidrag)", 
+                paginate: {
+                    first: "Første",
+                    last: "Siste",
+                    next: "Neste",
+                    previous: "Førre"
+                },
+                zeroRecords: "Ingen bidrag funne"
+            },
+            drawCallback: function(settings) {
+                var api = this.api();
+                var json = api.ajax.json();  // Get the entire response object
+
+                // Display the total number of songs
+                var totalSongs = json.recordsTotal;  // Use recordsTotal from the JSON response
+                $('#totalSongsDisplay').text(`Totalt antall bidrag: ${totalSongs}`);
+            }
         });
-    </script>
+
+        // Reset button functionality
+        $('#resetButton').on('click', function() {
+            table.search('').columns().search('').draw(); // Reset search and column filters
+        });
+    });
+</script>
+
+<style>
+    .overflow-x-auto .dataTables_filter input {
+        border: 1px solid #ccc; /* Change border */
+        border-radius: 0px; /* Add border radius */
+        padding: 0.5em; /* Add some padding */
+        background-color: white;
+    }
+
+    .dataTables_wrapper .dataTables_length select {
+        border: 1px solid #aaa;
+        border-radius: 3px;
+        padding: 5px;
+        background-color: white;
+    }
+</style>
 {% endblock %}

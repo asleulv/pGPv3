@@ -24,8 +24,9 @@ class RoundAdmin(admin.ModelAdmin):
 
     # Restrict editing if the end date has passed for non-superusers
     def get_readonly_fields(self, request, obj=None):
-        if obj and obj.end_date < timezone.now():
-            return [f.name for f in self.model._meta.fields]
+        # Allow editing for staff users, but restrict for regular users
+        if obj and obj.end_date < timezone.now() and not request.user.is_superuser:
+            return [f.name for f in self.model._meta.fields]  # All fields are read-only
         return self.readonly_fields
 
     # Prevent non-admin users from deleting rounds after the end date has passed
