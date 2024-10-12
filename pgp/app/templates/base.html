@@ -41,6 +41,9 @@
           <li>
             <a href="{% url 'combined-songs' %}" class="hover:underline">Totallista</a>
           </li>
+          <li>
+            <a href="{% url 'round_winners' %}" class="hover:underline">Vinnarar</a>
+          </li>
           {% if user.is_authenticated %}
           <li class="relative">
             <button id="user-menu" class="flex items-center space-x-2 focus:outline-none">

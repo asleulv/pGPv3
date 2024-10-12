@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Vinnere av pGP-rundar{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-12">
+    <h1 class="text-2xl font-bold mb-6">Vinnere av pGP-rundar:</h1>
+    <div class="grid grid-cols-1 gap-6">
+
+        {% for winner in winners %}
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 w-full flex flex-col">
+                <div class="font-bold text-lg mb-1">{{ winner.round_name }}</div>
+                <div class="text-sm text-gray-500 mb-2">
+                    <strong>Arrangør:</strong> {{ winner.organizer }} <br>
+                    <strong>Dato lagt til:</strong> {{ winner.date_added }}
+                </div>
+                <div class="flex-grow mb-2">
+                    <div class="text-sm text-gray-500">
+                        <strong>Vinnar:</strong> {{ winner.winning_player_nickname }}
+                    </div>
+                    <div class="text-lg font-semibold mb-1 text-gray-600">  <!-- Increased font size and bold -->
+                        {{ winner.artist }} - 
+                        <a href="{{ winner.spotify_url }}" class="text-blue-600 hover:underline" target="_blank">{{ winner.song_title }}</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center col-span-1">Det finnes ingen vinnere.</div>
+        {% endfor %}
+
+
+
+    </div>
+</div>
+{% endblock %}

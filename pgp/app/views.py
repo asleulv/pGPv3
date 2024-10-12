@@ -23,7 +23,7 @@ from django.http import HttpResponseForbidden
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .utils import get_combined_song_data
+from .utils import get_combined_song_data, get_round_winners
 from django.core.paginator import Paginator, EmptyPage
 from django.http import JsonResponse
 
@@ -564,3 +564,39 @@ def combined_song_data_view(request):
 @login_required
 def combined_song_view(request):
     return render(request, 'app/combined_songs.html')
+
+def get_winners_data():
+    # Get the round winners data (this returns a list of namedtuples)
+    winners = get_round_winners()
+
+    # Prepare the winners data for the response
+    return [
+        {
+            'round_name': winner.round_name,
+            'organizer': winner.organizer,
+            'date_added': winner.date_added,
+            'artist': winner.artist,
+            'song_title': winner.song_title,
+            'spotify_url': winner.spotify_url,
+            'winning_player_nickname': winner.winning_player_nickname,
+        }
+        for winner in winners
+    ]
+
+@login_required
+def round_winners_data_view(request):
+    # Call the helper function to get winners data
+    winners_data = get_winners_data()
+
+    # Return the data as JSON
+    return JsonResponse({
+        'data': winners_data
+    })
+
+@login_required
+def round_winners_view(request):
+    # Call the helper function to get winners data
+    winners_data = get_winners_data()
+
+    # Pass the data to the template context
+    return render(request, 'app/round_winners.html', {'winners': winners_data})

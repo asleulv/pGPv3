@@ -19,5 +19,7 @@ urlpatterns = [
     path('export/word/<int:round_id>/', views.export_to_word, name='export_to_word'),
     path('combined-songs/data/', views.combined_song_data_view, name='combined_song_data_view'),
     path('combined-songs/', views.combined_song_view, name='combined-songs'),
+    path('round-winners/data/', views.round_winners_data_view, name='round_winners_data_view'),
+    path('round-winners/', views.round_winners_view, name='round_winners'),
 
 ]
