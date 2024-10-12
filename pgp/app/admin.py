@@ -59,6 +59,18 @@ class SongAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs  # Only allow superusers to see this
         return qs.none()  # Non-admins cannot see Song data
+    
+@admin.register(models.LegacySong)
+class LegacySongAdmin(admin.ModelAdmin):
+    list_display = ('song', 'artist', 'pgp_tema', 'pgp_levert_av')  # Equivalent to 'title', 'artist', 'round', 'player'
+    search_fields = ('song', 'artist', 'pgp_tema', 'pgp_levert_av')  # Search by song, artist, round (pgp_tema), and player (pgp_levert_av)
+    list_filter = ('pgp_tema', 'pgp_levert_av')  # Filter by round (pgp_tema) and player (pgp_levert_av)
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs  # Only allow superusers to see this
+        return qs.none()  # Non-admins cannot see LegacySong data
 
 # Register the Vote model (visible only to superusers)
 @admin.register(models.Vote)

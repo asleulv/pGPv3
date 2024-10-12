@@ -148,7 +148,7 @@
     </div>
 {% endif %}
 
-{% if round.start_date >= now %}
+{% if round.start_date >= now and not round.round_finished %}
     <h2 class="text-2xl font-bold bg-green-500 text-white p-2 shadow-md">
         {% if player_song %}Endre bidrag:{% else %}Send inn bidrag:{% endif %}
     </h2>
@@ -166,7 +166,7 @@
             </button>
         </form>
     
-{% endif %}
+
 
         
         {% if player_song %}
@@ -177,8 +177,9 @@
             </button>
         </form>
         {% endif %}
-        
+         
         <hr class="my-4 border-gray-300">
+        {% endif %}  
         {% if player_song %}
             <div class="mt-8">
                 <h3 class="text-lg font-semibold mb-2">Registrert bidrag:</h3>
