@@ -73,6 +73,9 @@
           <li class="w-full">
             <a href="{% url 'combined-songs' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">Totallista</a>
           </li>
+          <li class="w-full">
+            <a href="{% url 'round_winners' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">Vinnarar</a>
+          </li>
           {% if user.is_authenticated %}
           <li class="w-full relative">
             <a href="{% url 'logout' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">Logg ut</a>
