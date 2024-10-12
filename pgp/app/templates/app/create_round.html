@@ -13,7 +13,7 @@
             <div class="flex flex-col">
                 <label for="{{ form.name.id_for_label }}" class="text-gray-700 font-medium">{% trans "Rundenavn:" %}</label>
                 <div class="mt-1">
-                    <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" value="{{ form.name.value|default_if_none:'' }}" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" value="{{ form.name.value|default_if_none:''  }}"  placeholder="pGP#??? - Ditt tema" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 </div>
                 {% if form.name.help_text %}
                     <p class="mt-1 text-sm text-gray-500">{{ form.name.help_text }}</p>
@@ -63,8 +63,11 @@
                 </div>
             </div>
         </div>
-        <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded mt-6">{% trans "🚀Start runde!" %}</button>
-    </form>
+        <div class="flex justify-center">
+            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded mt-6">
+                {% trans "🚀Start runde!" %}
+            </button>
+        </div>    </form>
 </div>
 
 <script>
