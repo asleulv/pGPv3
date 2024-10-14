@@ -110,15 +110,10 @@ def round_detail(request, pk):
     player = Player.objects.get(user=request.user)
     player_song = Song.objects.filter(round=round_instance, player=player).first()
     has_voted = Vote.objects.filter(player=player, song__round=round_instance).exists()
-    
     now = timezone.now()
-    
-    # Initialize song submission form
     form = SongSubmissionForm(instance=player_song)
     track_id = get_track_id(player_song)
     is_organizer = round_instance.organizer == request.user
-    organizer_data = get_organizer_data(round_instance) if is_organizer else {}
-    
     release_time = round_instance.release_time if round_instance.playlist_released else None
     countdown = calculate_countdown(now, release_time) if release_time else None
 
@@ -133,25 +128,28 @@ def round_detail(request, pk):
         .select_related('song') \
         .order_by('-score')  # Sort votes by score
     
-    all_players = Player.objects.filter(id__in=submitted_player_ids)
+     # Fetch all players in the database
+    all_players = Player.objects.all()
 
     # Get the list of players who have voted
-    players_with_votes = Vote.objects.filter(song__round=round_instance).values_list('player_id', flat=True).distinct()
-    players_with_votes_ids = set(players_with_votes)
+    players_with_votes_ids = set(Vote.objects.filter(song__round=round_instance).values_list('player_id', flat=True).distinct())
 
-    # Get players who have not voted
-    players_without_votes = all_players.exclude(id__in=players_with_votes_ids)
-    
+    # Get players who have submitted a song (these are already filtered players for this round)
+    players_with_song = Player.objects.filter(id__in=submitted_player_ids)
+
+    # Players who have not voted
+    players_without_votes = players_with_song.exclude(id__in=players_with_votes_ids)
+
+    # Fetch all players who have not submitted a song
+    players_without_song = all_players.exclude(id__in=submitted_player_ids)
+
     has_submitted_song = player_song is not None
 
     if is_organizer and request.method == "POST" and 'finish_round' in request.POST:
         round_instance.round_finished = True
         round_instance.save()
-        return redirect('round_detail', pk=round_instance.pk)
-    
-    print(f"Players with votes: {players_with_votes}")
-    print(f"Players without votes: {players_without_votes}")
-    
+        return redirect('round_detail', pk=round_instance.pk)    
+    print(players_with_song)
     # Update the context to include all necessary data for both organizers and players
     context = {
         'round': round_instance,
@@ -168,7 +166,10 @@ def round_detail(request, pk):
         'num_submitted_songs': all_submitted_songs.count(),
         'players': Player.objects.filter(id__in=submitted_player_ids), 
         'players_with_votes': Player.objects.filter(id__in=players_with_votes_ids),  # Players who have voted
-        'players_without_votes': players_without_votes,  # Players who have not voted
+        'players_without_votes': players_without_votes,  
+        'players_without_song': players_without_song,
+        'players_with_song': players_with_song,
+        'all_players': all_players, 
         'votes_dict': {
             song.id: {
                 vote.player.id: vote.score for vote in song.vote_set.all()
@@ -176,17 +177,11 @@ def round_detail(request, pk):
             for song in all_submitted_songs
         },
         'player_votes': player_votes, 
-        'organizer_data': organizer_data,  # Include organizer data if the user is the organizer
         'has_submitted_song': has_submitted_song, 
     }
 
     return render(request, 'app/round_detail.html', context)
 
-
-
-def get_organizer_data(round_instance):
-    # This function is no longer needed as we calculate everything in round_detail
-    pass
 
 
 @login_required

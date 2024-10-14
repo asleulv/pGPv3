@@ -4,7 +4,7 @@
 {% block title %}Ny pGP-runde{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto bg-white shadow-lg rounded-lg p-8 mt-12">
+<div class="max-w-md mx-auto bg-white shadow-lg p-8 mt-12">
     <h1 class="text-2xl font-bold mb-6">🧙‍♂️ {% trans "Start ny pGP-runde" %}</h1>
     <form method="post">
         {% csrf_token %}
@@ -64,7 +64,7 @@
             </div>
         </div>
         <div class="flex justify-center">
-            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded mt-6">
+            <button type="submit" class="bg-blue-600 text-white py-2 px-4 mt-6">
                 {% trans "🚀Start runde!" %}
             </button>
         </div>    </form>

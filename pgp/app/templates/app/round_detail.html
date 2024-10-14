@@ -272,24 +272,44 @@
 <div class="p-4 text-black bg-white shadow-lg">
     <p class="mb-0 font-bold">Antall bidrag: {{ num_submitted_songs }}</p>
 
-    <h3 class="font-bold">Har stemt:</h3>
-    <p>
-        {% if players_with_votes %}
-            {{ players_with_votes|join:", " }}
-        {% else %}
-            Ingen!
-        {% endif %}
-    </p>
+    {% if now < round.start_date %}
+        <h3 class="font-bold">Har levert bidrag:</h3>
+        <p>
+            {% if players_with_song %}
+                {{ players_with_song|join:", " }}
+            {% else %}
+                Ingen!
+            {% endif %}
+        </p>
 
-    <h3 class="font-bold">Manglar stemmer frå:</h3>
-    <p>
-        {% if players_without_votes %}
-            {{ players_without_votes|join:", " }}
-        {% else %}
-            Ingen!
-        {% endif %}
-    </p>
+        <h3 class="font-bold">Har ikkje levert bidrag:</h3>
+        <p>
+            {% if players_without_song %}
+                {{ players_without_song|join:", " }}
+            {% else %}
+                Ingen!
+            {% endif %}
+        </p>
+    {% else %}
+        <h3 class="font-bold">Har stemt:</h3>
+        <p>
+            {% if players_with_votes %}
+                {{ players_with_votes|join:", " }}
+            {% else %}
+                Ingen!
+            {% endif %}
+        </p>
 
+        <h3 class="font-bold">Manglar stemmer frå:</h3>
+        <p>
+            {% if players_without_votes %}
+                {{ players_without_votes|join:", " }}
+            {% else %}
+                Ingen!
+            {% endif %}
+        </p>
+    {% endif %}
+</div>
 <br>
     <button id="exportExcelButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
         Excel-eksport
