@@ -3,6 +3,14 @@
 
 {% block title %}pGP: {{ round.name }}{% endblock %}
 
+{% block head %}
+    {{ block.super }} 
+    <meta property="og:title" content="pGP: {{ round.name }}" />
+    <meta property="og:description" content="{{ round.description|truncatewords:20 }}" />
+    <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+    <meta property="og:type" content="website" />
+{% endblock %}
+
 {% block content %}
 
 <div class="container mx-auto my-8 px-4">
