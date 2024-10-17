@@ -50,15 +50,21 @@ class PlayerAdmin(admin.ModelAdmin):
 # Register the Song model (visible only to superusers)
 @admin.register(models.Song)
 class SongAdmin(admin.ModelAdmin):
-    list_display = ('title', 'artist', 'round', 'player')
+    list_display = ('title', 'artist', 'round', 'get_obfuscated_player')
     search_fields = ('title', 'artist', 'round__name', 'player__nickname')
-    list_filter = ('round', 'player')
+    list_filter = ('round',)
+
+    def get_obfuscated_player(self, obj):
+        # Slur the player's nickname to hide their identity
+        return '🔒'  # Replace this with any kind of obfuscation you prefer
+
+    get_obfuscated_player.short_description = 'Player'  # Name to display in admin
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.is_superuser:
-            return qs  # Only allow superusers to see this
-        return qs.none()  # Non-admins cannot see Song data
+            return qs  # Superusers can see everything
+        return qs  # Non-admins will see the obfuscated player names
     
 @admin.register(models.LegacySong)
 class LegacySongAdmin(admin.ModelAdmin):
