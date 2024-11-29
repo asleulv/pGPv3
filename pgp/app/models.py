@@ -56,6 +56,24 @@ class Round(models.Model):
         # Reset wins and bottoms for all players before updating stats
         PlayerStats.objects.update(wins=0, bottoms=0)
 
+        # Debug: print the sorted players and their scores
+        print("Sorted players and scores:")
+        for index, (player, score) in enumerate(sorted_players):
+            print(f"Rank {index + 1}: Player {player.nickname} - Score {score}")
+
+        # Get the top and bottom players
+        if sorted_players:
+            winning_player = sorted_players[0][0]
+            losing_player = sorted_players[-1][0]
+
+            # Increment wins and bottoms for the players
+            winning_player.stats.wins += 1
+            losing_player.stats.bottoms += 1
+
+            # Debug: print the winners and bottoms for verification
+            print(f"Top player (Winner): {winning_player.nickname} - Wins incremented")
+            print(f"Bottom player: {losing_player.nickname} - Bottoms incremented")
+
         # Update stats for each player
         for index, (player, score) in enumerate(sorted_players):
             stats, created = PlayerStats.objects.get_or_create(player=player)
@@ -69,14 +87,8 @@ class Round(models.Model):
             if index < 10:
                 stats.total_points_pgp += pgp_points[index]
 
-            # Set the total number of rounds played (count of rounds player has participated in)
+            # Set the total number of rounds played
             stats.rounds_played = player.song_set.filter(round__round_finished=True).count()
-
-            # Increment wins and bottoms only for this round
-            if index == 0:  # First place in this round
-                stats.wins += 1
-            if index == len(sorted_players) - 1:  # Last place in this round
-                stats.bottoms += 1
 
             stats.save()
 
