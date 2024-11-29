@@ -53,6 +53,9 @@ class Round(models.Model):
         # Sort players by their scores for this round (descending order)
         sorted_players = sorted(player_scores.items(), key=lambda x: x[1], reverse=True)
 
+        # Reset wins and bottoms for all players before updating stats
+        PlayerStats.objects.update(wins=0, bottoms=0)
+
         # Update stats for each player
         for index, (player, score) in enumerate(sorted_players):
             stats, created = PlayerStats.objects.get_or_create(player=player)
@@ -69,10 +72,10 @@ class Round(models.Model):
             # Set the total number of rounds played (count of rounds player has participated in)
             stats.rounds_played = player.song_set.filter(round__round_finished=True).count()
 
-            # Update wins and bottoms only if not already updated for this round
-            if index == 0 and not created:  # First place in this round
+            # Increment wins and bottoms only for this round
+            if index == 0:  # First place in this round
                 stats.wins += 1
-            if index == len(sorted_players) - 1 and not created:  # Last place in this round
+            if index == len(sorted_players) - 1:  # Last place in this round
                 stats.bottoms += 1
 
             stats.save()
