@@ -1,4 +1,3 @@
-<!-- app/templates/app/home.html -->
 {% extends 'base.html' %}
 
 {% block title %}pGP beta1{% endblock %}
@@ -27,24 +26,82 @@
 
 {% load custom_filters %}
 
-<div class="shadow-md rounded p-4 bg-white">
-    <h2 class="text-xl font-bold mb-2">pGP-deltakarar:</h2>
-    {% if players %}
-        <p class="text-black">
-            {% for player in players %}
-                {{ random_emojis|get_item:player.id }} {{ player.nickname }}{% if not forloop.last %}, {% endif %}
-            {% endfor %}
-        </p>
+<!-- All-Time Player Stats Table -->
+<div class="shadow-md rounded p-4 bg-white mt-6">
+    <h2 class="text-xl font-bold mb-4">Totatabellen</h2>
+    {% if stats %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full table-auto border-collapse">
+                <thead>
+                    <tr>
+                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(0)">Spelar <span id="arrow0" class="sort-arrow"></span></th>
+                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(1)">Totale poeng <span id="arrow1" class="sort-arrow"></span></th>
+                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(2)">Totale poeng PGP-format <span id="arrow2" class="sort-arrow"></span></th>
+                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(3)">Gj. snittleg poengsum <span id="arrow3" class="sort-arrow"></span></th>
+                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(4)">Rundar spelt <span id="arrow4" class="sort-arrow"></span></th>
+                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(5)">Seirar <span id="arrow5" class="sort-arrow"></span></th>
+                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(6)">Sisteplassar <span id="arrow6" class="sort-arrow"></span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for player_stat in stats %}
+                        <tr>
+                            <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.player.nickname }}</td>
+                            <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.total_points }}</td>
+                            <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.total_points_pgp }}</td>
+                            <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.average_score }}</td>
+                            <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.rounds_played }}</td>
+                            <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.wins }}</td>
+                            <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.bottoms }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
-        <p class="text-gray-700">Ingen registrerte spelarar.</p>
+        <p class="text-gray-700">Ingen stats funnet.</p>
     {% endif %}
 </div>
 
+<script>
+    let currentSortOrder = true; // true for ascending, false for descending
 
-
-
-
-
-
+    function sortTable(n) {
+        const table = document.querySelector("table");
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+    
+        const isNumeric = n !== 0;
+    
+        rows.sort((a, b) => {
+            let aText = a.children[n].innerText.trim();
+            let bText = b.children[n].innerText.trim();
+    
+            if (isNumeric) {
+                aText = parseFloat(aText) || 0;
+                bText = parseFloat(bText) || 0;
+            }
+    
+            if (aText < bText) return currentSortOrder ? -1 : 1;
+            if (aText > bText) return currentSortOrder ? 1 : -1;
+            return 0;
+        });
+    
+        // Update sort order indicator
+        document.querySelectorAll('.sort-arrow').forEach((arrow, index) => {
+            arrow.textContent = ''; // Clear all arrows
+            arrow.style.display = 'none';
+        });
+        const arrow = document.querySelector(`#arrow${n}`);
+        arrow.textContent = currentSortOrder ? '▲' : '▼';
+        arrow.style.display = 'inline';
+    
+        currentSortOrder = !currentSortOrder;
+    
+        rows.forEach(row => tbody.appendChild(row));
+    }
+    
+    
+</script>
 
 {% endblock %}

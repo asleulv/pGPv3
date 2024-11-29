@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from datetime import timedelta
 from datetime import datetime
 from django.db import models
-from .models import Round, Song, Player, Vote
+from .models import Round, Song, Player, Vote, PlayerStats
 from .forms import RoundForm, SongSubmissionForm, DynamicVoteForm, RegistrationForm
 from .spotify_views import get_spotify_client
 from urllib.parse import urlparse
@@ -36,6 +36,7 @@ def user_logout(request):
 def home(request):
     players = Player.objects.all()
     active_rounds = Round.objects.filter(end_date__gte=timezone.now())  # Get current rounds
+    stats = PlayerStats.objects.all().order_by('-total_points')
 
     emojis = ['🎵', '🎤', '🎸', '🎧', '🎷', '💄', '👓', '🩲', '🌩', '🍓', '🎱', '🧩', '⚓️']
     
@@ -46,6 +47,7 @@ def home(request):
         'players': players,
         'random_emojis': random_emojis,
         'active_rounds': active_rounds,
+        'stats': stats
     })
 
 @login_required
@@ -500,7 +502,7 @@ def edit_round(request, round_id):
 
 @login_required
 def combined_song_data_view(request):
-    page = request.GET.get('page', 1)
+    page = int(request.GET.get('page', 1))
     page_size = int(request.GET.get('pageSize', 10))  # Default page size of 10
     search_value = request.GET.get('search[value]', '')
     order_column = request.GET.get('orderColumn', 'dato')  # Default column for ordering
