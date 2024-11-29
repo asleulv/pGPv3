@@ -38,69 +38,42 @@ class Round(models.Model):
         if not self.round_finished:
             return
 
+        # Get all players in this round
         players = Player.objects.filter(song__round=self).distinct()
 
-        # Gather the scores for all players in the round
-        player_scores = []
-        for player in players:
-            total_points = player.song_set.filter(round=self).aggregate(
-                total_score=Sum('vote__score')
-            )['total_score'] or 0
+        # Define PGP points for top 10
+        pgp_points = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1]
 
-            player_scores.append((player, total_points))
+        # Collect scores for players in this round
+        player_scores = {
+            player: player.song_set.filter(round=self).aggregate(total=Sum('vote__score'))['total'] or 0
+            for player in players
+        }
 
-        # Sort players by total points in descending order
-        player_scores.sort(key=lambda x: x[1], reverse=True)
+        # Sort players by their scores for this round (descending order)
+        sorted_players = sorted(player_scores.items(), key=lambda x: x[1], reverse=True)
 
-        # Assign PGP points to the top 10 players
-        pgp_points = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1]  # Points distribution for top 10
-        for index, (player, points) in enumerate(player_scores[:10]):
-            stats, created = PlayerStats.objects.get_or_create(player=player)
-            stats.total_points_pgp += pgp_points[index]  # Add PGP-style points
-            stats.save()
+        # Update stats for each player
+        for index, (player, score) in enumerate(sorted_players):
+            stats, _ = PlayerStats.objects.get_or_create(player=player)
 
-        # Update other player stats
-        for player in players:
-            total_points = player.song_set.filter(round=self).aggregate(
-                total_score=Sum('vote__score')
-            )['total_score'] or 0
+            # Update total points (sum of all scores across all rounds)
+            stats.total_points = player.song_set.aggregate(
+                total_points=Sum('vote__score')
+            )['total_points'] or 0
 
-            highest_score_song = player.song_set.filter(round=self).annotate(
-                max_score=ExpressionWrapper(
-                    F('vote__score'), output_field=fields.IntegerField()
-                )
-            ).order_by('-max_score').first()
+            # Update PGP points for top 10
+            if index < 10:
+                stats.total_points_pgp += pgp_points[index]
 
-            lowest_score_song = player.song_set.filter(round=self).annotate(
-                min_score=ExpressionWrapper(
-                    F('vote__score'), output_field=fields.IntegerField()
-                )
-            ).order_by('min_score').first()
-
-            total_votes = player.song_set.filter(round=self).aggregate(
-                total_votes=Sum('vote__score')
-            )['total_votes'] or 0
-            num_songs = player.song_set.filter(round=self).count()
-            average_score = total_votes / num_songs if num_songs > 0 else 0
-
-            stats, created = PlayerStats.objects.get_or_create(player=player)
-            stats.total_points = total_points
-            stats.highest_score_song = highest_score_song.title if highest_score_song else ''
-            stats.highest_score = highest_score_song.vote_set.aggregate(
-                highest=models.Max('score')
-            )['highest'] if highest_score_song else 0
-            stats.lowest_score_song = lowest_score_song.title if lowest_score_song else ''
-            stats.lowest_score = lowest_score_song.vote_set.aggregate(
-                lowest=models.Min('score')
-            )['lowest'] if lowest_score_song else 0
-            stats.average_score = average_score
+            # Increment rounds played
             stats.rounds_played += 1
 
             # Update wins and bottoms
-            if player_scores.index((player, total_points)) == 0:
-                stats.wins += 1  # Increment wins if the player is the 1st place
-            if player_scores.index((player, total_points)) == len(player_scores) - 1:
-                stats.bottoms += 1  # Increment bottoms if the player is in the last place
+            if index == 0:  # First place in this round
+                stats.wins += 1
+            if index == len(sorted_players) - 1:  # Last place in this round
+                stats.bottoms += 1
 
             stats.save()
 
@@ -156,16 +129,9 @@ class PlayerStats(models.Model):
     player = models.OneToOneField(Player, on_delete=models.CASCADE, related_name="stats")
     total_points = models.IntegerField(default=0)
     total_points_pgp = models.IntegerField(default=0)
-    highest_score_song = models.CharField(max_length=200, blank=True, null=True)
-    highest_score = models.IntegerField(default=0)
-    lowest_score_song = models.CharField(max_length=200, blank=True, null=True)
-    lowest_score = models.IntegerField(default=0)
-    organizer_history = models.JSONField(default=list, blank=True)
-    average_score = models.FloatField(default=0)
     rounds_played = models.IntegerField(default=0)
     wins = models.IntegerField(default=0)
     bottoms = models.IntegerField(default=0)
-    disqualifications = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.player.nickname} Stats"
