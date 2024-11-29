@@ -55,7 +55,7 @@ class Round(models.Model):
 
         # Update stats for each player
         for index, (player, score) in enumerate(sorted_players):
-            stats, _ = PlayerStats.objects.get_or_create(player=player)
+            stats, created = PlayerStats.objects.get_or_create(player=player)
 
             # Update total points (sum of all scores across all rounds)
             stats.total_points = player.song_set.aggregate(
@@ -66,13 +66,13 @@ class Round(models.Model):
             if index < 10:
                 stats.total_points_pgp += pgp_points[index]
 
-            # Increment rounds played
-            stats.rounds_played += 1
+            # Set the total number of rounds played (count of rounds player has participated in)
+            stats.rounds_played = player.song_set.filter(round__round_finished=True).count()
 
-            # Update wins and bottoms
-            if index == 0:  # First place in this round
+            # Update wins and bottoms only if not already updated for this round
+            if index == 0 and not created:  # First place in this round
                 stats.wins += 1
-            if index == len(sorted_players) - 1:  # Last place in this round
+            if index == len(sorted_players) - 1 and not created:  # Last place in this round
                 stats.bottoms += 1
 
             stats.save()
