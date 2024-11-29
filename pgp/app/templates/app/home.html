@@ -36,9 +36,9 @@
                     <tr>
                         <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(0)">Spelar <span id="arrow0" class="sort-arrow"></span></th>
                         <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(1)">Totale poeng <span id="arrow1" class="sort-arrow"></span></th>
-                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(4)">Rundar spelt <span id="arrow4" class="sort-arrow"></span></th>
-                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(5)">Seirar <span id="arrow5" class="sort-arrow"></span></th>
-                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(6)">Sisteplassar <span id="arrow6" class="sort-arrow"></span></th>
+                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(2)">Rundar spelt <span id="arrow2" class="sort-arrow"></span></th>
+                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(3)">Gj. snitt per runde <span id="arrow3" class="sort-arrow"></span></th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -47,8 +47,7 @@
                             <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.player.nickname }}</td>
                             <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.total_points }}</td>
                             <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.rounds_played }}</td>
-                            <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.wins }}</td>
-                            <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.bottoms }}</td>
+                            <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.average_points_per_round }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

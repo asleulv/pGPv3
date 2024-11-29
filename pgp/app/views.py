@@ -38,14 +38,15 @@ def home(request):
     active_rounds = Round.objects.filter(end_date__gte=timezone.now())  # Get current rounds
     stats = PlayerStats.objects.all().order_by('-total_points')
 
-    emojis = ['🎵', '🎤', '🎸', '🎧', '🎷', '💄', '👓', '🩲', '🌩', '🍓', '🎱', '🧩', '⚓️']
-    
-    # Assign one random emoji to each player
-    random_emojis = {player.id: random.choice(emojis) for player in players}
+    # Calculate average points per round for each player and round to one decimal place
+    for stat in stats:
+        if stat.rounds_played > 0:
+            stat.average_points_per_round = round(stat.total_points / stat.rounds_played, 1)
+        else:
+            stat.average_points_per_round = 0  # Handle division by zero
 
     return render(request, 'app/home.html', {
         'players': players,
-        'random_emojis': random_emojis,
         'active_rounds': active_rounds,
         'stats': stats
     })
