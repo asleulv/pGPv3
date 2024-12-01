@@ -162,7 +162,7 @@
 <div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
     {% if stats %}
         <div class="overflow-x-auto">
-            <table class="min-w-full table-auto border-collapse bg-gray-100">
+            <table class="min-w-full table-auto border-collapse">
                 <thead>
                     <tr class="bg-blue-100 text-gray-800">
                         <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(0)">Spelar <span id="arrow0" class="sort-arrow"></span></th>
@@ -173,7 +173,7 @@
                 </thead>
                 <tbody class="text-gray-700">
                     {% for player_stat in stats %}
-                        <tr class="hover:bg-gray-200">
+                        <tr class="hover:bg-gray-50">
                             <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.player.nickname }}</td>
                             <td class="border px-2 py-1 sm:px-4 sm:py-2 text-right">{{ player_stat.total_points }}</td>
                             <td class="border px-2 py-1 sm:px-4 sm:py-2 text-right">{{ player_stat.rounds_played }}</td>
