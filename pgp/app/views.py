@@ -23,7 +23,7 @@ from django.http import HttpResponseForbidden
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .utils import get_combined_song_data, get_round_winners
+from .utils import get_combined_song_data, get_round_winners, LoggedInPlayerStats
 from django.core.paginator import Paginator, EmptyPage
 from django.http import JsonResponse
 
@@ -38,17 +38,25 @@ def home(request):
     active_rounds = Round.objects.filter(end_date__gte=timezone.now())  # Get current rounds
     stats = PlayerStats.objects.all().order_by('-total_points')
 
-    # Calculate average points per round for each player and round to one decimal place
-    for stat in stats:
-        if stat.rounds_played > 0:
-            stat.average_points_per_round = round(stat.total_points / stat.rounds_played, 1)
-        else:
-            stat.average_points_per_round = 0  # Handle division by zero
+    # Add logged-in player's stats if available
+    logged_in_player_stats = None
+    if request.user.is_authenticated:
+        try:
+            player_stats = LoggedInPlayerStats(request.user)
+            logged_in_player_stats = {
+                'previous_songs': player_stats.previous_songs(),
+                'top_voters': player_stats.top_voters(),
+                'top_given_votes': player_stats.top_given_votes(),
+            }
+        except Player.DoesNotExist:
+            # Handle case where the logged-in user does not have an associated Player object
+            logged_in_player_stats = None
 
     return render(request, 'app/home.html', {
         'players': players,
         'active_rounds': active_rounds,
-        'stats': stats
+        'stats': stats,
+        'logged_in_player_stats': logged_in_player_stats,
     })
 
 @login_required

@@ -148,6 +148,16 @@ class PlayerStats(models.Model):
     wins = models.IntegerField(default=0)
     bottoms = models.IntegerField(default=0)
 
+    @property
+    def average_points_per_round(self):
+        """
+        Calculate the average points per round, rounded to one decimal place.
+        Handle cases where rounds_played is zero to avoid division by zero.
+        """
+        if self.rounds_played > 0:
+            return round(self.total_points / self.rounds_played, 1)
+        return 0
+
     def __str__(self):
         return f"{self.player.nickname} Stats"
 

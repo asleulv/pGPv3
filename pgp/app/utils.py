@@ -1,8 +1,8 @@
 # myapp/utils.py
 from collections import namedtuple
-from .models import LegacySong, Song, Round  # Ensure all relevant models are imported
+from .models import LegacySong, Song, Round, Vote, Player  # Ensure all relevant models are imported
 from django.utils import timezone
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Subquery, Sum
 
 def get_combined_song_data():
     CombinedSong = namedtuple('CombinedSong', [
@@ -134,5 +134,43 @@ def get_round_winners():
     winners.sort(key=lambda x: x.date_added, reverse=True)
 
     return winners
+
+
+class LoggedInPlayerStats:
+    def __init__(self, user):
+        self.player = Player.objects.get(user=user)
+
+    def previous_songs(self):
+        """
+        Get a list of songs submitted by the logged-in player.
+        Includes Spotify URL and round information.
+        """
+        return Song.objects.filter(player=self.player).select_related('round').values(
+            'title', 'artist', 'spotify_url', 'round__id', 'round__name'
+        )
+
+    def top_voters(self):
+        """
+        Get a list of the top players who voted for the logged-in player's songs,
+        sorted by the total points given.
+        """
+        return (
+            Vote.objects.filter(song__player=self.player)
+            .values('player__nickname')
+            .annotate(total_points=Sum('score'))
+            .order_by('-total_points')[:10]
+        )
+
+    def top_given_votes(self):
+        """
+        Get a list of players the logged-in player gave the most points to,
+        sorted by total points given.
+        """
+        return (
+            Vote.objects.filter(player=self.player)
+            .values('song__player__nickname')
+            .annotate(total_points=Sum('score'))
+            .order_by('-total_points')[:10]
+        )
 
 
