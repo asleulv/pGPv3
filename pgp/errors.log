@@ -10511,3 +10511,93 @@ Traceback (most recent call last):
   File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\db\models\sql\query.py", line 1253, in check_query_object_type
     raise ValueError(
 ValueError: Cannot query "Jostein": Must be "User" instance.
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 521, in combined_song_data_view
+    combined_songs = get_combined_song_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 14, in get_combined_song_data
+    dato=Coalesce('round__release_time', Value('')),  # Use release_time as dato
+NameError: name 'Coalesce' is not defined
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 521, in combined_song_data_view
+    combined_songs = get_combined_song_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 14, in get_combined_song_data
+    dato=Coalesce('round__release_time', Value('')),  # Use release_time as dato
+NameError: name 'Coalesce' is not defined
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 521, in combined_song_data_view
+    combined_songs = get_combined_song_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 10, in get_combined_song_data
+    song_queryset = Song.objects.filter(
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\db\models\query.py", line 1590, in annotate
+    return self._annotate(args, kwargs, select=True)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\db\models\query.py", line 1631, in _annotate
+    raise ValueError(
+ValueError: The annotation 'artist' conflicts with a field on the model.
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 521, in combined_song_data_view
+    combined_songs = get_combined_song_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 10, in get_combined_song_data
+    song_queryset = Song.objects.filter(
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\db\models\query.py", line 1590, in annotate
+    return self._annotate(args, kwargs, select=True)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\db\models\query.py", line 1631, in _annotate
+    raise ValueError(
+ValueError: The annotation 'artist' conflicts with a field on the model.
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 521, in combined_song_data_view
+    combined_songs = get_combined_song_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 34, in get_combined_song_data
+    combined_songs += [
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 36, in <listcomp>
+    dato=legacy_song.date_added.strftime('%Y-%m-%d') if legacy_song.date_added else '',
+AttributeError: 'str' object has no attribute 'strftime'
+Internal Server Error: /combined-songs/data/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 521, in combined_song_data_view
+    combined_songs = get_combined_song_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 34, in get_combined_song_data
+    combined_songs += [
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 36, in <listcomp>
+    dato=legacy_song.date_added.strftime('%Y-%m-%d') if legacy_song.date_added else '',
+AttributeError: 'str' object has no attribute 'strftime'

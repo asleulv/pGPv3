@@ -10,7 +10,7 @@ DJANGO_ENV = config('DJANGO_ENV', default='development')
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-d(^@nnu9naym*n-*)!7!jvtx&8ab9#l2iaf8vq^7^&-pj=$e+^"
+SECRET_KEY = config('SECRET_KEY')
 
 LOGIN_URL = '/accounts/login/'
 TIME_INPUT_FORMATS = ['%H:%M']
