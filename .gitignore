@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *.pyo
 
+# settings
+settings.py
+core/settings.py
+
 # Virtual Environment
 venv/
 env/
@@ -39,3 +43,4 @@ build/
 # Secret files
 *.env
 
+pgp/core/settings.py
