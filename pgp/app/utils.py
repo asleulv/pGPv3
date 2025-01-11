@@ -2,7 +2,7 @@
 from collections import namedtuple
 from .models import LegacySong, Song, Round, Vote, Player  # Ensure all relevant models are imported
 from django.utils import timezone
-from django.db.models import OuterRef, Subquery, Sum
+from django.db.models import OuterRef, Subquery, Sum, Count
 
 def get_combined_song_data():
     CombinedSong = namedtuple('CombinedSong', [
@@ -82,9 +82,11 @@ def get_round_winners():
                 Song.objects.filter(round=OuterRef('id'))
                 .order_by('-total_score')
                 .values('total_score')[:1]
-            )
+            ),
+            # Count how many players voted for the round's songs
+            num_voters=Count('song__vote', distinct=True)
         )
-        .filter(winning_score__gt=0)
+        .filter(winning_score__gt=0, num_voters__gt=0)  # Ensure at least one player voted
         .annotate(
             winning_song_title=Subquery(
                 Song.objects.filter(round=OuterRef('id'))
@@ -105,6 +107,14 @@ def get_round_winners():
                 Song.objects.filter(round=OuterRef('id'))
                 .order_by('-total_score')
                 .values('player__nickname')[:1]
+            ),
+        )
+        .filter(
+            # Ensure that the winning player has voted for others in the round
+            winning_player_nickname__in=Subquery(
+                Vote.objects.filter(song__round=OuterRef('id'))
+                .values('player__nickname')
+                .distinct()
             )
         )
         .values(
@@ -171,6 +181,18 @@ class LoggedInPlayerStats:
             .values('song__player__nickname')
             .annotate(total_points=Sum('score'))
             .order_by('-total_points')[:10]
+        )
+    
+    def top_score_12_songs(self):
+        """
+        Get a list of songs where the logged-in player has given a score of 12.
+        Includes Spotify URL and round information.
+        """
+        return (
+            Vote.objects.filter(player=self.player, score=12)
+            .select_related('song')  # Ensure the song is fetched, but we don't need to select the round directly
+            .prefetch_related('song__round')  # Prefetch the related round for efficient querying
+            .values('song__title', 'song__artist', 'song__spotify_url', 'song__round__id', 'song__round__name')
         )
 
 

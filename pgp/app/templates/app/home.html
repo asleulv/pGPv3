@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %}pGP beta1{% endblock %}
+{% block title %}🦆 pGP beta2{% endblock %}
 
 {% block content %}
 <div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
     <h1 class="text-3xl font-bold mb-4 text-gray-800">Velkommen, {{ user.username }}!</h1>
-    <p class="text-gray-600">🤞La oss krysse fingrane for at dette systemet funkar!</p>
+    <p class="text-gray-600">🦄 Dette er pGP. Dette er livet.</p>
 </div>
 
 <div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
@@ -38,24 +38,24 @@
             {% if logged_in_player_stats.previous_songs %}
                 <ul class="list-none list-inside" id="previousSongsList">
                     {% for song in logged_in_player_stats.previous_songs|slice:":10" %}
-                    <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
-                        <a href="{{ song.spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base">
-                            🤐 {{ song.artist }} - {{ song.title }}
-                        </a>
-                        
-                        <!-- Display the round name below the song on small screens, and inline on larger screens -->
-                        <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2">
-                            ({{ song.round__name }})
-                        </span>
-                    </li>
-                    
+                        <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
+                            <a href="{{ song.spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base">
+                                🐔 {{ song.artist }} - {{ song.title }}
+                            </a>
+                            
+                            <!-- Display the round name below the song on small screens, and inline on larger screens -->
+                            <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2">
+                                ({{ song.round__name }})
+                            </span>
+                        </li>
                     {% endfor %}
+                    
                     {% if logged_in_player_stats.previous_songs|length > 10 %}
                         <div id="extraPreviousSongs" style="display: none;">
                             {% for song in logged_in_player_stats.previous_songs|slice:"10:" %}
                             <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
                                 <a href="{{ song.spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base">
-                                    🤐 {{ song.artist }} - {{ song.title }}
+                                    🐔 {{ song.artist }} - {{ song.title }}
                                 </a>
                                 
                                 <!-- Display the round name below the song on small screens, and inline on larger screens -->
@@ -63,7 +63,6 @@
                                     ({{ song.round__name }})
                                 </span>
                             </li>
-                            
                             {% endfor %}
                         </div>
                         <button 
@@ -72,18 +71,20 @@
                             class="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200">
                             Vis meir
                         </button>
-                        <button 
-                            id="copySpotifyUrlsButton" 
-                            onclick="copySpotifyUrlsToClipboard()" 
-                            class="mt-4 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition duration-200">
-                            Kopier Spotify URLar
-                        </button>
                     {% endif %}
                 </ul>
+                <!-- Show the copy button regardless of the number of songs -->
+                <button 
+                    id="copyPreviousSongsSpotifyUrlsButton" 
+                    onclick="copySpotifyUrlsToClipboard('previousSongsList')" 
+                    class="mt-4 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition duration-200">
+                    Kopier Spotify URLar
+                </button>
             {% else %}
                 <p class="text-gray-700">Ingen tidligere sanger funnet.</p>
             {% endif %}
         </div>
+        
 
         <!-- Voting Stats -->
 <div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
@@ -153,6 +154,59 @@
         {% endif %}
     </div>
 </div>
+<!-- Dine 12'arar (Songs given a top score of 12) -->
+<div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
+    <h4 class="text-lg font-bold text-blue-600 border-b-2 border-blue-400 pb-2 mb-4">Dine 12'arar</h4>
+    {% if logged_in_player_stats.top_score_12_songs %}
+        <ul class="list-none list-inside" id="topScore12SongsList">
+            {% for song in logged_in_player_stats.top_score_12_songs|slice:":10" %}
+                <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
+                    <a href="{{ song.song__spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base">
+                        🥇 {{ song.song__artist }} - {{ song.song__title }}
+                    </a>
+                    
+                    <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2">
+                        ({{ song.song__round__name }})
+                    </span>
+                </li>
+            {% endfor %}
+            
+            {% if logged_in_player_stats.top_score_12_songs|length > 10 %}
+                <div id="extraTopScore12Songs" style="display: none;">
+                    {% for song in logged_in_player_stats.top_score_12_songs|slice:"10:" %}
+                        <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
+                            <a href="{{ song.song__spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base">
+                                🥇 {{ song.song__artist }} - {{ song.song__title }}
+                            </a>
+                            
+                            <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2">
+                                ({{ song.song__round__name }})
+                            </span>
+                        </li>
+                    {% endfor %}
+                </div>
+
+                <button 
+                    id="toggleTopScore12SongsButton" 
+                    onclick="toggleVisibility('extraTopScore12Songs', 'toggleTopScore12SongsButton')" 
+                    class="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200">
+                    Vis meir
+                </button>
+            {% endif %}
+        </ul>
+
+        <!-- Always visible "Kopier Spotify URLar" button -->
+        <button 
+            id="copyTopScore12SongsSpotifyUrlsButton" 
+            onclick="copySpotifyUrlsToClipboard('topScore12SongsList')" 
+            class="mt-4 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition duration-200">
+            Kopier Spotify URLar
+        </button>
+    {% else %}
+        <p class="text-gray-700">Du har ikke gitt 12 poeng til noen sanger enda.</p>
+    {% endif %}
+</div>
+
 
     </div>
 {% endif %}
@@ -177,7 +231,7 @@
                             <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.player.nickname }}</td>
                             <td class="border px-2 py-1 sm:px-4 sm:py-2 text-right">{{ player_stat.total_points }}</td>
                             <td class="border px-2 py-1 sm:px-4 sm:py-2 text-right">{{ player_stat.rounds_played }}</td>
-                            <td class="border px-2 py-1 sm:px-4 sm:py-2 text-right">{{ player_stat.avg_points_per_round|floatformat:2 }}</td>
+                            <td class="border px-2 py-1 sm:px-4 sm:py-2 text-right">{{ player_stat.average_points_per_round|floatformat:2 }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -238,30 +292,28 @@
         }
     }
 
-    function copySpotifyUrlsToClipboard() {
-        // Get all the Spotify URLs from the previous songs list
-        const songLinks = document.querySelectorAll('#previousSongsList a');
-        
-        // Create an array to hold the URLs
-        const urls = Array.from(songLinks).map(link => link.href);
-
-        // Join the URLs with newline characters to format them correctly
-        const textToCopy = urls.join('\n');
-
-        // Create a temporary textarea to use the clipboard API
+    function copySpotifyUrlsToClipboard(listId) {
+        // Get the list of Spotify URLs based on the list ID
+        const list = document.getElementById(listId);
+        const songLinks = list.querySelectorAll('a');
+    
+        // Extract the href attribute (Spotify URL) from each link
+        const spotifyUrls = Array.from(songLinks).map(link => link.href);
+    
+        // Create a textarea element to hold the URLs for copying
         const textarea = document.createElement('textarea');
-        textarea.value = textToCopy;
+        textarea.value = spotifyUrls.join('\n');
         document.body.appendChild(textarea);
-
-        // Select and copy the text
+    
+        // Select the text in the textarea and copy it
         textarea.select();
         document.execCommand('copy');
-
-        // Remove the textarea after copying
+    
+        // Remove the temporary textarea
         document.body.removeChild(textarea);
-
-        // Alert the user that the URLs have been copied
-        alert('Dine bidrag er kopier til utklippstavla! No kan du bruke ctrl+v inn i ei tom Spotify-speleliste for timar med rein tortur!');
+    
+        // Optionally, show a notification or change button text to indicate the action was successful
+        alert('Spotify URLs copied to clipboard!');
     }
 </script>
 

@@ -10601,3 +10601,18 @@ Traceback (most recent call last):
   File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 36, in <listcomp>
     dato=legacy_song.date_added.strftime('%Y-%m-%d') if legacy_song.date_added else '',
 AttributeError: 'str' object has no attribute 'strftime'
+Internal Server Error: /round-winners/
+Traceback (most recent call last):
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\venv\lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 606, in round_winners_view
+    winners_data = get_winners_data()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\views.py", line 577, in get_winners_data
+    winners = get_round_winners()
+  File "C:\Users\47924\Documents\Programmering\Django\pGPv3\pgp\app\utils.py", line 87, in get_round_winners
+    num_voters=Count('song__vote', distinct=True)
+NameError: name 'Count' is not defined

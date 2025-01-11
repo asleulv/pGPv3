@@ -43,10 +43,12 @@ def home(request):
     if request.user.is_authenticated:
         try:
             player_stats = LoggedInPlayerStats(request.user)
+
             logged_in_player_stats = {
-                'previous_songs': player_stats.previous_songs(),
+                'previous_songs': player_stats.previous_songs().order_by('-id'),
                 'top_voters': player_stats.top_voters(),
                 'top_given_votes': player_stats.top_given_votes(),
+                'top_score_12_songs': player_stats.top_score_12_songs(),
             }
         except Player.DoesNotExist:
             # Handle case where the logged-in user does not have an associated Player object
