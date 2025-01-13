@@ -140,7 +140,7 @@ class LoggedInPlayerStats:
             Vote.objects.filter(song__player=self.player)
             .values('player__nickname')
             .annotate(total_points=Sum('score'))
-            .order_by('-total_points')[:10]
+            .order_by('-total_points')
         )
 
     def top_given_votes(self):
@@ -152,7 +152,7 @@ class LoggedInPlayerStats:
             Vote.objects.filter(player=self.player)
             .values('song__player__nickname')
             .annotate(total_points=Sum('score'))
-            .order_by('-total_points')[:10]
+            .order_by('-total_points')
         )
     
     def top_score_12_songs(self):
