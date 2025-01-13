@@ -28,23 +28,23 @@
 
 <!-- New Stats Section -->
 {% if user.is_authenticated %}
-<h2 class="text-2xl font-bold mb-2 mx-4 md:mx-8 text-gray-800">🍩 Statistikk:</h2>
+
 
     <!-- Previous Songs and Voting Stats Side-by-Side -->
     <div class="grid grid-cols-1 md:grid-cols-2">
         <!-- Previous Songs -->
         <div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
-            <h4 class="text-lg font-bold text-blue-600 border-b-2 border-blue-400 pb-2 mb-4">Bidragshistorikk for {{ user.username }}</h4>
+            <h4 class="text-lg font-bold text-blue-800 border-b-2 border-black-200 pb-2 mb-4">📜Bidragshistorikk for {{ user.username }}</h4>
             {% if logged_in_player_stats.previous_songs %}
                 <ul class="list-none list-inside" id="previousSongsList">
                     {% for song in logged_in_player_stats.previous_songs|slice:":10" %}
                         <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
-                            <a href="{{ song.spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base">
+                            <a href="{{ song.spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base truncate">
                                 🐔 {{ song.artist }} - {{ song.title }}
                             </a>
-                            
+        
                             <!-- Display the round name below the song on small screens, and inline on larger screens -->
-                            <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2">
+                            <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2 truncate">
                                 ({{ song.round__name }})
                             </span>
                         </li>
@@ -54,10 +54,10 @@
                         <div id="extraPreviousSongs" style="display: none;">
                             {% for song in logged_in_player_stats.previous_songs|slice:"10:" %}
                             <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
-                                <a href="{{ song.spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base">
+                                <a href="{{ song.spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base truncate">
                                     🐔 {{ song.artist }} - {{ song.title }}
                                 </a>
-                                
+        
                                 <!-- Display the round name below the song on small screens, and inline on larger screens -->
                                 <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2">
                                     ({{ song.round__name }})
@@ -85,87 +85,94 @@
             {% endif %}
         </div>
         
+        
 
         <!-- Voting Stats -->
 <div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
-    <!-- Top Voters -->
-    <div class="mb-6">
-        <h4 class="text-lg font-bold text-blue-600 border-b-2 border-blue-400 pb-2 mb-4">Fått mest poeng frå:</h4>
-        {% if logged_in_player_stats.top_voters %}
-            <ul class="list-none list-inside" id="topVotersList">
-                {% for voter in logged_in_player_stats.top_voters|slice:":10" %}
-                    <li class="flex justify-between items-center mb-2 {{ forloop.counter0|divisibleby:2|yesno:'bg-gray-100, bg-white' }}">
-                        {{ voter.player__nickname }} 
-                        <span class="text-gray-500">{{ voter.total_points }} poeng</span>
-                    </li>
-                {% endfor %}
-                {% if logged_in_player_stats.top_voters|length > 10 %}
-                    <div id="extraTopVoters" style="display: none;">
-                        {% for voter in logged_in_player_stats.top_voters|slice:"10:" %}
-                            <li class="flex justify-between items-center mb-2 {{ forloop.counter0|divisibleby:2|yesno:'bg-gray-100, bg-white' }}">
-                                {{ voter.player__nickname }}
-                                <span class="text-gray-500">{{ voter.total_points }} poeng</span>
-                            </li>
-                        {% endfor %}
-                    </div>
-                    <button 
-                        id="toggleTopVotersButton" 
-                        onclick="toggleVisibility('extraTopVoters', 'toggleTopVotersButton')" 
-                        class="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200">
-                        Vis meir
-                    </button>
-                {% endif %}
-            </ul>
-        {% else %}
-            <p class="text-gray-700">Ingen stemmer mottatt ennå.</p>
+<!-- Top Voters -->
+<div class="mb-6">
+    <h4 class="text-lg font-bold text-blue-800 border-b-2 border-black-200 pb-2 mb-4">📥Fått mest poeng frå</h4>
+    {% if logged_in_player_stats.top_voters %}
+        <ul class="list-none list-inside" id="topVotersList">
+            {% for voter in logged_in_player_stats.top_voters|slice:":10" %}
+                <li class="flex justify-between items-center mb-2 {{ forloop.counter0|divisibleby:2|yesno:'bg-gray-100, bg-white' }}">
+                    {{ voter.player__nickname }} 
+                    <span class="text-gray-500">{{ voter.total_points }} poeng</span>
+                </li>
+            {% endfor %}
+        </ul>
+        {% if logged_in_player_stats.top_voters|length > 10 %}
+            <div id="extraTopVoters" style="display: none;">
+                <ul class="list-none list-inside">
+                    {% for voter in logged_in_player_stats.top_voters|slice:"10:" %}
+                        <li class="flex justify-between items-center mb-2 {{ forloop.counter0|divisibleby:2|yesno:'bg-gray-100, bg-white' }}">
+                            {{ voter.player__nickname }}
+                            <span class="text-gray-500">{{ voter.total_points }} poeng</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <button 
+                id="toggleTopVotersButton" 
+                onclick="toggleVisibility('extraTopVoters', 'toggleTopVotersButton')" 
+                class="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200">
+                Vis meir
+            </button>
         {% endif %}
-    </div>
+    {% else %}
+        <p class="text-gray-700">Ingen stemmer mottatt ennå.</p>
+    {% endif %}
+</div>
 
-    <!-- Top Given Votes -->
-    <div>
-        <h4 class="text-lg font-bold text-blue-600 border-b-2 border-blue-400 pb-2 mb-4">Gitt mest poeng til:</h4>
-        {% if logged_in_player_stats.top_given_votes %}
-            <ul class="list-none list-inside" id="topGivenVotesList">
-                {% for recipient in logged_in_player_stats.top_given_votes|slice:":10" %}
-                    <li class="flex justify-between items-center mb-2 {{ forloop.counter0|divisibleby:2|yesno:'bg-gray-100, bg-white' }}">
-                        {{ recipient.song__player__nickname }}
-                        <span class="text-gray-500">{{ recipient.total_points }} poeng</span>
-                    </li>
-                {% endfor %}
-                {% if logged_in_player_stats.top_given_votes|length > 10 %}
-                    <div id="extraTopGivenVotes" style="display: none;">
-                        {% for recipient in logged_in_player_stats.top_given_votes|slice:"10:" %}
-                            <li class="flex justify-between items-center mb-2 {{ forloop.counter0|divisibleby:2|yesno:'bg-gray-100, bg-white' }}">
-                                {{ recipient.song__player__nickname }}
-                                <span class="text-gray-500">{{ recipient.total_points }} poeng</span>
-                            </li>
-                        {% endfor %}
-                    </div>
-                    <button 
-                        id="toggleTopGivenVotesButton" 
-                        onclick="toggleVisibility('extraTopGivenVotes', 'toggleTopGivenVotesButton')" 
-                        class="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200">
-                        Vis meir
-                    </button>
-                {% endif %}
-            </ul>
-        {% else %}
-            <p class="text-gray-700">Ingen poeng gitt ennå.</p>
+<!-- Top Given Votes -->
+<div>
+    <h4 class="text-lg font-bold text-blue-800 border-b-2 border-black-200 pb-2 mb-4">🎁Gitt mest poeng til</h4>
+    {% if logged_in_player_stats.top_given_votes %}
+        <ul class="list-none list-inside" id="topGivenVotesList">
+            {% for recipient in logged_in_player_stats.top_given_votes|slice:":10" %}
+                <li class="flex justify-between items-center mb-2 {{ forloop.counter0|divisibleby:2|yesno:'bg-gray-100, bg-white' }}">
+                    {{ recipient.song__player__nickname }}
+                    <span class="text-gray-500">{{ recipient.total_points }} poeng</span>
+                </li>
+            {% endfor %}
+        </ul>
+        {% if logged_in_player_stats.top_given_votes|length > 10 %}
+            <div id="extraTopGivenVotes" style="display: none;">
+                <ul class="list-none list-inside">
+                    {% for recipient in logged_in_player_stats.top_given_votes|slice:"10:" %}
+                        <li class="flex justify-between items-center mb-2 {{ forloop.counter0|divisibleby:2|yesno:'bg-gray-100, bg-white' }}">
+                            {{ recipient.song__player__nickname }}
+                            <span class="text-gray-500">{{ recipient.total_points }} poeng</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <button 
+                id="toggleTopGivenVotesButton" 
+                onclick="toggleVisibility('extraTopGivenVotes', 'toggleTopGivenVotesButton')" 
+                class="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200">
+                Vis meir
+            </button>
         {% endif %}
-    </div>
+    {% else %}
+        <p class="text-gray-700">Ingen poeng gitt ennå.</p>
+    {% endif %}
+</div>
+
+
 </div>
 <!-- Dine 12'arar (Songs given a top score of 12) -->
 <div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
-    <h4 class="text-lg font-bold text-blue-600 border-b-2 border-blue-400 pb-2 mb-4">Dine 12'arar</h4>
+    <h4 class="text-lg font-bold text-blue-800 border-b-2 border-black-200 pb-2 mb-4">💗Dine 12'arar</h4>
     {% if logged_in_player_stats.top_score_12_songs %}
         <ul class="list-none list-inside" id="topScore12SongsList">
             {% for song in logged_in_player_stats.top_score_12_songs|slice:":10" %}
                 <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
-                    <a href="{{ song.song__spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base">
+                    <a href="{{ song.song__spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base truncate">
                         🥇 {{ song.song__artist }} - {{ song.song__title }}
                     </a>
                     
-                    <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2">
+                    <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2 truncate">
                         ({{ song.song__round__name }})
                     </span>
                 </li>
@@ -175,11 +182,11 @@
                 <div id="extraTopScore12Songs" style="display: none;">
                     {% for song in logged_in_player_stats.top_score_12_songs|slice:"10:" %}
                         <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
-                            <a href="{{ song.song__spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base">
+                            <a href="{{ song.song__spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base truncate">
                                 🥇 {{ song.song__artist }} - {{ song.song__title }}
                             </a>
                             
-                            <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2">
+                            <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2 truncate">
                                 ({{ song.song__round__name }})
                             </span>
                         </li>
@@ -211,19 +218,22 @@
     </div>
 {% endif %}
 
-<h2 class="text-2xl font-bold mb-2 mx-4 md:mx-8 text-gray-800">🛼 Total-tabellen</h2>
+
+
 <!-- All-Time Player Stats Table -->
 <div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
+    <h4 class="text-lg font-bold text-blue-800 border-b-2 border-black-200 pb-2 mb-4">〽️Totaltabellen</h4>
     {% if stats %}
         <div class="overflow-x-auto">
             <table class="min-w-full table-auto border-collapse">
                 <thead>
-                    <tr class="bg-blue-100 text-gray-800">
-                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(0)">Spelar <span id="arrow0" class="sort-arrow"></span></th>
-                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(1)">Totale poeng <span id="arrow1" class="sort-arrow"></span></th>
-                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(2)">Rundar spelt <span id="arrow2" class="sort-arrow"></span></th>
-                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(3)">Gj. snitt per runde <span id="arrow3" class="sort-arrow"></span></th>
+                    <tr class="text-blue-800">
+                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(0)" style="text-decoration: underline;">Spelar <span id="arrow0" class="sort-arrow"></span></th>
+                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(1)" style="text-decoration: underline;">Totale poeng <span id="arrow1" class="sort-arrow"></span></th>
+                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(2)" style="text-decoration: underline;">Rundar spelt <span id="arrow2" class="sort-arrow"></span></th>
+                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(3)" style="text-decoration: underline;">Gj. snitt per runde <span id="arrow3" class="sort-arrow"></span></th>
                     </tr>
+                    
                 </thead>
                 <tbody class="text-gray-700">
                     {% for player_stat in stats %}
@@ -313,8 +323,24 @@
         document.body.removeChild(textarea);
     
         // Optionally, show a notification or change button text to indicate the action was successful
-        alert('Spotify URLs copied to clipboard!');
+        alert('Spotify-lenker kopiert!');
     }
+
 </script>
+
+<style>
+    .truncate {
+        white-space: normal; /* Allow wrapping on small screens */
+        overflow: visible; /* Show all content on small screens */
+    }
+    
+    @media (min-width: 640px) {
+        .truncate {
+            white-space: nowrap; /* Prevent text from wrapping on larger screens */
+            overflow: hidden; /* Hide overflow text */
+            text-overflow: ellipsis; /* Add ellipsis at the end of overflow text */
+        }
+    }
+</style>
 
 {% endblock %}

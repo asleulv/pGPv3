@@ -62,85 +62,57 @@ def get_round_winners():
 
     winners = []
 
-    # Fetch all LegacySong instances where pgp_plassering is '1' (first place)
+    # LegacySong winners
     for legacy_song in LegacySong.objects.filter(pgp_plassering='1'):
         round_name = f"pGP#{legacy_song.pgp_num} - {legacy_song.pgp_tema}" if legacy_song.pgp_num else legacy_song.pgp_tema
         winners.append(RoundWinner(
             round_name=round_name,
             organizer=legacy_song.pgp_arr,
-            date_added=legacy_song.date_added,  # Keep as text
+            date_added=legacy_song.date_added,
             artist=legacy_song.artist,
             song_title=legacy_song.song,
             spotify_url=legacy_song.spotify_url,
             winning_player_nickname=legacy_song.pgp_levert_av,
         ))
 
-    latest_round_winners = (
-        Round.objects.filter(round_finished=True)
-        .annotate(
-            winning_score=Subquery(
-                Song.objects.filter(round=OuterRef('id'))
-                .order_by('-total_score')
-                .values('total_score')[:1]
-            ),
-            # Count how many players voted for the round's songs
-            num_voters=Count('song__vote', distinct=True)
-        )
-        .filter(winning_score__gt=0, num_voters__gt=0)  # Ensure at least one player voted
-        .annotate(
-            winning_song_title=Subquery(
-                Song.objects.filter(round=OuterRef('id'))
-                .order_by('-total_score')
-                .values('title')[:1]
-            ),
-            winning_artist=Subquery(
-                Song.objects.filter(round=OuterRef('id'))
-                .order_by('-total_score')
-                .values('artist')[:1]
-            ),
-            winning_spotify_url=Subquery(
-                Song.objects.filter(round=OuterRef('id'))
-                .order_by('-total_score')
-                .values('spotify_url')[:1]
-            ),
-            winning_player_nickname=Subquery(
-                Song.objects.filter(round=OuterRef('id'))
-                .order_by('-total_score')
-                .values('player__nickname')[:1]
-            ),
-        )
-        .filter(
-            # Ensure that the winning player has voted for others in the round
-            winning_player_nickname__in=Subquery(
-                Vote.objects.filter(song__round=OuterRef('id'))
-                .values('player__nickname')
-                .distinct()
-            )
-        )
-        .values(
-            'name', 
-            'organizer__player__nickname', 
-            'start_date',
-            'winning_song_title',
-            'winning_artist',
-            'winning_spotify_url',
-            'winning_player_nickname'
-        )
-        .order_by('-start_date')  # This ensures the latest rounds are first
-    )
+    # Round winners
+    latest_rounds = Round.objects.filter(round_finished=True).annotate(
+        num_voters=Count('song__vote', distinct=True)
+    ).filter(num_voters__gt=0).order_by('-start_date')
 
-    for winner in latest_round_winners:
-        winners.append(RoundWinner(
-            round_name=winner['name'],
-            organizer=winner['organizer__player__nickname'],
-            date_added=winner['start_date'].strftime('%Y-%m-%d'),  # Keep as text
-            artist=winner['winning_artist'],
-            song_title=winner['winning_song_title'],
-            spotify_url=winner['winning_spotify_url'],
-            winning_player_nickname=winner['winning_player_nickname']
-        ))
+    for round_instance in latest_rounds:
+        # Get all songs for the round ordered by score
+        songs = (
+            Song.objects.filter(round=round_instance)
+            .annotate(voter_count=Count('vote__player', distinct=True))
+            .order_by('-total_score', '-voter_count')  # Highest score first
+        )
 
-    # Sort the winners list by date_added as text (since it's in the format 'YYYY-MM-DD')
+        # Find a valid winner
+        valid_winner = None
+        for song in songs:
+            # Check if the player who submitted this song voted for other songs
+            has_voted = Vote.objects.filter(
+                player=song.player,
+                song__round=round_instance
+            ).exclude(song=song).exists()
+
+            if has_voted:
+                valid_winner = song
+                break
+
+        if valid_winner:
+            winners.append(RoundWinner(
+                round_name=round_instance.name,
+                organizer=round_instance.organizer.player.nickname,
+                date_added=round_instance.start_date.strftime('%Y-%m-%d'),
+                artist=valid_winner.artist,
+                song_title=valid_winner.title,
+                spotify_url=valid_winner.spotify_url,
+                winning_player_nickname=valid_winner.player.nickname,
+            ))
+
+    # Sort winners by date_added (latest first)
     winners.sort(key=lambda x: x.date_added, reverse=True)
 
     return winners
@@ -190,9 +162,10 @@ class LoggedInPlayerStats:
         """
         return (
             Vote.objects.filter(player=self.player, score=12)
-            .select_related('song')  # Ensure the song is fetched, but we don't need to select the round directly
+            .select_related('song')  # Ensure the song is fetched
             .prefetch_related('song__round')  # Prefetch the related round for efficient querying
             .values('song__title', 'song__artist', 'song__spotify_url', 'song__round__id', 'song__round__name')
+            .order_by('-song__id')  # Apply ordering here
         )
 
 
