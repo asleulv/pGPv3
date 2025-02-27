@@ -318,7 +318,7 @@ def vote_view(request, pk):
     round_instance = get_object_or_404(Round, pk=pk)
     player = Player.objects.get(user=request.user)
     player_song = Song.objects.filter(round=round_instance, player=player).first()
-    songs = Song.objects.filter(round=round_instance).exclude(player=player)
+    songs = Song.objects.filter(round=round_instance).exclude(player=player).order_by('artist', 'title')
 
     if request.method == 'POST':
         form = DynamicVoteForm(request.POST, songs=songs)

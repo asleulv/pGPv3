@@ -16,7 +16,7 @@
 <div class="container mx-auto my-8 px-4">
     <h1 class="text-2xl uppercase mb-5 font-bold text-center">{{ round.name }}</h1>
 
-    <h2 class="text-2xl font-bold bg-blue-500 text-white p-2 shadow-md">Om runden:</h2>
+    <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-white p-2 shadow-md">Om runden:</h2>
     <div class="p-4 shadow-lg mb-8 bg-white">
         <p class="mb-2"><strong>Oppgåvetekst:</strong><br> {{ round.description|linebreaksbr }}</p>
         
@@ -116,7 +116,7 @@
     {% load i18n %}
 
     {% if round.playlist_released %}
-    <h2 class="text-2xl font-bold bg-purple-500 text-white p-2 shadow-md">pGP-liste:</h2>
+    <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-400 text-white p-2 shadow-md">pGP-liste:</h2>
     <div class="p-4 shadow-lg mb-8 bg-white">
         <iframe src="https://open.spotify.com/embed?uri={{ round.playlist_url }}" 
                 width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media">
@@ -125,7 +125,7 @@
 
     <!-- Show current player's submission -->
     {% if player_song %}
-    <h2 class="text-2xl font-bold  bg-green-500 text-white p-2 shadow-md">Ditt bidrag</h3>
+    <h2 class="text-2xl font-bold  bg-gradient-to-r from-green-600 to-green-400 text-white p-2 shadow-md">Ditt bidrag</h3>
     <div class="p-4 shadow-lg  mb-8 bg-white">
         <p class="text-gray-700 ">
             <strong>{{ player_song.artist }} - {{ player_song.title }}</strong>
@@ -208,16 +208,16 @@
 {% endif %}
 
 {% if round.round_finished %}
-<h2 class="text-2xl font-bold bg-pink-500 text-white p-2 shadow-md">
+<h2 class="text-2xl font-bold bg-gradient-to-r from-pink-600 to-pink-400 text-white p-2 shadow-md">
     Oppsummering av runde:
 </h2>
 <div class="p-4 text-black bg-white shadow-lg">
     <p class="mb-4">Antall bidrag: {{ num_submitted_songs }}</p>
 
-    <button id="exportExcelButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+    <button id="exportExcelButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-700">
         Excel-eksport
     </button>
-    <button id="exportButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+    <button id="exportButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-700">
         <a href="{% url 'export_to_word' round_id=round.id %}" class="text-white">Word-eksport</a>
     </button>
     <hr class="border-red-300">
@@ -273,7 +273,7 @@
 
 
 {% if is_organizer and not round.round_finished %}
-<h2 class="text-2xl font-bold bg-red-500 text-white mt-8 p-2 shadow-md">
+<h2 class="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-400 text-white mt-8 p-2 shadow-md">
     Kun for arrangør:
 </h2>
 
@@ -319,10 +319,10 @@
     {% endif %}
 </div>
 <br>
-    <button id="exportExcelButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+    <button id="exportExcelButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-700">
         Excel-eksport
     </button>
-    <button id="exportWordButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+    <button id="exportWordButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-700">
         <a href="{% url 'export_to_word' round_id=round.id %}" class="text-white">Word-eksport</a>
     </button>
     <hr class="border-red-300">
@@ -376,7 +376,7 @@
 
 
         <hr class="my-4 border-red-300">
-        <button id="copy-urls-button" class="bg-red-500 text-white px-4 py-1 hover:bg-blue-700">
+        <button id="copy-urls-button" class="bg-red-500 text-white px-4 py-1 rounded-full hover:bg-blue-700">
             💫 Kopier Spotify-lenker til utklippstavle
         </button>
         <p>
@@ -392,18 +392,18 @@
                    placeholder="Skriv inn Spotify-liste URL" />
                    
             {% if round.start_date > now %}
-                <button type="submit" class="bg-gray-400 text-white font-bold py-1 px-2 rounded" disabled>
+                <button type="submit" class="bg-gray-400 text-white font-bold py-1 px-2 rounded-full" disabled>
                     📤 Venter på bidragsfrist
                 </button>
             {% else %}
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded-full">
                     {% if round.playlist_released %}🔄 Oppdater liste{% else %}📤 Publiser liste{% endif %}
                 </button>
             {% endif %}
         </form>
     </div>
         {% if not round_finished %}
-        <div class="bg-red-600 p-8 mt-6 rounded-lg text-center">
+        <div class="bg-gradient-to-r from-red-600 to-red-500 p-8 mt-6 rounded-lg text-center">
             <div class="border-t-4 border-red-800 my-4"></div>
             <p class="text-white font-bold text-xl mb-5 uppercase">
                 ☢️ Tenk deg om no då... Resultata blir lagt ut så hugs å køyre sending først!
