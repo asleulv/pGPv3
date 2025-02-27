@@ -5,7 +5,7 @@
 {% block content %}
 <div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
     <h1 class="text-3xl font-bold mb-4 text-gray-800">Velkommen, {{ user.username }}!</h1>
-    <p class="text-gray-600">🦄 Dette er pGP. Dette er livet.</p>
+    <p class="text-gray-600">📢 Torumodo lar seg ikkje skremme av litt sensualitet.</p>
 </div>
 
 <div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
@@ -40,7 +40,7 @@
                     {% for song in logged_in_player_stats.previous_songs|slice:":10" %}
                         <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
                             <a href="{{ song.spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base truncate">
-                                🐔 {{ song.artist }} - {{ song.title }}
+                                🎵 {{ song.artist }} - {{ song.title }}
                             </a>
         
                             <!-- Display the round name below the song on small screens, and inline on larger screens -->
@@ -55,7 +55,7 @@
                             {% for song in logged_in_player_stats.previous_songs|slice:"10:" %}
                             <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
                                 <a href="{{ song.spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base truncate">
-                                    🐔 {{ song.artist }} - {{ song.title }}
+                                    🎵 {{ song.artist }} - {{ song.title }}
                                 </a>
         
                                 <!-- Display the round name below the song on small screens, and inline on larger screens -->

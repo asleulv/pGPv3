@@ -19,9 +19,9 @@
   </head>
   <body class="bg-gray-100 font-roboto">
 
-    <nav class="bg-gradient-to-r from-blue-900 to-blue-800 p-4 text-white">
+    <nav class="bg-gradient-to-r from-purple-900 to-blue-800 p-4 text-white">
       <div class="container mx-auto flex items-center justify-between">
-        <a href="/" class="font-bold text-lg">🐼 pGP beta2.1</a>
+        <a href="/" class="font-bold text-lg">🦙 pGP beta2.2</a>
         <div class="md:hidden">
           <button id="menu-button" class="flex items-center">
             <svg
@@ -37,9 +37,6 @@
         </div>
         <ul class="hidden md:flex items-center space-x-8">
           <li>
-            <a href="{% url 'create_round' %}" class="hover:underline">Ny pGP-runde</a>
-          </li>
-          <li>
             <a href="{% url 'round_list' %}" class="hover:underline">pGP-rundar</a>
           </li>
           <li>
@@ -51,12 +48,12 @@
           {% if user.is_authenticated %}
           <li class="relative">
             <button id="user-menu" class="flex items-center space-x-2 focus:outline-none">
-              <span>👻{{ user.username }}</span>
+              <span>🧸{{ user.username }}</span>
               <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            <div id="dropdown-menu" class="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-lg hidden">
+            <div id="dropdown-menu" class="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg hidden">
               <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm hover:bg-gray-100">Logg ut</a>
             </div>
           </li>
@@ -68,9 +65,7 @@
         </ul>
         <!-- Mobile Menu -->
         <ul id="mobile-menu" class="absolute top-16 right-0 bg-white text-black rounded-lg shadow-lg hidden w-full">
-          <li class="w-full">
-            <a href="{% url 'create_round' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">Ny pGP-runde</a>
-          </li>
+
           <li class="w-full">
             <a href="{% url 'round_list' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">pGP-rundar</a>
           </li>

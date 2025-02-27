@@ -5,6 +5,14 @@
 {% block content %}
 <div class="max-w-full mx-auto bg-white shadow-lg rounded-lg p-8 mt-12">
     <h1 class="text-2xl font-bold mb-6">pGP-rundar:</h1>
+
+    <!-- Button to start a new round -->
+<div class="mb-6 flex justify-center md:justify-end">
+    <a href="{% url 'create_round' %}" class="inline-block bg-green-600 text-white py-2 px-4 rounded-full hover:bg-green-500">
+        🪄 Start ny pGP-runde
+    </a>
+</div>
+
     <form>
         <div class="overflow-x-auto">
             <!-- Table for larger screens -->
