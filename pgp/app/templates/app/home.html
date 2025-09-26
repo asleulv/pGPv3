@@ -3,344 +3,583 @@
 {% block title %}🦆 pGP beta2{% endblock %}
 
 {% block content %}
-<div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
-    <h1 class="text-3xl font-bold mb-4 text-gray-800">Velkommen, {{ user.username }}!</h1>
-    <p class="text-gray-600">📢 Torumodo lar seg ikkje skremme av litt sensualitet.</p>
-</div>
-
-<div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
-    <h2 class="text-2xl font-bold mb-4 text-gray-800">Aktiv pGP-runde:</h2>
-    {% if active_rounds %}
-        <div class="space-y-4">
-            {% for round in active_rounds %}
-                <div class="flex justify-between items-center p-4 border-b border-gray-300 last:border-b-0">
-                    <a href="{% url 'round_detail' round.id %}" class="text-blue-600 hover:text-blue-800 font-semibold text-lg">
-                        {{ round.name }}
-                    </a>
-                    <span class="font-semibold text-blue-700">👑{{ round.organizer.username }}</span>
+<div class="max-w-6xl mx-auto">
+    <!-- Welcome Header -->
+    <div class="bg-gradient-to-r from-blue-50 to-purple-50 shadow-lg rounded-xl p-8 mb-8 mx-4 md:mx-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Velkommen, {{ user.username }}! 🎵
+                </h1>
+                <p class="text-gray-600 text-lg">Klar for neste pGP?</p>
+            </div>
+            {% if player and player.stats %}
+            <div class="hidden md:flex space-x-4">
+                <div class="text-center bg-white/70 backdrop-blur rounded-lg px-4 py-2">
+                    <div class="text-2xl font-bold text-blue-600">{{ player.stats.total_points }}</div>
+                    <div class="text-sm text-gray-600">Poeng</div>
                 </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p class="text-gray-700">Ingen aktive pGP-runder.</p>
-    {% endif %}
-</div>
-
-<!-- New Stats Section -->
-{% if user.is_authenticated %}
-
-
-    <!-- Previous Songs and Voting Stats Side-by-Side -->
-    <div class="grid grid-cols-1 md:grid-cols-2">
-        <!-- Previous Songs -->
-        <div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
-            <h4 class="text-lg font-bold text-blue-800 border-b-2 border-black-200 pb-2 mb-4">📜Bidragshistorikk for {{ user.username }}</h4>
-            {% if logged_in_player_stats.previous_songs %}
-                <ul class="list-none list-inside" id="previousSongsList">
-                    {% for song in logged_in_player_stats.previous_songs|slice:":10" %}
-                        <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
-                            <a href="{{ song.spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base truncate">
-                                🎵 {{ song.artist }} - {{ song.title }}
-                            </a>
-        
-                            <!-- Display the round name below the song on small screens, and inline on larger screens -->
-                            <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2 truncate">
-                                ({{ song.round__name }})
-                            </span>
-                        </li>
-                    {% endfor %}
-                    
-                    {% if logged_in_player_stats.previous_songs|length > 10 %}
-                        <div id="extraPreviousSongs" style="display: none;">
-                            {% for song in logged_in_player_stats.previous_songs|slice:"10:" %}
-                            <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
-                                <a href="{{ song.spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base truncate">
-                                    🎵 {{ song.artist }} - {{ song.title }}
-                                </a>
-        
-                                <!-- Display the round name below the song on small screens, and inline on larger screens -->
-                                <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2">
-                                    ({{ song.round__name }})
-                                </span>
-                            </li>
-                            {% endfor %}
-                        </div>
-                        <button 
-                            id="togglePreviousSongsButton" 
-                            onclick="toggleVisibility('extraPreviousSongs', 'togglePreviousSongsButton')" 
-                            class="mt-4 bg-blue-600 text-white py-2 px-4 rounded-full hover:bg-blue-700 transition duration-200">
-                            Vis meir
-                        </button>
-                    {% endif %}
-                </ul>
-                <!-- Show the copy button regardless of the number of songs -->
-                <button 
-                    id="copyPreviousSongsSpotifyUrlsButton" 
-                    onclick="copySpotifyUrlsToClipboard('previousSongsList')" 
-                    class="mt-4 bg-green-600 text-white py-2 px-4 rounded-full hover:bg-green-700 transition duration-200">
-                    Kopier Spotify URLar
-                </button>
-            {% else %}
-                <p class="text-gray-700">Ingen tidligere sanger funnet.</p>
+                <div class="text-center bg-white/70 backdrop-blur rounded-lg px-4 py-2">
+                    <div class="text-2xl font-bold text-green-600">{{ player.stats.wins }}</div>
+                    <div class="text-sm text-gray-600">Sigrar</div>
+                </div>
+                <div class="text-center bg-white/70 backdrop-blur rounded-lg px-4 py-2">
+                    <div class="text-2xl font-bold text-purple-600">{{ player.stats.average_points_per_round|floatformat:1 }}</div>
+                    <div class="text-sm text-gray-600">Snitt</div>
+                </div>
+            </div>
             {% endif %}
         </div>
-        
-        
-
-        <!-- Voting Stats -->
-<div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
-<!-- Top Voters -->
-<div class="mb-6">
-    <h4 class="text-lg font-bold text-blue-800 border-b-2 border-black-200 pb-2 mb-4">📥Fått mest poeng frå</h4>
-    {% if logged_in_player_stats.top_voters %}
-        <ul class="list-none list-inside" id="topVotersList">
-            {% for voter in logged_in_player_stats.top_voters|slice:":10" %}
-                <li class="flex justify-between items-center mb-2 {{ forloop.counter0|divisibleby:2|yesno:'bg-gray-100, bg-white' }}">
-                    {{ voter.player__nickname }} 
-                    <span class="text-gray-500">{{ voter.total_points }} poeng</span>
-                </li>
-            {% endfor %}
-        </ul>
-        {% if logged_in_player_stats.top_voters|length > 10 %}
-            <div id="extraTopVoters" style="display: none;">
-                <ul class="list-none list-inside">
-                    {% for voter in logged_in_player_stats.top_voters|slice:"10:" %}
-                        <li class="flex justify-between items-center mb-2 {{ forloop.counter0|divisibleby:2|yesno:'bg-gray-100, bg-white' }}">
-                            {{ voter.player__nickname }}
-                            <span class="text-gray-500">{{ voter.total_points }} poeng</span>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <button 
-                id="toggleTopVotersButton" 
-                onclick="toggleVisibility('extraTopVoters', 'toggleTopVotersButton')" 
-                class="mt-4 bg-blue-600 text-white py-2 px-4 rounded-full hover:bg-blue-700 transition duration-200">
-                Vis meir
-            </button>
-        {% endif %}
-    {% else %}
-        <p class="text-gray-700">Ingen stemmer mottatt ennå.</p>
-    {% endif %}
-</div>
-
-<!-- Top Given Votes -->
-<div>
-    <h4 class="text-lg font-bold text-blue-800 border-b-2 border-black-200 pb-2 mb-4">🎁Gitt mest poeng til</h4>
-    {% if logged_in_player_stats.top_given_votes %}
-        <ul class="list-none list-inside" id="topGivenVotesList">
-            {% for recipient in logged_in_player_stats.top_given_votes|slice:":10" %}
-                <li class="flex justify-between items-center mb-2 {{ forloop.counter0|divisibleby:2|yesno:'bg-gray-100, bg-white' }}">
-                    {{ recipient.song__player__nickname }}
-                    <span class="text-gray-500">{{ recipient.total_points }} poeng</span>
-                </li>
-            {% endfor %}
-        </ul>
-        {% if logged_in_player_stats.top_given_votes|length > 10 %}
-            <div id="extraTopGivenVotes" style="display: none;">
-                <ul class="list-none list-inside">
-                    {% for recipient in logged_in_player_stats.top_given_votes|slice:"10:" %}
-                        <li class="flex justify-between items-center mb-2 {{ forloop.counter0|divisibleby:2|yesno:'bg-gray-100, bg-white' }}">
-                            {{ recipient.song__player__nickname }}
-                            <span class="text-gray-500">{{ recipient.total_points }} poeng</span>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <button 
-                id="toggleTopGivenVotesButton" 
-                onclick="toggleVisibility('extraTopGivenVotes', 'toggleTopGivenVotesButton')" 
-                class="mt-4 bg-blue-600 text-white py-2 px-4 rounded-full hover:bg-blue-700 transition duration-200">
-                Vis meir
-            </button>
-        {% endif %}
-    {% else %}
-        <p class="text-gray-700">Ingen poeng gitt ennå.</p>
-    {% endif %}
-</div>
-
-
-</div>
-<!-- Dine 12'arar (Songs given a top score of 12) -->
-<div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
-    <h4 class="text-lg font-bold text-blue-800 border-b-2 border-black-200 pb-2 mb-4">💗Dine 12'arar</h4>
-    {% if logged_in_player_stats.top_score_12_songs %}
-        <ul class="list-none list-inside" id="topScore12SongsList">
-            {% for song in logged_in_player_stats.top_score_12_songs|slice:":10" %}
-                <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
-                    <a href="{{ song.song__spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base truncate">
-                        🥇 {{ song.song__artist }} - {{ song.song__title }}
-                    </a>
-                    
-                    <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2 truncate">
-                        ({{ song.song__round__name }})
-                    </span>
-                </li>
-            {% endfor %}
-            
-            {% if logged_in_player_stats.top_score_12_songs|length > 10 %}
-                <div id="extraTopScore12Songs" style="display: none;">
-                    {% for song in logged_in_player_stats.top_score_12_songs|slice:"10:" %}
-                        <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
-                            <a href="{{ song.song__spotify_url }}" target="_blank" class="text-black hover:underline text-lg sm:text-base truncate">
-                                🥇 {{ song.song__artist }} - {{ song.song__title }}
-                            </a>
-                            
-                            <span class="text-gray-500 text-sm mt-1 sm:mt-0 sm:ml-2 truncate">
-                                ({{ song.song__round__name }})
-                            </span>
-                        </li>
-                    {% endfor %}
-                </div>
-
-                <button 
-                    id="toggleTopScore12SongsButton" 
-                    onclick="toggleVisibility('extraTopScore12Songs', 'toggleTopScore12SongsButton')" 
-                    class="mt-4 bg-blue-600 text-white py-2 px-4 rounded-full hover:bg-blue-700 transition duration-200">
-                    Vis meir
-                </button>
-            {% endif %}
-        </ul>
-
-        <!-- Always visible "Kopier Spotify URLar" button -->
-        <button 
-            id="copyTopScore12SongsSpotifyUrlsButton" 
-            onclick="copySpotifyUrlsToClipboard('topScore12SongsList')" 
-            class="mt-4 bg-green-600 text-white py-2 px-4 rounded-full hover:bg-green-700 transition duration-200">
-            Kopier Spotify URLar
-        </button>
-    {% else %}
-        <p class="text-gray-700">Du har ikke gitt 12 poeng til noen sanger enda.</p>
-    {% endif %}
-</div>
-
-
     </div>
-{% endif %}
 
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Column -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Active Rounds -->
+            <div class="bg-white shadow-xl rounded-xl p-8 mx-4 md:mx-8 border-l-4 border-purple-500">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                        <span class="text-3xl mr-3">🎪</span>
+                        Aktive pGP-rundar
+                    </h2>
+                    {% if active_rounds %}
+                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                            {{ active_rounds|length }} aktiv{{ active_rounds|length|pluralize:"e" }}
+                        </span>
+                    {% endif %}
+                </div>
+                
+                {% if active_rounds %}
+                    <div class="space-y-4">
+                        {% for round in active_rounds %}
+                        <div class="group bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 rounded-xl p-6 transition-all duration-200 border border-blue-100">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <a href="{% url 'round_detail' round.id %}" class="text-xl font-bold text-blue-700 hover:text-blue-900 group-hover:underline">
+                                        {{ round.name }}
+                                    </a>
+                                    <p class="text-gray-600 mt-2 line-clamp-2">{{ round.description|truncatewords:15 }}</p>
+                                    <div class="flex items-center mt-3 text-sm text-gray-500">
+                                        <i class="fas fa-calendar mr-2"></i>
+                                        <span>Slutt: {{ round.end_date|date:"d.m.Y H:i" }}</span>
+                                    </div>
+                                </div>
+                                <div class="text-right ml-6">
+                                    <div class="flex items-center text-blue-600 font-medium">
+                                        <i class="fas fa-crown mr-2"></i>
+                                        {{ round.organizer.username }}
+                                    </div>
+                                    <div class="mt-2">
+                                        <a href="{% url 'round_detail' round.id %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center text-sm font-medium">
+                                            <i class="fas fa-play mr-2"></i>
+                                            Gå til runde
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-4">🎵</div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2">Ingen aktive rundar</h3>
+                        <p class="text-gray-500 mb-6">Vent på at nokon startar ei ny runde, eller start sjølv!</p>
+                        <a href="{% url 'round_list' %}" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors inline-flex items-center font-medium">
+                            <i class="fas fa-plus mr-2"></i>
+                            Sjå alle rundar
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
 
+            <!-- Personal Statistics -->
+            {% if user.is_authenticated and logged_in_player_stats %}
+            <div class="bg-white shadow-lg rounded-xl mx-4 md:mx-8 overflow-hidden">
+                <button onclick="toggleSection('personalStats')" class="w-full p-6 text-left bg-gradient-to-r from-green-50 to-blue-50 hover:from-green-100 hover:to-blue-100 transition-colors border-b border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                            <span class="text-2xl mr-3">📊</span>
+                            Din personlege statistikk
+                        </h3>
+                        <i id="personalStatsIcon" class="fas fa-chevron-down text-gray-500 transition-transform"></i>
+                    </div>
+                    <p class="text-gray-600 mt-1 text-sm">Detaljert oversikt over dine bidrag og stemmer</p>
+                </button>
+                
+                <div id="personalStats" class="hidden">
+                    <div class="p-6 space-y-8">
+                        <!-- Trend Chart with Scrolling -->
+                        {% if chart_data %}
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                <span class="mr-2">📈</span>
+                                Trend
+                            </h4>
+                            <p class="text-sm text-gray-600 mb-2">Din plassering over tid (1. plass = topp)</p>
+                            <div class="flex items-center justify-between mb-4">
+                                <p class="text-xs text-gray-500">💡 Dra for å skrolle • Rul for å zoome</p>
+                                <div class="flex space-x-2">
+                                    <button onclick="resetTrendChart()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
+                                        🔄 Reset
+                                    </button>
+                                    <button onclick="showLatestTrend()" class="text-xs px-3 py-1 bg-blue-100 hover:bg-blue-200 rounded-md transition-colors">
+                                        ⏮️ Nyaste
+                                    </button>
+                                </div>
+                            </div>
+                            <div style="height: 350px; position: relative;">
+                                <canvas id="trendChart"></canvas>
+                            </div>
+                        </div>
+                        {% endif %}
 
-<!-- All-Time Player Stats Table -->
-<div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
-    <h4 class="text-lg font-bold text-blue-800 border-b-2 border-black-200 pb-2 mb-4">〽️Totaltabellen</h4>
-    {% if stats %}
-        <div class="overflow-x-auto">
-            <table class="min-w-full table-auto border-collapse">
-                <thead>
-                    <tr class="text-blue-800">
-                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(0)" style="text-decoration: underline;">Spelar <span id="arrow0" class="sort-arrow"></span></th>
-                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(1)" style="text-decoration: underline;">Totale poeng <span id="arrow1" class="sort-arrow"></span></th>
-                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(2)" style="text-decoration: underline;">Rundar spelt <span id="arrow2" class="sort-arrow"></span></th>
-                        <th class="border px-2 py-1 sm:px-4 sm:py-2 sortable" onclick="sortTable(3)" style="text-decoration: underline;">Gj. snitt per runde <span id="arrow3" class="sort-arrow"></span></th>
-                    </tr>
-                    
-                </thead>
-                <tbody class="text-gray-700">
-                    {% for player_stat in stats %}
-                        <tr class="hover:bg-gray-50">
-                            <td class="border px-2 py-1 sm:px-4 sm:py-2">{{ player_stat.player.nickname }}</td>
-                            <td class="border px-2 py-1 sm:px-4 sm:py-2 text-right">{{ player_stat.total_points }}</td>
-                            <td class="border px-2 py-1 sm:px-4 sm:py-2 text-right">{{ player_stat.rounds_played }}</td>
-                            <td class="border px-2 py-1 sm:px-4 sm:py-2 text-right">{{ player_stat.average_points_per_round|floatformat:2 }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        <!-- Bidragshistorikk -->
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center justify-between">
+                                <span class="flex items-center">
+                                    <span class="mr-2">🎵</span>
+                                    Bidragshistorikk ({{ logged_in_player_stats.previous_songs|length }})
+                                </span>
+                                <button onclick="copySpotifyUrls('songsContainer')" class="text-xs bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 transition-colors">
+                                    📋 Kopier Spotify-lenker
+                                </button>
+                            </h4>
+                            {% if logged_in_player_stats.previous_songs %}
+                                <div id="songsContainer" class="space-y-2 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-gray-200">
+                                    {% for song in logged_in_player_stats.previous_songs %}
+                                    <div class="song-item bg-gray-50 rounded-lg p-3">
+                                        <a href="{{ song.spotify_url }}" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium text-sm block">
+                                            🎵 {{ song.artist }} - {{ song.title }}
+                                        </a>
+                                        <div class="flex justify-between items-center mt-1">
+                                            <span class="text-xs text-gray-500">{{ song.round__name }}</span>
+                                            {% if song.total_score %}
+                                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{{ song.total_score }} poeng</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-gray-500 text-sm">Ingen bidrag enno</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Fått mest poeng frå -->
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <span class="mr-2">🗳️</span>
+                                    Fått mest poeng frå
+                                </h4>
+                                <button onclick="copyVoterStats()" class="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors">
+                                    📋 Kopier
+                                </button>
+                            </div>
+                            {% if logged_in_player_stats.top_voters %}
+                                <div id="votersContainer" class="space-y-2 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-gray-200">
+                                    {% for voter in logged_in_player_stats.top_voters %}
+                                    <div class="voter-item bg-blue-50 rounded-lg p-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="font-medium text-blue-800">{{ voter.player__nickname }}</span>
+                                            <span class="text-blue-600 font-bold">{{ voter.total_points }} poeng</span>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-gray-500 text-sm">Ingen stemmer motteke enno</p>
+                            {% endif %}
+                        </div>
+
+                        
+
+                        <!-- Gitt mest poeng til -->
+                        {% if logged_in_player_stats.top_given_votes %}
+                        <div class="border-t pt-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <span class="mr-2">🎁</span>
+                                    Gitt mest poeng til ({{ logged_in_player_stats.top_given_votes|length }})
+                                </h4>
+                                <button onclick="copyGivenVotes()" class="text-xs bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 transition-colors">
+                                    📋 Kopier
+                                </button>
+                            </div>
+                            <div id="givenVotesContainer" class="space-y-2 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-400 scrollbar-track-gray-200">
+                                {% for recipient in logged_in_player_stats.top_given_votes %}
+                                <div class="given-vote-item bg-purple-50 rounded-lg p-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-medium text-purple-800">{{ recipient.song__player__nickname }}</span>
+                                        <span class="text-purple-600 font-bold">{{ recipient.total_points }} poeng</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- 12-poengare -->
+                        {% if logged_in_player_stats.top_score_12_songs %}
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-lg font-semibold text-gray-800 flex items-center">
+                                    <span class="mr-2">💗</span>
+                                    Dine 12-poengare ({{ logged_in_player_stats.top_score_12_songs|length }})
+                                </h4>
+                                <button onclick="copyTwelvePointers()" class="text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors">
+                                    📋 Kopier
+                                </button>
+                            </div>
+                            <div id="twelveContainer" class="space-y-2 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-red-400 scrollbar-track-gray-200">
+                                {% for song in logged_in_player_stats.top_score_12_songs %}
+                                <div class="twelve-item bg-red-50 rounded-lg p-3">
+                                    <a href="{{ song.song__spotify_url }}" target="_blank" class="text-red-700 hover:text-red-900 font-medium text-sm block">
+                                        🥇 {{ song.song__artist }} - {{ song.song__title }}
+                                    </a>
+                                    <span class="text-xs text-red-500">{{ song.song__round__name }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Community Stats -->
+            <div class="bg-white shadow-lg rounded-xl mx-4 md:mx-8 overflow-hidden">
+                <button onclick="toggleSection('communityStats')" class="w-full p-6 text-left bg-gradient-to-r from-yellow-50 to-orange-50 hover:from-yellow-100 hover:to-orange-100 transition-colors border-b border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                            <span class="text-2xl mr-3">🏆</span>
+                            Fellesskapstatistikk
+                        </h3>
+                        <i id="communityStatsIcon" class="fas fa-chevron-down text-gray-500 transition-transform"></i>
+                    </div>
+                    <p class="text-gray-600 mt-1 text-sm">Analyser og trendar frå heile pGP-fellesskapet</p>
+                </button>
+                
+                <div id="communityStats" class="hidden">
+                    <div class="p-6">
+                        <!-- Community Charts -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-800 mb-4">Mest aktive spelarar</h4>
+                                <div style="height: 200px;"><canvas id="mostActiveChart"></canvas></div>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-800 mb-4">Aktivitet over tid</h4>
+                                <div style="height: 200px;"><canvas id="activityChart"></canvas></div>
+                            </div>
+                        </div>
+
+                        <!-- Leaderboard -->
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-lg font-semibold text-gray-800">〽️ Full totaltabell</h4>
+                                <button onclick="copyLeaderboard()" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium">
+                                    📋 Kopier tabell
+                                </button>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">Klikk på kolonnetitlar for å sortere</p>
+                            {% if stats %}
+                            <div class="overflow-x-auto">
+                                <table id="leaderboardTable" class="min-w-full table-auto">
+                                    <thead>
+                                        <tr class="border-b border-gray-200">
+                                            <th class="text-left py-3 px-3">Plass</th>
+                                            <th class="text-left py-3 sortable cursor-pointer hover:bg-gray-50 transition-colors" onclick="sortTable(1)">
+                                                Spelar <span class="sort-arrow text-xs text-gray-400"></span>
+                                            </th>
+                                            <th class="text-right py-3 sortable cursor-pointer hover:bg-gray-50 transition-colors" onclick="sortTable(2)">
+                                                Poeng <span class="sort-arrow text-xs text-gray-400"></span>
+                                            </th>
+                                            <th class="text-right py-3 sortable cursor-pointer hover:bg-gray-50 transition-colors" onclick="sortTable(3)">
+                                                Rundar <span class="sort-arrow text-xs text-gray-400"></span>
+                                            </th>
+                                            <th class="text-right py-3 sortable cursor-pointer hover:bg-gray-50 transition-colors bg-blue-50" onclick="sortTable(4)">
+                                                Snitt <span class="sort-arrow text-xs text-blue-600">▼</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for player_stat in stats %}
+                                        <tr class="border-b border-gray-100 hover:bg-gray-50 {% if player_stat.player.user == user %}bg-blue-50{% endif %}">
+                                            <td class="py-3 px-3 font-bold {% if forloop.counter <= 3 %}text-yellow-600{% endif %}" data-rank="{{ forloop.counter }}">
+                                                {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter }}.{% endif %}
+                                            </td>
+                                            <td class="py-3 font-medium">{{ player_stat.player.nickname }}</td>
+                                            <td class="py-3 text-right" data-sort-value="{{ player_stat.total_points }}">{{ player_stat.total_points }}</td>
+                                            <td class="py-3 text-right" data-sort-value="{{ player_stat.rounds_played }}">{{ player_stat.rounds_played }}</td>
+                                            <td class="py-3 text-right" data-sort-value="{{ player_stat.average_points_per_round }}">{{ player_stat.average_points_per_round|floatformat:1 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    {% else %}
-        <p class="text-gray-700">Ingen poengstatistikk tilgjengelig.</p>
-    {% endif %}
+
+        <!-- Sidebar -->
+        <div class="space-y-8">
+            <!-- Top 5 -->
+            <div class="bg-white shadow-lg rounded-xl p-6 mx-4 md:mx-8">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                    <span class="text-xl mr-2">🏆</span>Toppscore
+                </h3>
+                {% if stats|slice:":5" %}
+                    <div class="space-y-3">
+                        {% for player_stat in stats|slice:":5" %}
+                        <div class="flex items-center justify-between {% if player_stat.player.user == user %}bg-blue-50 -mx-2 px-2 py-1 rounded{% endif %}">
+                            <div class="flex items-center">
+                                <span class="w-6 text-center font-bold {% if forloop.counter == 1 %}text-yellow-500{% elif forloop.counter == 2 %}text-gray-400{% elif forloop.counter == 3 %}text-amber-600{% else %}text-gray-500{% endif %}">
+                                    {% if forloop.counter <= 3 %}
+                                        {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% else %}🥉{% endif %}
+                                    {% else %}{{ forloop.counter }}.{% endif %}
+                                </span>
+                                <span class="ml-3 font-medium {% if player_stat.player.user == user %}text-blue-800{% endif %}">
+                                    {{ player_stat.player.nickname }}
+                                </span>
+                            </div>
+                            <span class="font-bold text-gray-600">{{ player_stat.average_points_per_round|floatformat:1 }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-4 text-center">
+                        <button onclick="toggleSection('communityStats')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Sjå full tabell ↓</button>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Recent Activity -->
+            {% if user.is_authenticated and player %}
+            <div class="bg-white shadow-lg rounded-xl p-6 mx-4 md:mx-8">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                    <span class="text-xl mr-2">🎵</span>Siste aktivitet
+                </h3>
+                {% if logged_in_player_stats.previous_songs|slice:":3" %}
+                    <div class="space-y-3">
+                        {% for song in logged_in_player_stats.previous_songs|slice:":3" %}
+                        <div class="group">
+                            <a href="{{ song.spotify_url }}" target="_blank" class="text-gray-800 hover:text-blue-600 font-medium text-sm group-hover:underline block">
+                                🎵 {{ song.artist }} - {{ song.title|truncatechars:25 }}
+                            </a>
+                            <span class="text-xs text-gray-500">{{ song.round__name|truncatechars:20 }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-4">
+                        <button onclick="toggleSection('personalStats')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Sjå alle bidrag →</button>
+                    </div>
+                {% else %}
+                    <p class="text-gray-500 text-sm">Ingen bidrag enno</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            <div class="bg-white shadow-lg rounded-xl p-6 mx-4 md:mx-8">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                    <span class="text-xl mr-2">⚡</span>Snarvegar
+                </h3>
+                <div class="grid grid-cols-1 gap-3">
+                    <a href="{% url 'combined-songs' %}" class="bg-blue-50 hover:bg-blue-100 p-3 rounded-lg transition-colors group flex items-center">
+                        <i class="fas fa-list-music text-blue-600 mr-3"></i>
+                        <span class="font-medium text-gray-800 group-hover:text-blue-800">Totallista</span>
+                    </a>
+                    <a href="{% url 'round_winners' %}" class="bg-yellow-50 hover:bg-yellow-100 p-3 rounded-lg transition-colors group flex items-center">
+                        <i class="fas fa-trophy text-yellow-600 mr-3"></i>
+                        <span class="font-medium text-gray-800 group-hover:text-yellow-800">Vinnarar</span>
+                    </a>
+                    <a href="{% url 'user_profile' %}" class="bg-purple-50 hover:bg-purple-100 p-3 rounded-lg transition-colors group flex items-center">
+                        <i class="fas fa-user text-purple-600 mr-3"></i>
+                        <span class="font-medium text-gray-800 group-hover:text-purple-800">Min profil</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <script>
-    let currentSortOrder = true;
+let currentSortColumn = -1, sortDirection = 'asc';
 
-    function sortTable(n) {
-        const table = document.querySelector("table");
-        const tbody = table.querySelector("tbody");
-        const rows = Array.from(tbody.querySelectorAll("tr"));
+function toggleSection(sectionId) {
+    const section = document.getElementById(sectionId), icon = document.getElementById(sectionId + 'Icon');
+    if (section.classList.contains('hidden')) {
+        section.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+        if (sectionId === 'personalStats') setTimeout(initTrendChart, 100);
+        if (sectionId === 'communityStats') { setTimeout(initCommunityCharts, 100); setTimeout(() => sortTable(4), 200); }
+    } else {
+        section.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
 
-        const isNumeric = n !== 0;
-
-        rows.sort((a, b) => {
-            let aText = a.children[n].innerText.trim();
-            let bText = b.children[n].innerText.trim();
-
-            if (isNumeric) {
-                aText = parseFloat(aText) || 0;
-                bText = parseFloat(bText) || 0;
+function initTrendChart() {
+    {% if chart_data %}
+    const ctx = document.getElementById('trendChart');
+    if (ctx && !ctx.hasChart) {
+        const chartData = {{ chart_data|safe }};
+        const maxVisible = 10;
+        const totalRounds = chartData.labels.length;
+        const startIndex = Math.max(0, totalRounds - maxVisible);
+        
+        // Calculate proper padding for Y-axis
+        const minRank = Math.min(...chartData.data);
+        const maxRank = Math.max(...chartData.data);
+        
+        window.trendChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Plassering', 
+                    data: chartData.data, 
+                    borderColor: 'rgb(34, 197, 94)', 
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)', 
+                    borderWidth: 3, 
+                    fill: true, 
+                    tension: 0.4,
+                    pointBackgroundColor: function(context) {
+                        const value = context.parsed.y;
+                        if (value === 1) return '#FFD700';
+                        if (value === 2) return '#C0C0C0';
+                        if (value === 3) return '#CD7F32';
+                        return 'rgb(34, 197, 94)';
+                    }, 
+                    pointBorderColor: '#fff', 
+                    pointBorderWidth: 2, 
+                    pointRadius: 6, 
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true, 
+                maintainAspectRatio: false, 
+                interaction: { intersect: false, mode: 'index' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const rank = context.parsed.y;
+                                if (rank === 1) return '🥇 Førsteplass!';
+                                if (rank === 2) return '🥈 Andreplass';
+                                if (rank === 3) return '🥉 Tredjeplass';
+                                return rank + '. plass';
+                            }
+                        }
+                    },
+                    zoom: {
+                        pan: { enabled: true, mode: 'x', modifierKey: null },
+                        zoom: { wheel: { enabled: true, speed: 0.1 }, pinch: { enabled: true }, mode: 'x' },
+                        limits: { x: { min: 0, max: totalRounds - 1, minRange: 3 } }
+                    }
+                },
+                scales: {
+    y: { 
+        reverse: true, 
+        suggestedMin: Math.max(0.5, minRank - 0.5),
+        suggestedMax: maxRank + 0.5,
+        offset: true,
+        grace: '5%',
+        ticks: { 
+            stepSize: 1, 
+            callback: function(value) { 
+                // Hide the "0" label but keep the grid line
+                if (value === 0) return null;
+                // Only show integer values as rankings
+                return Number.isInteger(value) ? value + '.' : null; 
             }
+        }, 
+        grid: { color: 'rgba(0, 0, 0, 0.05)' }, 
+        title: { display: true, text: 'Plassering' } 
+    },
+    x: { 
+        min: startIndex, 
+        max: totalRounds - 1, 
+        offset: true,
+        grid: { display: false }, 
+        title: { display: true, text: 'pGP-rundar' }, 
+        ticks: { maxRotation: 45, minRotation: 0 } 
+    }
+}
 
-            if (aText < bText) return currentSortOrder ? -1 : 1;
-            if (aText > bText) return currentSortOrder ? 1 : -1;
-            return 0;
+            }
         });
-
-        document.querySelectorAll('.sort-arrow').forEach((arrow, index) => {
-            arrow.textContent = '';
-            arrow.style.display = 'none';
-        });
-        const arrow = document.querySelector(`#arrow${n}`);
-        arrow.textContent = currentSortOrder ? '▲' : '▼';
-        arrow.style.display = 'inline';
-
-        currentSortOrder = !currentSortOrder;
-
-        rows.forEach(row => tbody.appendChild(row));
+        ctx.hasChart = true;
     }
+    {% endif %}
+}
 
-    function toggleVisibility(sectionId, buttonId) {
-        const section = document.getElementById(sectionId);
-        const button = document.getElementById(buttonId);
 
-        if (section.style.display === "none") {
-            section.style.display = "block";
-            button.textContent = "Vis mindre";
-        } else {
-            section.style.display = "none";
-            button.textContent = "Vis meir";
-        }
+
+// IMPROVED BUTTON FUNCTIONS
+function resetTrendChart() { 
+    if (window.trendChart) {
+        window.trendChart.resetZoom('default');  // Reset to original view
+        console.log('Chart reset to show all data points');
     }
+}
 
-    function copySpotifyUrlsToClipboard(listId) {
-        // Get the list of Spotify URLs based on the list ID
-        const list = document.getElementById(listId);
-        const songLinks = list.querySelectorAll('a');
-    
-        // Extract the href attribute (Spotify URL) from each link
-        const spotifyUrls = Array.from(songLinks).map(link => link.href);
-    
-        // Create a textarea element to hold the URLs for copying
-        const textarea = document.createElement('textarea');
-        textarea.value = spotifyUrls.join('\n');
-        document.body.appendChild(textarea);
-    
-        // Select the text in the textarea and copy it
-        textarea.select();
-        document.execCommand('copy');
-    
-        // Remove the temporary textarea
-        document.body.removeChild(textarea);
-    
-        // Optionally, show a notification or change button text to indicate the action was successful
-        alert('Spotify-lenker kopiert!');
+function showLatestTrend() { 
+    if (window.trendChart) { 
+        const totalRounds = window.trendChart.data.labels.length;
+        const maxVisible = 10;
+        const startIndex = Math.max(0, totalRounds - maxVisible);
+        
+        // Zoom to show the latest rounds
+        window.trendChart.zoomScale('x', {
+            min: startIndex,
+            max: totalRounds - 1
+        }, 'default');
+        console.log('Showing latest', maxVisible, 'rounds');
     }
+}
 
+function sortTable(columnIndex) {
+    const table = document.getElementById('leaderboardTable'), tbody = table.querySelector('tbody'), rows = Array.from(tbody.querySelectorAll('tr'));
+    table.querySelectorAll('.sort-arrow').forEach(arrow => { arrow.textContent = ''; arrow.classList.remove('text-blue-600'); arrow.classList.add('text-gray-400'); });
+    if (currentSortColumn === columnIndex) sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'; else { sortDirection = columnIndex === 4 ? 'desc' : 'asc'; currentSortColumn = columnIndex; }
+    rows.sort((a, b) => {
+        if (columnIndex === 0) return 0;
+        let aValue, bValue;
+        if (columnIndex === 1) { aValue = a.cells[columnIndex].textContent.trim(); bValue = b.cells[columnIndex].textContent.trim(); return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue); }
+        else { aValue = parseFloat(a.cells[columnIndex].dataset.sortValue || a.cells[columnIndex].textContent); bValue = parseFloat(b.cells[columnIndex].dataset.sortValue || b.cells[columnIndex].textContent); return sortDirection === 'asc' ? aValue - bValue : bValue - aValue; }
+    });
+    const currentHeader = table.querySelector(`th:nth-child(${columnIndex + 1}) .sort-arrow`);
+    if (currentHeader) { currentHeader.textContent = sortDirection === 'asc' ? '▲' : '▼'; currentHeader.classList.remove('text-gray-400'); currentHeader.classList.add('text-blue-600'); table.querySelectorAll('th').forEach(th => th.classList.remove('bg-blue-50')); table.querySelector(`th:nth-child(${columnIndex + 1})`).classList.add('bg-blue-50'); }
+    rows.forEach((row, index) => { tbody.appendChild(row); const rankCell = row.cells[0], newRank = index + 1; if (newRank <= 3) { const medals = ['🥇', '🥈', '🥉']; rankCell.innerHTML = medals[newRank - 1]; } else rankCell.textContent = newRank + '.'; rankCell.className = newRank <= 3 ? 'py-3 px-3 font-bold text-yellow-600' : 'py-3 px-3 font-bold'; rankCell.dataset.rank = newRank; });
+}
+
+function copySpotifyUrls(containerId) { const links = document.getElementById(containerId).querySelectorAll('a[href*="spotify.com"]'); copyToClipboard(Array.from(links).map(link => link.href).join('\n'), '🎵 Spotify-lenker kopiert!'); }
+function copyVoterStats() { let text = 'Fått mest poeng frå:\n'; document.querySelectorAll('.voter-item').forEach(item => { text += `${item.querySelector('.text-blue-800').textContent}: ${item.querySelector('.text-blue-600').textContent}\n`; }); copyToClipboard(text, '🗳️ Stemmestatistikk kopiert!'); }
+function copyTwelvePointers() { let text = 'Mine 12-poengare:\n'; document.querySelectorAll('.twelve-item').forEach(item => { const link = item.querySelector('a'); text += `${link.textContent.replace('🥇 ', '')} (${item.querySelector('.text-red-500').textContent})\n${link.href}\n\n`; }); copyToClipboard(text, '💗 12-poengare kopiert!'); }
+function copyGivenVotes() { let text = 'Gitt mest poeng til:\n'; document.querySelectorAll('.given-vote-item').forEach(item => { text += `${item.querySelector('.text-purple-800').textContent}: ${item.querySelector('.text-purple-600').textContent}\n`; }); copyToClipboard(text, '🎁 Gitte stemmer kopiert!'); }
+function copyLeaderboard() { let text = 'pGP Totaltabell:\nPlass\tSpelar\tPoeng\tRundar\tSnitt\n'; document.querySelectorAll('#leaderboardTable tbody tr').forEach(row => { const cells = row.querySelectorAll('td'), rank = cells[0].dataset.rank, place = parseInt(rank) <= 3 ? ['🥇', '🥈', '🥉'][parseInt(rank) - 1] : `${rank}.`; text += `${place}\t${cells[1].textContent}\t${cells[2].textContent}\t${cells[3].textContent}\t${cells[4].textContent}\n`; }); copyToClipboard(text, '🏆 Totaltabell kopiert!'); }
+function copyToClipboard(text, msg) { const textarea = document.createElement('textarea'); textarea.value = text; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); document.body.removeChild(textarea); showCopyFeedback(msg); }
+function showCopyFeedback(msg) { const feedback = document.createElement('div'); feedback.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300'; feedback.textContent = msg; document.body.appendChild(feedback); setTimeout(() => feedback.classList.add('opacity-100'), 100); setTimeout(() => { feedback.classList.add('opacity-0', 'translate-x-full'); setTimeout(() => document.body.removeChild(feedback), 300); }, 3000); }
+function initCommunityCharts() {
+    const activeCtx = document.getElementById('mostActiveChart');
+    if (activeCtx && !activeCtx.hasChart && {{ stats|length }} > 0) { new Chart(activeCtx, { type: 'bar', data: { labels: [{% for stat in stats|slice:":6" %}'{{ stat.player.nickname }}',{% endfor %}], datasets: [{ label: 'Rundar spelt', data: [{% for stat in stats|slice:":6" %}{{ stat.rounds_played }},{% endfor %}], backgroundColor: 'rgba(59, 130, 246, 0.8)', borderColor: 'rgb(59, 130, 246)', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } }); activeCtx.hasChart = true; }
+    const activityCtx = document.getElementById('activityChart');
+    if (activityCtx && !activityCtx.hasChart) { new Chart(activityCtx, { type: 'line', data: { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mai'], datasets: [{ label: 'Nye rundar', data: [2, 4, 3, 5, 6], borderColor: 'rgb(245, 158, 11)', backgroundColor: 'rgba(245, 158, 11, 0.1)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } }); activityCtx.hasChart = true; }
+}
 </script>
 
 <style>
-    .truncate {
-        white-space: normal; /* Allow wrapping on small screens */
-        overflow: visible; /* Show all content on small screens */
-    }
-    
-    @media (min-width: 640px) {
-        .truncate {
-            white-space: nowrap; /* Prevent text from wrapping on larger screens */
-            overflow: hidden; /* Hide overflow text */
-            text-overflow: ellipsis; /* Add ellipsis at the end of overflow text */
-        }
-    }
+.scrollbar-thin::-webkit-scrollbar{width:6px}.scrollbar-thumb-blue-400::-webkit-scrollbar-thumb{background-color:#60a5fa;border-radius:3px}.scrollbar-thumb-red-400::-webkit-scrollbar-thumb{background-color:#f87171;border-radius:3px}.scrollbar-thumb-purple-400::-webkit-scrollbar-thumb{background-color:#c084fc;border-radius:3px}.scrollbar-track-gray-200::-webkit-scrollbar-track{background-color:#e5e7eb;border-radius:3px}.scrollbar-thin::-webkit-scrollbar-thumb:hover{background-color:#3b82f6}
 </style>
-
 {% endblock %}

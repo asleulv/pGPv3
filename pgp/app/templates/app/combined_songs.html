@@ -4,16 +4,16 @@
 
 {% block content %}
 <div class="container mx-auto my-8">
-    <div class="flex flex-col items-center mb-4"> <!-- Add flexbox for centering -->
+    <div class="flex flex-col items-center mb-4">
         <h1 class="text-2xl font-bold">Totallista</h1>
-        <div id="totalSongsDisplay" class="text-lg font-medium text-center"> <!-- Center text -->
+        <div id="totalSongsDisplay" class="text-lg font-medium text-center">
             <!-- Total songs display -->
         </div>
     </div>
     
     <!-- Reset Button -->
     <div class="mb-4 text-center">
-        <button id="resetButton" class="bg-blue-500 text-white py-2 px-4">
+        <button id="resetButton" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors">
             Nullstill
         </button>
     </div>
@@ -46,19 +46,30 @@
         var table = $('#songsTable').DataTable({
             processing: true,
             serverSide: true,
+            searchDelay: 400,  // ✅ ADD: Prevent search on every keystroke
             ajax: {
                 url: "{% url 'combined_song_data_view' %}",
                 type: "GET",
                 data: function (d) {
-                    d.page = Math.ceil(d.start / d.length) + 1; // Set the page number
-                    d.pageSize = d.length;                      // Set the page size
+                    // ✅ ADD: Don't search on very short terms (less than 3 characters)
+                    if (d.search && d.search.value && d.search.value.length > 0 && d.search.value.length < 3) {
+                        d.search.value = '';
+                    }
+                    
+                    d.page = Math.ceil(d.start / d.length) + 1;
+                    d.pageSize = d.length;
                     if (d.order && d.order.length > 0) {
-                        d.orderColumn = d.columns[d.order[0].column].data; // Get column name
-                        d.orderDir = d.order[0].dir;                       // Get sort direction (asc/desc)
+                        d.orderColumn = d.columns[d.order[0].column].data;
+                        d.orderDir = d.order[0].dir;
                     }
                 },
                 dataSrc: function(json) {
-                    return json.data; // Data source for DataTables
+                    return json.data;
+                },
+                // ✅ ADD: Error handling for failed requests
+                error: function(xhr, error, code) {
+                    console.log('Error loading data:', error);
+                    alert('Feil ved lasting av data. Prøv igjen.');
                 }
             },
             columns: [
@@ -68,17 +79,20 @@
                 { data: 'levert_av' },
                 { data: 'tema' },
                 { data: 'spotify', render: function(data) {
-                    return `<a href="${data}" target="_blank" class="text-blue-500 hover:underline">Låt</a>`;
+                    return `<a href="${data}" target="_blank" class="text-blue-500 hover:underline">🎵 Låt</a>`;
                 }}
             ],
             order: [[0, 'desc']],
             paging: true,
             searching: true,
             ordering: true,
-            pageLength: 10, // Default page length
+            pageLength: 10,
+            // ✅ ADD: More page length options for users
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             language: {
                 processing: "Laster...",
                 search: "Søk:",
+                searchPlaceholder: "Søk i artist, tittel, tema...", // ✅ ADD: Helpful placeholder
                 lengthMenu: "Vis _MENU_ bidrag per side",
                 info: "Viser _START_ til _END_ av _TOTAL_ bidrag", 
                 infoEmpty: "Ingen bidrag tilgjengeleg", 
@@ -89,31 +103,60 @@
                     next: "Neste",
                     previous: "Førre"
                 },
-                zeroRecords: "Ingen bidrag funne"
+                zeroRecords: "Ingen bidrag funne. Prøv eit anna søkeord."
             },
             drawCallback: function(settings) {
                 var api = this.api();
-                var json = api.ajax.json();  // Get the entire response object
+                var json = api.ajax.json();
 
                 // Display the total number of songs
-                var totalSongs = json.recordsTotal;  // Use recordsTotal from the JSON response
-                $('#totalSongsDisplay').text(`Totalt antall bidrag: ${totalSongs}`);
+                var totalSongs = json.recordsTotal;
+                var filteredSongs = json.recordsFiltered;
+                
+                // ✅ IMPROVED: Show both total and filtered count
+                if (totalSongs === filteredSongs) {
+                    $('#totalSongsDisplay').text(`Totalt antall bidrag: ${totalSongs}`);
+                } else {
+                    $('#totalSongsDisplay').text(`Visar ${filteredSongs} av ${totalSongs} bidrag`);
+                }
+            },
+            // ✅ ADD: Loading state improvements
+            initComplete: function() {
+                console.log('DataTable loaded successfully');
+                
+                // Add search hint
+                $('.dataTables_filter input').attr('placeholder', 'Søk (minimum 3 bokstavar)...');
             }
         });
 
-        // Reset button functionality
+        // ✅ IMPROVED: Reset button with feedback
         $('#resetButton').on('click', function() {
-            table.search('').columns().search('').draw(); // Reset search and column filters
+            $(this).text('Nullstiller...').prop('disabled', true);
+            
+            table.search('').columns().search('').draw();
+            
+            setTimeout(() => {
+                $(this).text('Nullstill').prop('disabled', false);
+            }, 500);
+        });
+        
+        // ✅ ADD: Keyboard shortcut for search focus
+        $(document).on('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                $('.dataTables_filter input').focus();
+            }
         });
     });
 </script>
 
 <style>
     .overflow-x-auto .dataTables_filter input {
-        border: 1px solid #ccc; /* Change border */
-        border-radius: 0px; /* Add border radius */
-        padding: 0.5em; /* Add some padding */
+        border: 1px solid #ccc;
+        border-radius: 4px;  /* ✅ IMPROVED: Better border radius */
+        padding: 0.5em;
         background-color: white;
+        min-width: 250px;  /* ✅ ADD: Wider search box */
     }
 
     .dataTables_wrapper .dataTables_length select {
@@ -121,6 +164,32 @@
         border-radius: 3px;
         padding: 5px;
         background-color: white;
+    }
+    
+    /* ✅ ADD: Better loading state */
+    .dataTables_processing {
+        background: rgba(255, 255, 255, 0.9) !important;
+        border: 1px solid #ddd !important;
+        border-radius: 4px !important;
+    }
+    
+    /* ✅ ADD: Search hint styling */
+    .dataTables_filter {
+        margin-bottom: 1rem;
+    }
+    
+    .dataTables_filter::after {
+        content: "💡 Trykk Ctrl+F for rask søk";
+        display: block;
+        font-size: 0.75rem;
+        color: #666;
+        margin-top: 0.25rem;
+    }
+    
+    /* ✅ ADD: Better button styling */
+    #resetButton:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
 </style>
 {% endblock %}

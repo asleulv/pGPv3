@@ -5,27 +5,25 @@ from django.utils import timezone
 from django.http import HttpResponse
 from datetime import timedelta
 from datetime import datetime
-from django.db import models
 from .models import Round, Song, Player, Vote, PlayerStats
-from .forms import RoundForm, SongSubmissionForm, DynamicVoteForm, RegistrationForm
+from .forms import RoundForm, SongSubmissionForm, DynamicVoteForm, UserProfileForm
 from .spotify_views import get_spotify_client
 from urllib.parse import urlparse
-from django import forms
 from docx.shared import Pt
-from django.db.models import Sum, Value, Q
+from django.db.models import Sum, Value
 from django.db.models.functions import Coalesce
 import re
 from django.contrib.auth import logout
 from docx import Document
-import random
 import logging
-from django.http import HttpResponseForbidden
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-from .utils import get_combined_song_data, get_round_winners, LoggedInPlayerStats
+from .utils import get_combined_song_data, get_round_winners, LoggedInPlayerStats, get_user_chart_data
 from django.core.paginator import Paginator, EmptyPage
 from django.http import JsonResponse
+import json
+from django.core.cache import cache
+
 
 def user_logout(request):
     logout(request)
@@ -40,9 +38,12 @@ def home(request):
 
     # Add logged-in player's stats if available
     logged_in_player_stats = None
+    chart_data = None
+    
     if request.user.is_authenticated:
         try:
             player_stats = LoggedInPlayerStats(request.user)
+            player = request.user.player
 
             logged_in_player_stats = {
                 'previous_songs': player_stats.previous_songs().order_by('-id'),
@@ -50,16 +51,54 @@ def home(request):
                 'top_given_votes': player_stats.top_given_votes(),
                 'top_score_12_songs': player_stats.top_score_12_songs(),
             }
+            
+            # Get chart data for trend visualization
+            chart_data = get_user_chart_data(player)
+            
         except Player.DoesNotExist:
             # Handle case where the logged-in user does not have an associated Player object
             logged_in_player_stats = None
+            chart_data = None
 
     return render(request, 'app/home.html', {
         'players': players,
         'active_rounds': active_rounds,
         'stats': stats,
         'logged_in_player_stats': logged_in_player_stats,
+        'chart_data': json.dumps(chart_data) if chart_data else None,
     })
+
+@login_required
+def user_profile(request):
+    """Display user profile with edit functionality"""
+    try:
+        player = request.user.player
+    except:
+        player = None
+    
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=request.user)
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, '🎉 Profilen din er oppdatert!')
+            return redirect('user_profile')
+        else:
+            messages.error(request, '❌ Det oppstod ein feil. Sjekk informasjonen og prøv igjen.')
+    else:
+        form = UserProfileForm(instance=request.user)
+
+    # Get organizer rounds
+    organizer_rounds = Round.objects.filter(organizer=request.user).order_by('-start_date')
+
+    context = {
+        'form': form,
+        'player': player,
+        'organizer_rounds': organizer_rounds,
+    }
+    return render(request, 'registration/profile.html', context)
+
+
 
 @login_required
 def round_list(request):
@@ -162,7 +201,7 @@ def round_detail(request, pk):
         round_instance.round_finished = True
         round_instance.save()
         return redirect('round_detail', pk=round_instance.pk)    
-    print(players_with_song)
+    
     # Update the context to include all necessary data for both organizers and players
     context = {
         'round': round_instance,
@@ -514,59 +553,72 @@ def edit_round(request, round_id):
 @login_required
 def combined_song_data_view(request):
     page = int(request.GET.get('page', 1))
-    page_size = int(request.GET.get('pageSize', 10))  # Default page size of 10
-    search_value = request.GET.get('search[value]', '')
-    order_column = request.GET.get('orderColumn', 'dato')  # Default column for ordering
-    order_dir = request.GET.get('orderDir', 'asc')         # Default order direction
+    page_size = int(request.GET.get('pageSize', 10))
+    search_value = request.GET.get('search[value]', '').strip()
+    order_column = request.GET.get('orderColumn', 'dato')
+    order_dir = request.GET.get('orderDir', 'asc')
 
-    # Get the combined song data (assumed to return a list)
-    combined_songs = get_combined_song_data()
-
-    # Apply search filter if search_value is provided
-    if search_value:
-        combined_songs = [
-            song for song in combined_songs if (
-                search_value.lower() in song.artist.lower() or
-                search_value.lower() in song.tittel.lower() or
-                search_value.lower() in song.levert_av.lower() or
-                search_value.lower() in song.tema.lower()
-            )
+    # ✅ SOLUTION: Cache as dictionaries, not custom objects
+    cache_key = 'combined_songs_data_dicts'
+    combined_songs_dicts = cache.get(cache_key)
+    
+    if combined_songs_dicts is None:
+        # Get the custom objects
+        combined_songs_objects = get_combined_song_data()
+        
+        # Convert to dictionaries for caching (these CAN be pickled)
+        combined_songs_dicts = [
+            {
+                'dato': song.dato,
+                'artist': song.artist,
+                'tittel': song.tittel,
+                'levert_av': song.levert_av,
+                'tema': song.tema,
+                'spotify': song.spotify,
+            }
+            for song in combined_songs_objects
         ]
+        
+        cache.set(cache_key, combined_songs_dicts, 300)  # Cache for 5 minutes
+        
+    total_records = len(combined_songs_dicts)
 
-    # Update total records after filtering
-    total_filtered = len(combined_songs)
+    # Early exit for short search terms
+    if search_value and len(search_value) < 3:
+        search_value = ''
 
-    # Sort the combined songs based on the order_column and order_dir
+    # Filter dictionaries instead of objects
+    if search_value:
+        search_lower = search_value.lower()
+        
+        filtered_songs = []
+        for song_dict in combined_songs_dicts:
+            if (search_lower in song_dict['artist'].lower() or
+                search_lower in song_dict['tittel'].lower() or
+                search_lower in song_dict['levert_av'].lower() or
+                search_lower in song_dict['tema'].lower()):
+                filtered_songs.append(song_dict)
+        
+        combined_songs_dicts = filtered_songs
+    
+    total_filtered = len(combined_songs_dicts)
+
+    # Sort dictionaries
     if order_column in ['dato', 'artist', 'tittel', 'levert_av', 'tema']:
-        combined_songs.sort(key=lambda x: getattr(x, order_column), reverse=(order_dir == 'desc'))
+        reverse_sort = (order_dir == 'desc')
+        combined_songs_dicts.sort(key=lambda x: x[order_column], reverse=reverse_sort)
 
-    # Paginate the filtered combined songs (assuming it's a list)
-    paginator = Paginator(combined_songs, page_size)
+    # Slice for pagination
+    start_idx = (page - 1) * page_size
+    end_idx = start_idx + page_size
+    songs_slice = combined_songs_dicts[start_idx:end_idx]
 
-    # Handle potential pagination errors (e.g., page out of range)
-    try:
-        songs_page = paginator.page(page)
-    except EmptyPage:
-        songs_page = paginator.page(paginator.num_pages)  # Return last page if page is out of range
-
-    # Prepare the songs data for the response with formatted date
-    songs_data = [
-        {
-            'dato': song.dato,  # Already formatted in get_combined_song_data
-            'artist': song.artist,
-            'tittel': song.tittel,
-            'levert_av': song.levert_av,
-            'tema': song.tema,
-            'spotify': song.spotify,
-        }
-        for song in songs_page
-    ]
-
+    # songs_slice is already in the right format!
     return JsonResponse({
-        'recordsTotal': len(get_combined_song_data()),  
-        'recordsFiltered': total_filtered,              
+        'recordsTotal': total_records,
+        'recordsFiltered': total_filtered,
         'draw': int(request.GET.get('draw', 1)),
-        'data': songs_data
+        'data': songs_slice  # Already dictionaries, ready to go
     })
 
 @login_required

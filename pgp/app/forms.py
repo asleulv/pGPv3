@@ -99,3 +99,35 @@ class RegistrationForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+    
+class UserProfileForm(forms.ModelForm):
+    """Form for editing Django's built-in User fields"""
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500',
+            'readonly': True
+        }),
+        help_text="Brukarnamn kan ikkje endrast"
+    )
+    email = forms.EmailField(
+        required=False,
+        widget=forms.EmailInput(attrs={
+            'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500',
+            'placeholder': 'din.epost@example.com'
+        }),
+        help_text="E-post for nullstilling av passord"
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'email']  # Removed first_name and last_name
+
+    def clean_email(self):
+        """Validate that email is unique if provided"""
+        email = self.cleaned_data.get('email')
+        if email:
+            existing_user = User.objects.filter(email=email).exclude(pk=self.instance.pk).first()
+            if existing_user:
+                raise ValidationError("Denne e-postadressa er allereie i bruk.")
+        return email

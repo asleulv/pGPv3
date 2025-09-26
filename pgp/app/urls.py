@@ -6,6 +6,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('logout/', views.user_logout, name='logout'),
     path('register/', views.register, name='register'),
+    path('profil/', views.user_profile, name='user_profile'),
     path('my_rounds/', views.my_rounds, name='my_rounds'),
     path('edit_round/<int:round_id>/', views.edit_round, name='edit_round'),
     path('create-round/', views.create_round, name='create_round'),

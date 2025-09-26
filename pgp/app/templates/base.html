@@ -19,9 +19,10 @@
   </head>
   <body class="bg-gray-100 font-roboto flex flex-col min-h-screen">
 
-    <nav class="bg-gradient-to-r from-blue-900 to-blue-600 p-4 text-white">
+
+    <nav class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 text-gray-100 shadow-lg">
       <div class="container mx-auto flex items-center justify-between">
-        <a href="/" class="font-bold text-lg">☠️ pGP beta2.3</a>
+        <a href="/" class="font-bold text-2xl">❤️‍🔥 pGP beta2.5</a>
         <div class="md:hidden">
           <button id="menu-button" class="flex items-center">
             <svg
@@ -48,13 +49,19 @@
           {% if user.is_authenticated %}
           <li class="relative">
             <button id="user-menu" class="flex items-center space-x-2 focus:outline-none">
-              <span>🧸{{ user.username }}</span>
+              <span>{{ user.username }}</span>
               <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            <div id="dropdown-menu" class="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg hidden">
-              <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm hover:bg-gray-100">Logg ut</a>
+            <div id="dropdown-menu" class="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg hidden rounded-lg">
+              <a href="{% url 'user_profile' %}" class="block px-4 py-2 text-sm hover:bg-gray-100 rounded-t-lg">
+                <i class="fas fa-user mr-2"></i>Min profil
+              </a>
+              <div class="border-t border-gray-200"></div>
+              <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm hover:bg-gray-100 rounded-b-lg">
+                <i class="fas fa-sign-out-alt mr-2"></i>Logg ut
+              </a>
             </div>
           </li>
           {% else %}
@@ -66,6 +73,7 @@
         <!-- Mobile Menu -->
         <ul id="mobile-menu" class="absolute top-16 right-0 bg-white text-black rounded-lg shadow-lg hidden w-full">
 
+
           <li class="w-full">
             <a href="{% url 'round_list' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">pGP-rundar</a>
           </li>
@@ -76,9 +84,18 @@
             <a href="{% url 'round_winners' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">Vinnarar</a>
           </li>
           {% if user.is_authenticated %}
-          <li class="w-full relative">
-            <a href="{% url 'logout' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">Logg ut</a>
-          </li>
+          <div class="border-t border-gray-200">
+            <li class="w-full">
+              <a href="{% url 'user_profile' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">
+                <i class="fas fa-user mr-3"></i>Min profil
+              </a>
+            </li>
+            <li class="w-full">
+              <a href="{% url 'logout' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">
+                <i class="fas fa-sign-out-alt mr-3"></i>Logg ut
+              </a>
+            </li>
+          </div>
           {% else %}
           <li class="w-full">
             <a href="{% url 'login' %}" class="block px-6 py-4 text-lg hover:bg-gray-100 w-full text-left">Logg inn</a>
@@ -88,16 +105,17 @@
       </div>
     </nav>
 
+
     <div class="container mx-auto my-8">
       {% if messages %}
       <div class="container mx-auto my-8">
         {% for message in messages %} 
         {% if message.tags == 'error' %}
-        <div class="p-4 mb-4 text-white bg-red-500">{{ message }}</div>
+        <div class="p-4 mb-4 text-white bg-red-500 rounded-lg">{{ message }}</div>
         {% elif message.tags == 'success' %}
-        <div class="p-4 mb-4 text-white bg-green-500">{{ message }}</div>
+        <div class="p-4 mb-4 text-white bg-green-500 rounded-lg">{{ message }}</div>
         {% elif message.tags == 'info' %}
-        <div class="p-4 mb-4 text-white bg-blue-500">{{ message }}</div>
+        <div class="p-4 mb-4 text-white bg-blue-500 rounded-lg">{{ message }}</div>
         {% endif %} 
         {% endfor %}
       </div>
@@ -105,9 +123,11 @@
       {% block content %} {% endblock %}
     </div>
 
-    <footer class="text-center py-4 bg-gradient-to-r from-blue-900 to-blue-600 text-white mt-auto">
+
+    <footer class="text-center py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white mt-auto">
       &copy; Megadik
     </footer>
+
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
@@ -116,26 +136,30 @@
         const menuButton = document.getElementById("menu-button");
         const mobileMenu = document.getElementById("mobile-menu");
 
-        userMenuButton.addEventListener("click", () => {
-          dropdownMenu.classList.toggle("hidden");
-        });
+        // Only add event listener if elements exist
+        if (userMenuButton && dropdownMenu) {
+          userMenuButton.addEventListener("click", () => {
+            dropdownMenu.classList.toggle("hidden");
+          });
+        }
 
-        menuButton.addEventListener("click", () => {
-          mobileMenu.classList.toggle("hidden");
-        });
+        if (menuButton && mobileMenu) {
+          menuButton.addEventListener("click", () => {
+            mobileMenu.classList.toggle("hidden");
+          });
+        }
 
         document.addEventListener("click", (event) => {
-          if (
-            !userMenuButton.contains(event.target) &&
-            !dropdownMenu.contains(event.target)
-          ) {
+          // Only run if elements exist
+          if (userMenuButton && dropdownMenu && 
+              !userMenuButton.contains(event.target) &&
+              !dropdownMenu.contains(event.target)) {
             dropdownMenu.classList.add("hidden");
           }
 
-          if (
-            !menuButton.contains(event.target) &&
-            !mobileMenu.contains(event.target)
-          ) {
+          if (menuButton && mobileMenu && 
+              !menuButton.contains(event.target) &&
+              !mobileMenu.contains(event.target)) {
             mobileMenu.classList.add("hidden");
           }
         });
@@ -145,13 +169,16 @@
 </html>
 <style>
 
+
   .font-roboto {
     font-family: 'Roboto', sans-serif;
   }
 
+
 #mobile-menu {
   z-index: 50; /* or a value that suits your layout */
 }
+
 
 
 </style>

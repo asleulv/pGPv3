@@ -167,5 +167,49 @@ class LoggedInPlayerStats:
             .values('song__title', 'song__artist', 'song__spotify_url', 'song__round__id', 'song__round__name')
             .order_by('-song__id')  # Apply ordering here
         )
+    
 
+
+# Add this to your existing utils.py file
+def get_user_chart_data(player):
+    """
+    Generate chart data for user's ranking progression over time
+    Returns None if no data available
+    """
+    if not player:
+        return None
+    
+    user_rounds = []
+    user_ranks = []
+    
+    # Get all finished rounds that the user participated in
+    user_songs = Song.objects.filter(
+        player=player, 
+        round__round_finished=True
+    ).select_related('round').order_by('round__start_date')
+    
+    for song in user_songs:
+        round_obj = song.round
+        
+        # Get all songs in this round with their scores, ordered by score (descending)
+        all_songs_in_round = Song.objects.filter(round=round_obj).order_by('-total_score')
+        
+        # Calculate rank (1 = best, 2 = second best, etc.)
+        rank = 1
+        for i, round_song in enumerate(all_songs_in_round, 1):
+            if round_song.player == player:
+                rank = i
+                break
+        
+        user_rounds.append(round_obj.name[:15])  # Truncate long names
+        user_ranks.append(rank)
+    
+    if user_rounds and user_ranks:
+        return {
+            'labels': user_rounds,
+            'data': user_ranks,
+            'max_rank': max(user_ranks) if user_ranks else 10  # For chart scaling
+        }
+    
+    return None
 

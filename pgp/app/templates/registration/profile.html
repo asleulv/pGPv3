@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+
+{% block title %}🧸 Min profil - pGP beta2{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
+        <h1 class="text-3xl font-bold mb-2 text-gray-800">🧸 Min profil</h1>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left Column: Profile Form + Stats -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Profile Form -->
+            <div class="bg-white shadow-lg rounded-lg p-6 mx-4 md:mx-8">
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <div>
+                        <h3 class="text-lg font-bold text-blue-800 border-b-2 border-gray-200 pb-2 mb-4">
+                            👤 Kontoinformasjon
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    Brukarnamn
+                                </label>
+                                {{ form.username }}
+                                <p class="text-xs text-gray-500 mt-1">{{ form.username.help_text }}</p>
+                            </div>
+                            
+                            <div>
+                                <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    E-postadresse
+                                </label>
+                                {{ form.email }}
+                                <p class="text-xs text-gray-500 mt-1">{{ form.email.help_text }}</p>
+                                {% if form.email.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                        <a href="/" class="text-blue-600 hover:text-blue-800 font-medium">
+                            ← Tilbake til heimesida
+                        </a>
+                        <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded-full hover:bg-blue-700 transition duration-200 font-medium">
+                            💾 Lagre endringar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Ranking Chart with Scrolling -->
+            {% if chart_data and player %}
+            <div class="bg-white shadow-lg rounded-lg p-6 mx-4 md:mx-8">
+                <h3 class="text-lg font-bold text-blue-800 border-b-2 border-gray-200 pb-2 mb-4">
+                    🏆 Plassering over tid
+                </h3>
+                <p class="text-sm text-gray-600 mb-2">Din plassering i alle rundar (1. plass = topp)</p>
+                <div class="flex items-center justify-between mb-4">
+                    <p class="text-xs text-gray-500">💡 Dra for å skrolle gjennom rundane • Rul for å zoome</p>
+                    <div class="flex space-x-2">
+                        <button onclick="resetChart()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
+                            🔄 Reset
+                        </button>
+                        <button onclick="showLatest()" class="text-xs px-3 py-1 bg-blue-100 hover:bg-blue-200 rounded-md transition-colors">
+                            ⏮️ Nyaste
+                        </button>
+                    </div>
+                </div>
+                <div style="height: 350px; position: relative;">
+                    <canvas id="rankingChart"></canvas>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Competition Stats -->
+            {% if player and player.stats %}
+            <div class="bg-white shadow-lg rounded-lg p-6 mx-4 md:mx-8">
+                <h3 class="text-lg font-bold text-blue-800 border-b-2 border-gray-200 pb-2 mb-4">
+                    🎵 pGP-statistikk
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center bg-blue-50 p-4 rounded-lg">
+                        <div class="text-xl font-bold text-blue-600">{{ player.stats.total_points }}</div>
+                        <div class="text-sm text-gray-600">Totale poeng</div>
+                    </div>
+                    <div class="text-center bg-green-50 p-4 rounded-lg">
+                        <div class="text-xl font-bold text-green-600">{{ player.stats.rounds_played }}</div>
+                        <div class="text-sm text-gray-600">Rundar spelt</div>
+                    </div>
+                    <div class="text-center bg-yellow-50 p-4 rounded-lg">
+                        <div class="text-xl font-bold text-yellow-600">{{ player.stats.wins }}</div>
+                        <div class="text-sm text-gray-600">Sigrar</div>
+                    </div>
+                    <div class="text-center bg-purple-50 p-4 rounded-lg">
+                        <div class="text-xl font-bold text-purple-600">{{ player.stats.average_points_per_round }}</div>
+                        <div class="text-sm text-gray-600">Snitt per runde</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Account Info + Organizer Rounds -->
+        <div class="space-y-8">
+            <!-- Account Status -->
+            <div class="bg-white shadow-lg rounded-lg p-6 mx-4 md:mx-8">
+                <h3 class="text-lg font-bold text-blue-800 border-b-2 border-gray-200 pb-2 mb-4">
+                    📊 Kontostatus
+                </h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Registrert</label>
+                        <p class="bg-gray-50 p-2 rounded text-gray-600 text-sm">{{ user.date_joined|date:"d.m.Y" }}</p>
+                    </div>
+                    
+                    {% if player %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">pGP-kallenamn</label>
+                        <p class="bg-gray-50 p-2 rounded text-gray-600 text-sm">{{ player.nickname }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Organizer Rounds -->
+            {% if organizer_rounds %}
+            <div class="bg-white shadow-lg rounded-lg p-6 mx-4 md:mx-8">
+                <h3 class="text-lg font-bold text-blue-800 border-b-2 border-gray-200 pb-2 mb-4">
+                    🎪 Mine rundar som arrangør
+                </h3>
+                <div class="space-y-3">
+                    {% for round in organizer_rounds|slice:":5" %}
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <a href="{% url 'round_detail' round.id %}" class="font-medium text-blue-600 hover:text-blue-800">
+                            {{ round.name }}
+                        </a>
+                        <p class="text-sm text-gray-500 mt-1">
+                            {% if round.round_finished %}
+                                ✅ Ferdig
+                            {% elif round.playlist_released %}
+                                🎵 Spilleliste publisert
+                            {% else %}
+                                ⏳ Pågår
+                            {% endif %}
+                        </p>
+                        <p class="text-xs text-gray-400">{{ round.start_date|date:"d.m.Y" }}</p>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if organizer_rounds|length > 5 %}
+                    <div class="text-center">
+                        <a href="{% url 'round_list' %}" class="text-blue-600 hover:text-blue-800 text-sm">
+                            Vis alle ({{ organizer_rounds|length }})
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Script with Scrolling/Panning -->
+{% if chart_data %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('rankingChart').getContext('2d');
+    const chartData = {{ chart_data|safe }};
+    
+    // Calculate initial display window (show 10 rounds at a time)
+    const maxVisible = 10;
+    const totalRounds = chartData.labels.length;
+    const startIndex = Math.max(0, totalRounds - maxVisible);
+    
+    window.rankingChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                label: 'Plassering',
+                data: chartData.data,
+                borderColor: 'rgb(34, 197, 94)',
+                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: function(context) {
+                    const value = context.parsed.y;
+                    if (value === 1) return '#FFD700';  // Gold
+                    if (value === 2) return '#C0C0C0';  // Silver  
+                    if (value === 3) return '#CD7F32';  // Bronze
+                    return 'rgb(34, 197, 94)';          // Green for others
+                },
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const rank = context.parsed.y;
+                            let suffix = 'plass';
+                            if (rank === 1) suffix = '🥇 Førsteplass!';
+                            else if (rank === 2) suffix = '🥈 Andreplass';
+                            else if (rank === 3) suffix = '🥉 Tredjeplass';
+                            else suffix = '. plass';
+                            
+                            return rank + suffix;
+                        }
+                    }
+                },
+                zoom: {
+                    pan: {
+                        enabled: true,
+                        mode: 'x',
+                        modifierKey: null,  // No modifier key needed
+                        onPanComplete: function({chart}) {
+                            // Optional: Add feedback when panning completes
+                        }
+                    },
+                    zoom: {
+                        wheel: {
+                            enabled: true,
+                            speed: 0.1
+                        },
+                        pinch: {
+                            enabled: true
+                        },
+                        mode: 'x',
+                        onZoomComplete: function({chart}) {
+                            // Optional: Add feedback when zoom completes
+                        }
+                    },
+                    limits: {
+                        x: {
+                            min: 0,
+                            max: totalRounds - 1,
+                            minRange: 3  // Minimum of 3 rounds visible
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    reverse: true,
+                    beginAtZero: false,
+                    min: 1,
+                    max: chartData.max_rank,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            return value + '.';
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Plassering'
+                    }
+                },
+                x: {
+                    min: startIndex,  // Start showing from most recent rounds
+                    max: totalRounds - 1,
+                    grid: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'pGP-rundar'
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 0
+                    }
+                }
+            }
+        },
+        plugins: [{
+            id: 'chartjs-plugin-zoom'
+        }]
+    });
+});
+
+// Utility functions for chart control
+function resetChart() {
+    if (window.rankingChart) {
+        window.rankingChart.resetZoom();
+    }
+}
+
+function showLatest() {
+    if (window.rankingChart) {
+        const totalRounds = window.rankingChart.data.labels.length;
+        const maxVisible = 10;
+        const startIndex = Math.max(0, totalRounds - maxVisible);
+        
+        window.rankingChart.zoomScale('x', {
+            min: startIndex,
+            max: totalRounds - 1
+        }, 'default');
+    }
+}
+</script>
+{% endif %}
+{% endblock %}
