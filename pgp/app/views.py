@@ -33,11 +33,21 @@ def user_logout(request):
 
 @login_required
 def home(request):
+    from django.db.models import F, ExpressionWrapper, FloatField
+    
     players = Player.objects.all()
-    active_rounds = Round.objects.filter(end_date__gte=timezone.now())  # Get current rounds
+    active_rounds = Round.objects.filter(end_date__gte=timezone.now())
     stats = PlayerStats.objects.all().order_by('-total_points')
-    stats_by_average = list(PlayerStats.objects.all())
-    stats_by_average.sort(key=lambda x: x.average_points_per_round, reverse=True)
+    
+    # ✅ Sort by average_points_per_round in database (with division by zero safety)
+    stats_by_average = PlayerStats.objects.exclude(
+        rounds_played=0  # Exclude players with no rounds
+    ).annotate(
+        avg_points=ExpressionWrapper(
+            F('total_points') / F('rounds_played'),
+            output_field=FloatField()
+        )
+    ).order_by('-avg_points')
 
     # Add logged-in player's stats if available
     logged_in_player_stats = None
@@ -59,7 +69,6 @@ def home(request):
             chart_data = get_user_chart_data(player)
             
         except Player.DoesNotExist:
-            # Handle case where the logged-in user does not have an associated Player object
             logged_in_player_stats = None
             chart_data = None
 
@@ -71,6 +80,7 @@ def home(request):
         'logged_in_player_stats': logged_in_player_stats,
         'chart_data': json.dumps(chart_data) if chart_data else None,
     })
+
 
 @login_required
 def user_profile(request):
