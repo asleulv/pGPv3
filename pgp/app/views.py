@@ -39,16 +39,6 @@ def home(request):
     active_rounds = Round.objects.filter(end_date__gte=timezone.now())
     stats = PlayerStats.objects.all().order_by('-total_points')
     
-    # ✅ Sort by average_points_per_round in database (with division by zero safety)
-    stats_by_average = PlayerStats.objects.exclude(
-        rounds_played=0  # Exclude players with no rounds
-    ).annotate(
-        avg_points=ExpressionWrapper(
-            F('total_points') / F('rounds_played'),
-            output_field=FloatField()
-        )
-    ).order_by('-avg_points')
-
     # Add logged-in player's stats if available
     logged_in_player_stats = None
     chart_data = None
@@ -76,7 +66,6 @@ def home(request):
         'players': players,
         'active_rounds': active_rounds,
         'stats': stats,
-        'stats_by_average': stats_by_average,
         'logged_in_player_stats': logged_in_player_stats,
         'chart_data': json.dumps(chart_data) if chart_data else None,
     })
