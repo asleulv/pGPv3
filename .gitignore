@@ -44,3 +44,7 @@ build/
 *.env
 
 pgp/core/settings.py
+
+# Cache files
+.cache
+pgp/.cache
