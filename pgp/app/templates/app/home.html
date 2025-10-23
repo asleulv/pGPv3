@@ -318,7 +318,7 @@
                                             <td class="py-3 text-right" data-sort-value="{{ player_stat.total_points }}">{{ player_stat.total_points }}</td>
                                             <td class="py-3 text-right" data-sort-value="{{ player_stat.rounds_played }}">{{ player_stat.rounds_played }}</td>
                                             <td class="py-3 text-right" data-sort-value="{{ player_stat.average_points_per_round }}">{{ player_stat.average_points_per_round|floatformat:1 }}</td>
-                                            <td class="py-3 text-right" data-sort-value="{{ player_stat.average_placement_per_round }}">{{ player_stat.average_placement_per_round|floatformat:1 }}</td>  <!-- ✅ NEW -->
+                                            <!-- <td class="py-3 text-right" data-sort-value="{{ player_stat.average_placement_per_round }}">{{ player_stat.average_placement_per_round|floatformat:1 }}</td> -->
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -574,15 +574,16 @@ function copyVoterStats() { let text = 'Fått mest poeng frå:\n'; document.quer
 function copyTwelvePointers() { let text = 'Mine 12-poengare:\n'; document.querySelectorAll('.twelve-item').forEach(item => { const link = item.querySelector('a'); text += `${link.textContent.replace('🥇 ', '')} (${item.querySelector('.text-red-500').textContent})\n${link.href}\n\n`; }); copyToClipboard(text, '💗 12-poengare kopiert!'); }
 function copyGivenVotes() { let text = 'Gitt mest poeng til:\n'; document.querySelectorAll('.given-vote-item').forEach(item => { text += `${item.querySelector('.text-purple-800').textContent}: ${item.querySelector('.text-purple-600').textContent}\n`; }); copyToClipboard(text, '🎁 Gitte stemmer kopiert!'); }
 function copyLeaderboard() { 
-    let text = 'pGP Totaltabell:\nPlass\tSpelar\tPoeng\tRundar\tSnitt poeng\tSnitt plassering\n'; 
+    let text = 'pGP Totaltabell:\nPlass\tSpelar\tPoeng\tRundar\tSnitt poeng\n'; 
     document.querySelectorAll('#leaderboardTable tbody tr').forEach(row => { 
         const cells = row.querySelectorAll('td'), 
               rank = cells[0].dataset.rank, 
               place = parseInt(rank) <= 3 ? ['🥇', '🥈', '🥉'][parseInt(rank) - 1] : `${rank}.`; 
-        text += `${place}\t${cells[1].textContent}\t${cells[2].textContent}\t${cells[3].textContent}\t${cells[4].textContent}\t${cells[5].textContent}\n`; 
+        text += `${place}\t${cells[1].textContent}\t${cells[2].textContent}\t${cells[3].textContent}\t${cells[4].textContent}\n`;  // ✅ Removed cells[5]
     }); 
     copyToClipboard(text, '🏆 Totaltabell kopiert!'); 
 }
+
 function copyToClipboard(text, msg) { const textarea = document.createElement('textarea'); textarea.value = text; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); document.body.removeChild(textarea); showCopyFeedback(msg); }
 function showCopyFeedback(msg) { const feedback = document.createElement('div'); feedback.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300'; feedback.textContent = msg; document.body.appendChild(feedback); setTimeout(() => feedback.classList.add('opacity-100'), 100); setTimeout(() => { feedback.classList.add('opacity-0', 'translate-x-full'); setTimeout(() => document.body.removeChild(feedback), 300); }, 3000); }
 function initCommunityCharts() {
