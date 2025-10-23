@@ -8,6 +8,7 @@ from datetime import datetime
 from .models import Round, Song, Player, Vote, PlayerStats
 from .forms import RoundForm, SongSubmissionForm, DynamicVoteForm, UserProfileForm
 from .spotify_views import get_spotify_client
+from .spotify_utils import resolve_spotify_url, validate_spotify_url
 from urllib.parse import urlparse
 from docx.shared import Pt
 from django.db.models import Sum, Value
@@ -35,6 +36,8 @@ def home(request):
     players = Player.objects.all()
     active_rounds = Round.objects.filter(end_date__gte=timezone.now())  # Get current rounds
     stats = PlayerStats.objects.all().order_by('-total_points')
+    stats_by_average = list(PlayerStats.objects.all())
+    stats_by_average.sort(key=lambda x: x.average_points_per_round, reverse=True)
 
     # Add logged-in player's stats if available
     logged_in_player_stats = None
@@ -64,6 +67,7 @@ def home(request):
         'players': players,
         'active_rounds': active_rounds,
         'stats': stats,
+        'stats_by_average': stats_by_average,
         'logged_in_player_stats': logged_in_player_stats,
         'chart_data': json.dumps(chart_data) if chart_data else None,
     })
@@ -140,11 +144,23 @@ def create_round(request):
     return render(request, 'app/create_round.html', {'form': form})
 
 def get_track_id(player_song):
+    """
+    Extracts track ID from a player's song.
+    Handles both old and new Spotify URL formats.
+    """
     if player_song and player_song.spotify_url:
+        # Try the new URL resolution method
+        from .spotify_utils import extract_track_id
+        track_id = extract_track_id(player_song.spotify_url)
+        if track_id:
+            return track_id
+        
+        # Fallback to the old method for backward compatibility
         parsed_url = urlparse(player_song.spotify_url)
         path_parts = parsed_url.path.split('/')
         if len(path_parts) > 2 and path_parts[1] == 'track':
             return path_parts[2]
+    
     return None
 
 def calculate_countdown(now, release_time):
@@ -283,58 +299,87 @@ def submit_song(request, pk):
 
     if request.method == 'POST':
         form = SongSubmissionForm(request.POST, instance=player_song)
-        if form.is_valid():
-            spotify_url = form.cleaned_data['spotify_url']
-            track_id = spotify_url.split('/')[-1].split('?')[0]
-            sp = get_spotify_client()
+        
+        # Get the raw Spotify URL from the form
+        spotify_url_input = request.POST.get('spotify_url', '').strip()
+        
+        # Basic validation
+        if not spotify_url_input:
+            messages.error(request, 'Du må oppgi ei Spotify-lenke!')
+            return render(request, 'app/round_detail.html', {
+                'round': round,
+                'form': form,
+                'player_song': player_song,
+            })
+        
+        # Validate it looks like a Spotify URL
+        if not validate_spotify_url(spotify_url_input):
+            messages.error(request, 'Dette ser ikkje ut som ei Spotify-lenke. Prøv igjen!')
+            return render(request, 'app/round_detail.html', {
+                'round': round,
+                'form': form,
+                'player_song': player_song,
+            })
+        
+        # Resolve the URL (handles both spotify.link and open.spotify.com formats)
+        standardized_url, track_id = resolve_spotify_url(spotify_url_input)
+        
+        if not standardized_url or not track_id:
+            messages.error(request, 'Kunne ikkje tolke Spotify-lenka di. Prøv igjen!')
+            return render(request, 'app/round_detail.html', {
+                'round': round,
+                'form': form,
+                'player_song': player_song,
+            })
+        
+        # Get Spotify client and fetch track data
+        sp = get_spotify_client()
+        
+        if sp:
+            try:
+                track_data = sp.track(track_id)
+                artist_name = track_data['artists'][0]['name']
+                song_title = track_data['name']
 
-            if sp:
-                try:
-                    track_data = sp.track(track_id)
-                    artist_name = track_data['artists'][0]['name']
-                    song_title = track_data['name']
+                # Check if the song already exists (same artist and title)
+                existing_song = Song.objects.filter(
+                    round=round,
+                    title=song_title,
+                    artist=artist_name
+                ).exclude(player=player).exists()
 
-                    # Check if the song already exists (same artist and title)
-                    existing_song = Song.objects.filter(
-                        round=round,
-                        title=song_title,
-                        artist=artist_name
-                    ).exclude(player=player).exists() 
-
-                    if existing_song:
-                        messages.error(request, '🖐 Stopp! Nokon har allereie levert denne! Prøv igjen med anna låt...')
-                        return redirect('round_detail', pk=pk)
-                    
-                    clean_spotify_url = f"https://open.spotify.com/track/{track_id}"
-
-                    # If the checks pass, update or create the song
-                    Song.objects.update_or_create(
-                        round=round,
-                        player=player,
-                        defaults={
-                            'spotify_url': clean_spotify_url,
-                            'title': song_title,
-                            'artist': artist_name
-                        }
-                    )
-
-                    messages.success(request, 'Bidrag registrert!')
+                if existing_song:
+                    messages.error(request, '🖐 Stopp! Nokon har allereie levert denne! Prøy igjen med anna låt...')
                     return redirect('round_detail', pk=pk)
+                
+                # If the checks pass, update or create the song with standardized URL
+                Song.objects.update_or_create(
+                    round=round,
+                    player=player,
+                    defaults={
+                        'spotify_url': standardized_url,
+                        'title': song_title,
+                        'artist': artist_name
+                    }
+                )
 
-                except Exception as e:
-                    messages.error(request, 'Hmm? Vis dette til Jostein: {}'.format(str(e)))
-            else:
-                messages.error(request, 'Får ikkje kontakt med Spotify.')
+                messages.success(request, 'Bidrag registrert!')
+                return redirect('round_detail', pk=pk)
+
+            except Exception as e:
+                logger.error(f"Spotify API error: {str(e)}")
+                messages.error(request, 'Hmm? Vis dette til Jostein: {}'.format(str(e)))
         else:
-            messages.error(request, 'Dette er ikkje ei Spotify-låt-lenke, ditt nek!')
-
-    form = SongSubmissionForm(instance=player_song)
+            messages.error(request, 'Får ikkje kontakt med Spotify.')
+    else:
+        form = SongSubmissionForm(instance=player_song)
 
     return render(request, 'app/round_detail.html', {
         'round': round,
         'form': form,
         'player_song': player_song,
     })
+
 
 # View to delete the player's song
 def delete_song(request, pk):

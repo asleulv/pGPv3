@@ -53,32 +53,25 @@ class Round(models.Model):
         # Sort players by their scores for this round (descending order)
         sorted_players = sorted(player_scores.items(), key=lambda x: x[1], reverse=True)
 
-        # Reset wins and bottoms for all players before updating stats
-        PlayerStats.objects.update(wins=0, bottoms=0)
-
-        # Debug: print the sorted players and their scores
-        print("Sorted players and scores:")
-        for index, (player, score) in enumerate(sorted_players):
-            print(f"Rank {index + 1}: Player {player.nickname} - Score {score}")
-
         # Get the top and bottom players
         if sorted_players:
             winning_player = sorted_players[0][0]
             losing_player = sorted_players[-1][0]
 
-            # Increment wins and bottoms for the players
-            winning_player.stats.wins += 1
-            losing_player.stats.bottoms += 1
+            # ✅ Get or create stats, increment wins/bottoms, and SAVE
+            winning_stats, _ = PlayerStats.objects.get_or_create(player=winning_player)
+            winning_stats.wins += 1
+            winning_stats.save()
 
-            # Debug: print the winners and bottoms for verification
-            print(f"Top player (Winner): {winning_player.nickname} - Wins incremented")
-            print(f"Bottom player: {losing_player.nickname} - Bottoms incremented")
+            losing_stats, _ = PlayerStats.objects.get_or_create(player=losing_player)
+            losing_stats.bottoms += 1
+            losing_stats.save()
 
         # Update stats for each player
         for index, (player, score) in enumerate(sorted_players):
             stats, created = PlayerStats.objects.get_or_create(player=player)
 
-            # Update total points (sum of all scores across all rounds)
+            # Update total points
             stats.total_points = player.song_set.aggregate(
                 total_points=Sum('vote__score')
             )['total_points'] or 0
@@ -90,7 +83,8 @@ class Round(models.Model):
             # Set the total number of rounds played
             stats.rounds_played = player.song_set.filter(round__round_finished=True).count()
 
-            stats.save()
+            stats.save()  # ✅ IMPORTANT: Save after updating!
+
 
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -156,6 +150,39 @@ class PlayerStats(models.Model):
         """
         if self.rounds_played > 0:
             return round(self.total_points / self.rounds_played, 1)
+        return 0
+    
+    @property
+    def average_placement_per_round(self):
+        """Calculate average placement (1st place = 1, 2nd = 2, etc.)"""
+        from django.db.models import Sum
+        
+        # Get all rounds this player participated in
+        player_rounds = self.player.song_set.filter(round__round_finished=True)
+        
+        if not player_rounds.exists():
+            return 0
+        
+        total_placement = 0
+        round_count = 0
+        
+        for song in player_rounds:
+            round_obj = song.round
+            
+            # Get all songs in this round sorted by score
+            all_songs_in_round = round_obj.song_set.annotate(
+                score_sum=Sum('vote__score')  # ✅ Changed from total_score to score_sum
+            ).order_by('-score_sum')
+            
+            # Find this player's rank
+            for rank, other_song in enumerate(all_songs_in_round, 1):
+                if other_song.id == song.id:
+                    total_placement += rank
+                    round_count += 1
+                    break
+        
+        if round_count > 0:
+            return round(total_placement / round_count, 1)
         return 0
 
     def __str__(self):

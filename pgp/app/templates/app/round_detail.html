@@ -445,62 +445,72 @@ function openModal() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('copy-urls-button').addEventListener('click', function() {
-        const songLinks = [];
-        const rows = document.querySelectorAll('table tbody tr'); // Select all table rows in the tbody
+    // Copy URLs button - only if it exists
+    const copyUrlsButton = document.getElementById('copy-urls-button');
+    if (copyUrlsButton) {
+        copyUrlsButton.addEventListener('click', function() {
+            const songLinks = [];
+            const rows = document.querySelectorAll('table tbody tr');
 
-        rows.forEach(function(row) {
-            const link = row.querySelector('td:nth-child(2) a'); // Get the link in the second cell
-            if (link) {
-                songLinks.push(link.href); 
+            rows.forEach(function(row) {
+                const link = row.querySelector('td:nth-child(2) a');
+                if (link) {
+                    songLinks.push(link.href); 
+                }
+            });
+
+            if (songLinks.length === 0) {
+                alert('Ingen Spotify-lenker å kopiere!');
+                return;
             }
-        });
 
-        if (songLinks.length === 0) {
-            alert('Ingen Spotify-lenker å kopiere!');
-            return; // Exit the function if there are no links
-        }
-
-        // Shuffle the songLinks array
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
             }
-            return array;
-        }
 
-        shuffleArray(songLinks);
+            shuffleArray(songLinks);
 
-        navigator.clipboard.writeText(songLinks.join('\n')).then(function() {
-            alert('Spotify-lenkene er kopiert til utklippstavlen!');
-        }).catch(function(error) {
-            console.error('Feil ved kopiering: ', error);
+            navigator.clipboard.writeText(songLinks.join('\n')).then(function() {
+                alert('Spotify-lenkene er kopiert til utklippstavlen!');
+            }).catch(function(error) {
+                console.error('Feil ved kopiering: ', error);
+            });
         });
-    });
+    }
+
+    const roundName = "{{ round.name|escapejs }}";
+
+    // Excel Export Functionality - only if button exists
+    const exportExcelButton = document.getElementById('exportExcelButton');
+    if (exportExcelButton) {
+        exportExcelButton.addEventListener('click', function () {
+            const table = document.querySelector('table');
+            if (!table) {
+                alert('Ingen tabell å eksportere!');
+                return;
+            }
+            
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.table_to_sheet(table);
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Songs');
+
+            const sanitizedRoundName = roundName.replace(/[<>:"/\\|?*]/g, '');
+            XLSX.writeFile(workbook, `${sanitizedRoundName}_resultat.xlsx`);
+        });
+    }
 });
-
-const roundName = "{{ round.name|escapejs }}";
-
-// Excel Export Functionality
-document.getElementById('exportExcelButton').addEventListener('click', function () {
-    const table = document.querySelector('table');
-    const workbook = XLSX.utils.book_new(); // Create a new workbook
-    const worksheet = XLSX.utils.table_to_sheet(table); // Convert the HTML table to a worksheet
-
-    // Add the worksheet to the workbook
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Songs');
-
-    // Sanitize the round name to remove invalid characters for file naming
-    const sanitizedRoundName = roundName.replace(/[<>:"/\\|?*]/g, '');
-
-    // Export the workbook to a file with the round name
-    XLSX.writeFile(workbook, `${sanitizedRoundName}_resultat.xlsx`); // Set the file name
-});
-
 
 function copyVotesToClipboard() {
     const votesList = document.getElementById('votes-list');
+    if (!votesList) {
+        alert('Ingen stemmer å kopiere!');
+        return;
+    }
+    
     const votesText = Array.from(votesList.getElementsByTagName('li'))
         .map(li => li.textContent)
         .join('\n');
@@ -513,9 +523,6 @@ function copyVotesToClipboard() {
             console.error('Failed to copy: ', err);
         });
 }
-
-
-
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>

@@ -300,8 +300,11 @@
                                             <th class="text-right py-3 sortable cursor-pointer hover:bg-gray-50 transition-colors" onclick="sortTable(3)">
                                                 Rundar <span class="sort-arrow text-xs text-gray-400"></span>
                                             </th>
-                                            <th class="text-right py-3 sortable cursor-pointer hover:bg-gray-50 transition-colors bg-blue-50" onclick="sortTable(4)">
-                                                Snitt <span class="sort-arrow text-xs text-blue-600">▼</span>
+                                            <th class="text-right py-3 sortable cursor-pointer hover:bg-gray-50 transition-colors" onclick="sortTable(4)">
+                                                Snitt poeng <span class="sort-arrow text-xs text-gray-400"></span>
+                                            </th>
+                                            <th class="text-right py-3 sortable cursor-pointer hover:bg-gray-50 transition-colors" onclick="sortTable(5)">
+                                                Snitt plassering <span class="sort-arrow text-xs text-gray-400"></span>
                                             </th>
                                         </tr>
                                     </thead>
@@ -315,6 +318,7 @@
                                             <td class="py-3 text-right" data-sort-value="{{ player_stat.total_points }}">{{ player_stat.total_points }}</td>
                                             <td class="py-3 text-right" data-sort-value="{{ player_stat.rounds_played }}">{{ player_stat.rounds_played }}</td>
                                             <td class="py-3 text-right" data-sort-value="{{ player_stat.average_points_per_round }}">{{ player_stat.average_points_per_round|floatformat:1 }}</td>
+                                            <td class="py-3 text-right" data-sort-value="{{ player_stat.average_placement_per_round }}">{{ player_stat.average_placement_per_round|floatformat:1 }}</td>  <!-- ✅ NEW -->
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -334,24 +338,25 @@
                 <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                     <span class="text-xl mr-2">🏆</span>Toppscore
                 </h3>
-                {% if stats|slice:":5" %}
-                    <div class="space-y-3">
-                        {% for player_stat in stats|slice:":5" %}
-                        <div class="flex items-center justify-between {% if player_stat.player.user == user %}bg-blue-50 -mx-2 px-2 py-1 rounded{% endif %}">
-                            <div class="flex items-center">
-                                <span class="w-6 text-center font-bold {% if forloop.counter == 1 %}text-yellow-500{% elif forloop.counter == 2 %}text-gray-400{% elif forloop.counter == 3 %}text-amber-600{% else %}text-gray-500{% endif %}">
-                                    {% if forloop.counter <= 3 %}
-                                        {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% else %}🥉{% endif %}
-                                    {% else %}{{ forloop.counter }}.{% endif %}
-                                </span>
-                                <span class="ml-3 font-medium {% if player_stat.player.user == user %}text-blue-800{% endif %}">
-                                    {{ player_stat.player.nickname }}
-                                </span>
-                            </div>
-                            <span class="font-bold text-gray-600">{{ player_stat.average_points_per_round|floatformat:1 }}</span>
+                {% if stats_by_average|slice:":5" %}
+                <div class="space-y-3">
+                    {% for player_stat in stats_by_average|slice:":5" %}  <!-- ✅ Changed! -->
+                    <div class="flex items-center justify-between {% if player_stat.player.user == user %}bg-blue-50 -mx-2 px-2 py-1 rounded{% endif %}">
+                        <div class="flex items-center">
+                            <span class="w-6 text-center font-bold {% if forloop.counter == 1 %}text-yellow-500{% elif forloop.counter == 2 %}text-gray-400{% elif forloop.counter == 3 %}text-amber-600{% else %}text-gray-500{% endif %}">
+                                {% if forloop.counter <= 3 %}
+                                    {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% else %}🥉{% endif %}
+                                {% else %}{{ forloop.counter }}.{% endif %}
+                            </span>
+                            <span class="ml-3 font-medium {% if player_stat.player.user == user %}text-blue-800{% endif %}">
+                                {{ player_stat.player.nickname }}
+                            </span>
                         </div>
-                        {% endfor %}
+                        <span class="font-bold text-gray-600">{{ player_stat.average_points_per_round|floatformat:1 }}</span>
                     </div>
+                    {% endfor %}
+                </div>
+
                     <div class="mt-4 text-center">
                         <button onclick="toggleSection('communityStats')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Sjå full tabell ↓</button>
                     </div>
@@ -568,7 +573,16 @@ function copySpotifyUrls(containerId) { const links = document.getElementById(co
 function copyVoterStats() { let text = 'Fått mest poeng frå:\n'; document.querySelectorAll('.voter-item').forEach(item => { text += `${item.querySelector('.text-blue-800').textContent}: ${item.querySelector('.text-blue-600').textContent}\n`; }); copyToClipboard(text, '🗳️ Stemmestatistikk kopiert!'); }
 function copyTwelvePointers() { let text = 'Mine 12-poengare:\n'; document.querySelectorAll('.twelve-item').forEach(item => { const link = item.querySelector('a'); text += `${link.textContent.replace('🥇 ', '')} (${item.querySelector('.text-red-500').textContent})\n${link.href}\n\n`; }); copyToClipboard(text, '💗 12-poengare kopiert!'); }
 function copyGivenVotes() { let text = 'Gitt mest poeng til:\n'; document.querySelectorAll('.given-vote-item').forEach(item => { text += `${item.querySelector('.text-purple-800').textContent}: ${item.querySelector('.text-purple-600').textContent}\n`; }); copyToClipboard(text, '🎁 Gitte stemmer kopiert!'); }
-function copyLeaderboard() { let text = 'pGP Totaltabell:\nPlass\tSpelar\tPoeng\tRundar\tSnitt\n'; document.querySelectorAll('#leaderboardTable tbody tr').forEach(row => { const cells = row.querySelectorAll('td'), rank = cells[0].dataset.rank, place = parseInt(rank) <= 3 ? ['🥇', '🥈', '🥉'][parseInt(rank) - 1] : `${rank}.`; text += `${place}\t${cells[1].textContent}\t${cells[2].textContent}\t${cells[3].textContent}\t${cells[4].textContent}\n`; }); copyToClipboard(text, '🏆 Totaltabell kopiert!'); }
+function copyLeaderboard() { 
+    let text = 'pGP Totaltabell:\nPlass\tSpelar\tPoeng\tRundar\tSnitt poeng\tSnitt plassering\n'; 
+    document.querySelectorAll('#leaderboardTable tbody tr').forEach(row => { 
+        const cells = row.querySelectorAll('td'), 
+              rank = cells[0].dataset.rank, 
+              place = parseInt(rank) <= 3 ? ['🥇', '🥈', '🥉'][parseInt(rank) - 1] : `${rank}.`; 
+        text += `${place}\t${cells[1].textContent}\t${cells[2].textContent}\t${cells[3].textContent}\t${cells[4].textContent}\t${cells[5].textContent}\n`; 
+    }); 
+    copyToClipboard(text, '🏆 Totaltabell kopiert!'); 
+}
 function copyToClipboard(text, msg) { const textarea = document.createElement('textarea'); textarea.value = text; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); document.body.removeChild(textarea); showCopyFeedback(msg); }
 function showCopyFeedback(msg) { const feedback = document.createElement('div'); feedback.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300'; feedback.textContent = msg; document.body.appendChild(feedback); setTimeout(() => feedback.classList.add('opacity-100'), 100); setTimeout(() => { feedback.classList.add('opacity-0', 'translate-x-full'); setTimeout(() => document.body.removeChild(feedback), 300); }, 3000); }
 function initCommunityCharts() {
