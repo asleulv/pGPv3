@@ -32,7 +32,8 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="space-y-8">
+
         <!-- Main Column -->
         <div class="lg:col-span-2 space-y-8">
             <!-- Active Rounds -->
@@ -329,86 +330,7 @@
             </div>
         </div>
 
-        <!-- Sidebar -->
-        <div class="space-y-8">
-            <!-- Top 5 -->
-            <div class="bg-white shadow-lg rounded-xl p-6 mx-4 md:mx-8">
-                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                    <span class="text-xl mr-2">🏆</span>Toppscore
-                </h3>
-                {% if stats|slice:":5" %}
-                <div class="space-y-3">
-                    {% for player_stat in stats|slice:":5" %}  <!-- ✅ Changed to stats -->
-                    <div class="flex items-center justify-between {% if player_stat.player.user == user %}bg-blue-50 -mx-2 px-2 py-1 rounded{% endif %}">
-                        <div class="flex items-center">
-                            <span class="w-6 text-center font-bold {% if forloop.counter == 1 %}text-yellow-500{% elif forloop.counter == 2 %}text-gray-400{% elif forloop.counter == 3 %}text-amber-600{% else %}text-gray-500{% endif %}">
-                                {% if forloop.counter <= 3 %}
-                                    {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% else %}🥉{% endif %}
-                                {% else %}{{ forloop.counter }}.{% endif %}
-                            </span>
-                            <span class="ml-3 font-medium {% if player_stat.player.user == user %}text-blue-800{% endif %}">
-                                {{ player_stat.player.nickname }}
-                            </span>
-                        </div>
-                        <span class="font-bold text-gray-600">{{ player_stat.average_points_per_round|floatformat:1 }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
-
-                    <div class="mt-4 text-center">
-                        <button onclick="toggleSection('communityStats')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Sjå full tabell ↓</button>
-                    </div>
-                {% endif %}
-
-            </div>
-
-            <!-- Recent Activity -->
-            {% if user.is_authenticated and player %}
-            <div class="bg-white shadow-lg rounded-xl p-6 mx-4 md:mx-8">
-                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                    <span class="text-xl mr-2">🎵</span>Siste aktivitet
-                </h3>
-                {% if logged_in_player_stats.previous_songs|slice:":3" %}
-                    <div class="space-y-3">
-                        {% for song in logged_in_player_stats.previous_songs|slice:":3" %}
-                        <div class="group">
-                            <a href="{{ song.spotify_url }}" target="_blank" class="text-gray-800 hover:text-blue-600 font-medium text-sm group-hover:underline block">
-                                🎵 {{ song.artist }} - {{ song.title|truncatechars:25 }}
-                            </a>
-                            <span class="text-xs text-gray-500">{{ song.round__name|truncatechars:20 }}</span>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <div class="mt-4">
-                        <button onclick="toggleSection('personalStats')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Sjå alle bidrag →</button>
-                    </div>
-                {% else %}
-                    <p class="text-gray-500 text-sm">Ingen bidrag enno</p>
-                {% endif %}
-            </div>
-            {% endif %}
-
-            <!-- Quick Actions -->
-            <div class="bg-white shadow-lg rounded-xl p-6 mx-4 md:mx-8">
-                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                    <span class="text-xl mr-2">⚡</span>Snarvegar
-                </h3>
-                <div class="grid grid-cols-1 gap-3">
-                    <a href="{% url 'combined-songs' %}" class="bg-blue-50 hover:bg-blue-100 p-3 rounded-lg transition-colors group flex items-center">
-                        <i class="fas fa-list-music text-blue-600 mr-3"></i>
-                        <span class="font-medium text-gray-800 group-hover:text-blue-800">Totallista</span>
-                    </a>
-                    <a href="{% url 'round_winners' %}" class="bg-yellow-50 hover:bg-yellow-100 p-3 rounded-lg transition-colors group flex items-center">
-                        <i class="fas fa-trophy text-yellow-600 mr-3"></i>
-                        <span class="font-medium text-gray-800 group-hover:text-yellow-800">Vinnarar</span>
-                    </a>
-                    <a href="{% url 'user_profile' %}" class="bg-purple-50 hover:bg-purple-100 p-3 rounded-lg transition-colors group flex items-center">
-                        <i class="fas fa-user text-purple-600 mr-3"></i>
-                        <span class="font-medium text-gray-800 group-hover:text-purple-800">Min profil</span>
-                    </a>
-                </div>
-            </div>
-        </div>
+       
     </div>
 </div>
 
