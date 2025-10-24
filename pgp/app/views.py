@@ -33,42 +33,42 @@ def user_logout(request):
 
 @login_required
 def home(request):
-    from django.db.models import F, ExpressionWrapper, FloatField
+    import time
+    start_total = time.time()
     
+    start = time.time()
     players = Player.objects.all()
-    active_rounds = Round.objects.filter(end_date__gte=timezone.now())
-    stats = PlayerStats.objects.all().order_by('-total_points')
+    print(f"[TIMING] Players query: {(time.time()-start)*1000:.1f}ms")
     
-    # Add logged-in player's stats if available
+    start = time.time()
+    active_rounds = Round.objects.filter(end_date__gte=timezone.now())
+    print(f"[TIMING] Active rounds: {(time.time()-start)*1000:.1f}ms")
+    
+    start = time.time()
+    stats = PlayerStats.objects.all().order_by('-total_points')
+    print(f"[TIMING] Stats query: {(time.time()-start)*1000:.1f}ms")
+    
     logged_in_player_stats = None
     chart_data = None
     
-    if request.user.is_authenticated:
-        try:
-            player_stats = LoggedInPlayerStats(request.user)
-            player = request.user.player
-
-            logged_in_player_stats = {
-                'previous_songs': player_stats.previous_songs().order_by('-id'),
-                'top_voters': player_stats.top_voters(),
-                'top_given_votes': player_stats.top_given_votes(),
-                'top_score_12_songs': player_stats.top_score_12_songs(),
-            }
-            
-            # Get chart data for trend visualization
-            chart_data = get_user_chart_data(player)
-            
-        except Player.DoesNotExist:
-            logged_in_player_stats = None
-            chart_data = None
-
-    return render(request, 'app/home.html', {
+    # COMMENT THIS ENTIRE SECTION OUT:
+    # if request.user.is_authenticated:
+    #     try:
+    #         ...all that code...
+    
+    start = time.time()
+    result = render(request, 'app/home.html', {
         'players': players,
         'active_rounds': active_rounds,
         'stats': stats,
         'logged_in_player_stats': logged_in_player_stats,
         'chart_data': json.dumps(chart_data) if chart_data else None,
     })
+    print(f"[TIMING] Template render: {(time.time()-start)*1000:.1f}ms")
+    print(f"[TIMING] TOTAL VIEW TIME: {(time.time()-start_total)*1000:.1f}ms")
+    
+    return result
+
 
 
 @login_required
