@@ -34,64 +34,39 @@ def user_logout(request):
     messages.success(request, "Du er no logga ut. Snakkast!")
     return redirect('home')
 
-@login_required
 def home(request):
-    import time
-    start_total = time.time()
-    
-    start = time.time()
     players = Player.objects.all()
-    logger.info(f"[TIMING] Players query: {(time.time()-start)*1000:.1f}ms")
-    
-    start = time.time()
     active_rounds = Round.objects.filter(end_date__gte=timezone.now())
-    logger.info(f"[TIMING] Active rounds: {(time.time()-start)*1000:.1f}ms")
-    
-    start = time.time()
     stats = PlayerStats.objects.all().order_by('-total_points')
-    logger.info(f"[TIMING] Stats query: {(time.time()-start)*1000:.1f}ms")
-    
+
     logged_in_player_stats = None
     chart_data = None
-    
+
     if request.user.is_authenticated:
         try:
-            start = time.time()
             player_stats = LoggedInPlayerStats(request.user)
             player = request.user.player
-            logger.info(f"[TIMING] LoggedInPlayerStats init: {(time.time()-start)*1000:.1f}ms")
 
-            start = time.time()
             logged_in_player_stats = {
                 'previous_songs': player_stats.previous_songs().order_by('-id'),
                 'top_voters': player_stats.top_voters(),
                 'top_given_votes': player_stats.top_given_votes(),
                 'top_score_12_songs': player_stats.top_score_12_songs(),
             }
-            logger.info(f"[TIMING] All player stats: {(time.time()-start)*1000:.1f}ms")
-            
-            start = time.time()
+
             chart_data = get_user_chart_data(player)
-            logger.info(f"[TIMING] Chart data: {(time.time()-start)*1000:.1f}ms")
-            
+
         except Player.DoesNotExist:
             logged_in_player_stats = None
             chart_data = None
 
-    start = time.time()
-    result = render(request, 'app/home.html', {
+    return render(request, 'app/home.html', {
         'players': players,
         'active_rounds': active_rounds,
         'stats': stats,
         'logged_in_player_stats': logged_in_player_stats,
         'chart_data': json.dumps(chart_data) if chart_data else None,
     })
-    logger.info(f"[TIMING] Template render: {(time.time()-start)*1000:.1f}ms")
-    logger.info(f"[TIMING] TOTAL VIEW TIME: {(time.time()-start_total)*1000:.1f}ms")
-    
-    return result
-
-
 
 
 @login_required
