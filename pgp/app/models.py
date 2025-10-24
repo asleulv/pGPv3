@@ -152,38 +152,7 @@ class PlayerStats(models.Model):
             return round(self.total_points / self.rounds_played, 1)
         return 0
     
-    @property
-    def average_placement_per_round(self):
-        """Calculate average placement (1st place = 1, 2nd = 2, etc.)"""
-        from django.db.models import Sum
-        
-        # Get all rounds this player participated in
-        player_rounds = self.player.song_set.filter(round__round_finished=True)
-        
-        if not player_rounds.exists():
-            return 0
-        
-        total_placement = 0
-        round_count = 0
-        
-        for song in player_rounds:
-            round_obj = song.round
-            
-            # Get all songs in this round sorted by score
-            all_songs_in_round = round_obj.song_set.annotate(
-                score_sum=Sum('vote__score')  # ✅ Changed from total_score to score_sum
-            ).order_by('-score_sum')
-            
-            # Find this player's rank
-            for rank, other_song in enumerate(all_songs_in_round, 1):
-                if other_song.id == song.id:
-                    total_placement += rank
-                    round_count += 1
-                    break
-        
-        if round_count > 0:
-            return round(total_placement / round_count, 1)
-        return 0
+   
 
     def __str__(self):
         return f"{self.player.nickname} Stats"
