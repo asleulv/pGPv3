@@ -8,18 +8,21 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+# Set working directory to /app
 WORKDIR /app
 
 # Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the code
+# Copy everything (including the 'pgp' folder) into /app
 COPY . .
 
-# Collect static files for Whitenoise
+# Move into the nested directory where manage.py and core/ actually live
+WORKDIR /app/pgp
+
+# Now this command will find manage.py
 RUN python manage.py collectstatic --noinput
 
-# Start the application with Gunicorn
+# Start Gunicorn, pointing to the core.wsgi inside this nested folder
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "core.wsgi:application"]
