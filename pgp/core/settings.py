@@ -10,7 +10,11 @@ DJANGO_ENV = config('DJANGO_ENV', default='development')
 DEBUG = config('DEBUG', default=False, cast=bool)
 SECRET_KEY = config('SECRET_KEY')
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost', cast=Csv())
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='https://127.0.0.1', cast=Csv())
+csrf_origins = config('CSRF_TRUSTED_ORIGINS', default='https://pgp.pmono.no')
+CSRF_TRUSTED_ORIGINS = csrf_origins.split(',') if isinstance(csrf_origins, str) else csrf_origins
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 # --- 3. APP DEFINITION ---
 INSTALLED_APPS = [
