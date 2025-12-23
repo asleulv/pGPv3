@@ -1,71 +1,17 @@
 import os
 from pathlib import Path
-from decouple import config
+from decouple import config, Csv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# --- 1. BASE PATHS ---
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# --- 2. CORE SECURITY & ENVIRONMENT ---
 DJANGO_ENV = config('DJANGO_ENV', default='development')
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
+DEBUG = config('DEBUG', default=False, cast=bool)
 SECRET_KEY = config('SECRET_KEY')
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
-LOGIN_URL = '/accounts/login/'
-TIME_INPUT_FORMATS = ['%H:%M']
-TIME_ZONE = 'Europe/Oslo'
-LANGUAGE_CODE = 'nn'
-USE_TZ = True
-
-SPOTIPY_CLIENT_ID = config('SPOTIPY_CLIENT_ID')
-SPOTIPY_CLIENT_SECRET = config('SPOTIPY_CLIENT_SECRET')
-REACT_APP_SPOTIPY_REDIRECT_URI = config('SPOTIPY_REDIRECT_URI')
-
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
-PASSWORD_RESET_TIMEOUT = 259200
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@yourdomain.com')
-
-# Email Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')  # Read from .env
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD') 
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-        },
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': 'errors.log',
-        },
-    },
-    'loggers': {
-        '': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
-
-
-ALLOWED_HOSTS = []
-
-# Application definition
-
+# --- 3. APP DEFINITION ---
 INSTALLED_APPS = [
     "app.apps.AppConfig",
     "django.contrib.admin",
@@ -79,18 +25,21 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware", # Handles static files in prod
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'django.middleware.locale.LocaleMiddleware',
 ]
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 ROOT_URLCONF = "core.urls"
+WSGI_APPLICATION = "core.wsgi.application"
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
+# --- 4. TEMPLATES ---
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -107,21 +56,15 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "core.wsgi.application"
-
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-
-if config('DJANGO_ENV') == 'production':
+# --- 5. DATABASES ---
+if config('DJANGO_ENV', default='development') == 'production':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',  
             'NAME': config('DB_NAME'),
             'USER': config('DB_USER'),
             'PASSWORD': config('DB_PASSWORD'),
-            'HOST': config('DB_HOST', default='localhost'),
+            'HOST': config('DB_HOST', default='db'),  # Docker service name
             'PORT': config('DB_PORT', default='3306'),  
         }
     }
@@ -133,42 +76,59 @@ else:
         }
     }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
+# --- 6. AUTHENTICATION & PASSWORDS ---
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+PASSWORD_RESET_TIMEOUT = 259200
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
-
-LANGUAGE_CODE = "en-us"
-
+# --- 7. REGIONAL SETTINGS ---
+TIME_ZONE = 'Europe/Oslo'
+LANGUAGE_CODE = 'nn' # Nynorsk
 USE_I18N = True
+USE_TZ = True
+TIME_INPUT_FORMATS = ['%H:%M']
 
+# --- 8. EXTERNAL SERVICES (SPOTIFY) ---
+SPOTIPY_CLIENT_ID = config('SPOTIPY_CLIENT_ID')
+SPOTIPY_CLIENT_SECRET = config('SPOTIPY_CLIENT_SECRET')
+REACT_APP_SPOTIPY_REDIRECT_URI = config('SPOTIPY_REDIRECT_URI')
 
+# --- 9. EMAIL SETTINGS ---
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@yourdomain.com')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD') 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-STATIC_URL = "static/"
+# --- 10. STATIC & MEDIA FILES ---
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# --- 11. LOGGING ---
+LOG_LEVEL = 'INFO' if DJANGO_ENV == 'production' else 'DEBUG'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': LOG_LEVEL,
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': LOG_LEVEL,
+    },
+}
