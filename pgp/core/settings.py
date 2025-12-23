@@ -9,12 +9,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DJANGO_ENV = config('DJANGO_ENV', default='development')
 DEBUG = config('DEBUG', default=False, cast=bool)
 SECRET_KEY = config('SECRET_KEY')
+
+# Use the 'cast=Csv()' method for both to ensure they become lists
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost', cast=Csv())
-csrf_origins = config('CSRF_TRUSTED_ORIGINS', default='https://pgp.pmono.no')
-CSRF_TRUSTED_ORIGINS = csrf_origins.split(',') if isinstance(csrf_origins, str) else csrf_origins
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='https://pgp.pmono.no', cast=Csv())
+
+# Proxy & SSL Security
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = True  # Added: Prevents JavaScript from touching CSRF cookie
+SESSION_COOKIE_HTTPONLY = True # Added: Prevents JavaScript from touching Session cookie
 
 # --- 3. APP DEFINITION ---
 INSTALLED_APPS = [
