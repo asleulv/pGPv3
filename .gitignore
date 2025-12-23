@@ -3,16 +3,13 @@ __pycache__/
 *.py[cod]
 *.pyo
 
-# settings
-settings.py
-core/settings.py
-
 # Virtual Environment
 venv/
 env/
 ENV/
 .venv/
 .env/
+*.env
 
 # Django
 *.sqlite3
@@ -39,11 +36,6 @@ media/
 *.egg-info/
 dist/
 build/
-
-# Secret files
-*.env
-
-pgp/core/settings.py
 
 # Cache files
 .cache
