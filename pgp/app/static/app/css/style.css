@@ -235,75 +235,107 @@ nav {
     }
 }
 
-/* --- Vinyl Record Design --- */
+/* --- Premium Vinyl Record Component --- */
 .vinyl-record {
-    width: 240px;
-    height: 240px;
-    background: #0b0b0b;
+    width: 280px;
+    height: 280px;
+    background: #080808;
     border-radius: 50%;
     position: relative;
+    box-shadow: 
+        0 30px 60px -12px rgba(0,0,0,0.5),
+        0 18px 36px -18px rgba(0,0,0,0.6),
+        inset 0 2px 4px rgba(255,255,255,0.1);
+    animation: vinyl-spin 6s linear infinite;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.1);
-    animation: vinyl-spin 12s linear infinite;
-    z-index: 1;
+    z-index: 10;
 }
 
-/* Grooves effect */
-.vinyl-record::before {
-    content: "";
+/* Grooves & Material Texture */
+.vinyl-grooves {
     position: absolute;
-    inset: 5px;
+    inset: 4px;
     border-radius: 50%;
-    background: repeating-radial-gradient(
-        circle,
-        rgba(255,255,255,0.03) 0px,
-        rgba(255,255,255,0.03) 1px,
-        transparent 1px,
-        transparent 4px
-    );
-    pointer-events: none;
+    background: 
+        repeating-radial-gradient(
+            circle at center,
+            #111 0,
+            #111 1px,
+            #080808 2px,
+            #111 3px
+        );
+    mask-image: radial-gradient(circle, black 35%, transparent 35%, transparent 40%, black 40%);
+    -webkit-mask-image: radial-gradient(circle, black 35%, transparent 35%, transparent 40%, black 40%);
 }
 
-/* Outer shine */
-.vinyl-record::after {
-    content: "";
+/* Realistic Shine/Reflections */
+.vinyl-record::before {
+    content: '';
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: linear-gradient(135deg, transparent 45%, rgba(255,255,255,0.05) 50%, transparent 55%);
+    background: conic-gradient(
+        from 0deg,
+        transparent 0%,
+        rgba(255,255,255,0.03) 10%,
+        transparent 20%,
+        rgba(255,255,255,0.03) 45%,
+        transparent 50%,
+        rgba(255,255,255,0.03) 60%,
+        transparent 70%,
+        rgba(255,255,255,0.03) 90%,
+        transparent 100%
+    );
+    z-index: 2;
+    pointer-events: none;
 }
 
+/* The Central Label */
 .vinyl-label {
-    width: 90px;
-    height: 90px;
-    background: linear-gradient(45deg, #6366f1, #a855f7);
+    position: relative;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
     border-radius: 50%;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    position: relative;
-    border: 4px solid #111;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
-    z-index: 2;
+    z-index: 5;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255,255,255,0.1);
 }
 
-.vinyl-label i {
+.label-text {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
     color: white;
-    font-size: 1.5rem;
-    opacity: 0.8;
+    font-size: 18px;
+    letter-spacing: -0.05em;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    line-height: 1;
 }
 
-/* Spindle hole */
-.vinyl-hole {
+.label-subtext {
+    font-size: 9px;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+}
+
+/* The Pin Hole */
+.vinyl-center {
     position: absolute;
-    width: 8px;
-    height: 8px;
-    background: #111;
+    width: 6px;
+    height: 6px;
+    background: #000;
     border-radius: 50%;
-    z-index: 3;
-    border: 1px solid rgba(255,255,255,0.1);
+    z-index: 10;
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.4);
 }
 
 @keyframes vinyl-spin {
@@ -311,6 +343,22 @@ nav {
     to { transform: rotate(360deg); }
 }
 
+@media (max-width: 768px) {
+    .vinyl-record {
+        width: 180px;
+        height: 180px;
+    }
+    .vinyl-label {
+        width: 60px;
+        height: 60px;
+    }
+    .label-text { font-size: 10px; }
+}
+
 [data-theme='dark'] .vinyl-record {
-    box-shadow: 0 25px 60px rgba(0,0,0,0.8), inset 0 0 15px rgba(255,255,255,0.05);
+    box-shadow: 
+        0 40px 80px -15px rgba(0,0,0,0.8),
+        0 0 40px rgba(99, 102, 241, 0.15),
+        inset 0 0 1px rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.05);
 }

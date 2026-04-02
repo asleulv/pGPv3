@@ -37,7 +37,13 @@
                 <div class="vinyl-grooves"></div>
                 <div class="vinyl-label">
                     <div class="label-text">pGP</div>
-                    <div class="label-subtext text-[6px] tracking-widest opacity-40">STEREO 33</div>
+                    <div class="label-subtext">
+                        {% if active_rounds %}
+                            {{ active_rounds.0.organizer.username|upper }}
+                        {% else %}
+                            STEREO 33
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="vinyl-center"></div>
             </div>
