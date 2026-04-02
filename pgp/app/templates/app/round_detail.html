@@ -90,6 +90,20 @@
                     {% endfor %}
                 </ul>
             </section>
+            {% elif player_song and round.playlist_released and round.end_date > now and not round.round_finished %}
+            <!-- Voting Action Button for Players who haven't voted yet -->
+            <section class="card !rounded-3xl shadow-xl bg-gradient-to-br from-indigo-600 to-indigo-700 text-white p-8 space-y-6 text-center transform hover:scale-[1.02] transition-transform shadow-indigo-500/30">
+                <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto text-3xl animate-pulse">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <div class="space-y-2">
+                    <h2 class="text-xl font-black uppercase tracking-tighter italic">Klar med poenga?</h2>
+                    <p class="text-xs text-white/70 font-medium leading-relaxed">Pakk ut instrumenta dine og lever stemmene dine i runden no!</p>
+                </div>
+                <a href="{% url 'vote_form' round.pk %}" class="btn !bg-white !text-indigo-600 !rounded-2xl !py-4 w-full font-black uppercase tracking-widest text-xs shadow-xl">
+                    OPNE STEMMESKJEMA <i class="fas fa-external-link-alt ml-2"></i>
+                </a>
+            </section>
             {% endif %}
 
             <!-- If round not finished and user is organizer -->
