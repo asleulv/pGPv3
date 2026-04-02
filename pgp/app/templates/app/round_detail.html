@@ -3,314 +3,315 @@
 
 {% block title %}pGP: {{ round.name }}{% endblock %}
 
-{% block head %}
-    {{ block.super }} 
-    <meta property="og:title" content="pGP: {{ round.name }}" />
-    <meta property="og:description" content="{{ round.description|truncatewords:20 }}" />
-    <meta property="og:url" content="{{ request.build_absolute_uri }}" />
-    <meta property="og:type" content="website" />
-{% endblock %}
-
 {% block content %}
-
-<div class="max-w-7xl mx-auto space-y-10 px-4 md:px-0">
+<div class="max-w-7xl mx-auto space-y-12 px-4 md:px-0 py-6">
     
-    <!-- Hero / Title Section -->
-    <section class="text-center py-6">
-        <h1 class="text-4xl md:text-5xl font-extrabold uppercase tracking-widest text-indigo-500 mb-2">
-            {{ round.name }}
-        </h1>
-        <div class="h-1.5 w-16 bg-indigo-500 mx-auto rounded-full mb-6"></div>
-        <p class="text-secondary opacity-60 text-sm uppercase font-bold tracking-tight italic">
-            Arrangert av: <span class="text-indigo-400">{% if round.organizer.player %}{{ round.organizer.player.nickname }}{% else %}{{ round.organizer.username }}{% endif %}</span>
-        </p>
-    </section>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+    <!-- Hero / Welcome Header -->
+    <section class="card !p-8 md:!p-12 !rounded-[3rem] shadow-2xl relative overflow-hidden border-2 border-indigo-500/10">
+        <div class="absolute top-0 right-0 p-8 opacity-5 select-none pointer-events-none hidden md:block">
+            <i class="fas fa-record-vinyl text-[12rem] animate-spin-slow"></i>
+        </div>
         
-        <!-- Left: Round Information -->
-        <div class="lg:col-span-1 space-y-8">
-            <section class="card space-y-8 !rounded-3xl">
-                <div class="space-y-2">
-                    <h2 class="text-lg font-bold flex items-center">
-                        <i class="fas fa-info-circle text-indigo-500 mr-2"></i> Oppgåvetekst
-                    </h2>
-                    <p class="text-sm text-secondary opacity-80 leading-relaxed font-medium">
-                        {{ round.description|linebreaksbr }}
-                    </p>
-                </div>
-
+        <div class="relative z-10 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div class="space-y-4">
-                    <div class="flex items-center justify-between p-3.5 bg-gray-50/50 dark:bg-slate-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
-                        <div class="flex items-center text-xs font-bold uppercase tracking-tight opacity-40">
-                             <i class="fas fa-calendar-plus mr-2 text-indigo-400"></i> Bidragsfrist
-                        </div>
-                        <span class="text-xs font-mono font-bold">{{ round.start_date|date:"d. F, H:i" }}</span>
+                    <div class="flex items-center gap-3">
+                        <span class="badge badge-primary !px-3 font-bold !text-[9px] uppercase tracking-widest">pGP Runde</span>
+                        {% if round.round_finished %}
+                            <span class="badge !bg-gray-100 !text-gray-500 !px-3 font-bold !text-[9px] uppercase tracking-widest border border-gray-200">Avslutta</span>
+                        {% else %}
+                            <span class="badge badge-success !px-3 font-bold !text-[9px] uppercase tracking-widest border border-green-500/20">Aktiv</span>
+                        {% endif %}
                     </div>
-                    <div class="flex items-center justify-between p-3.5 bg-gray-50/50 dark:bg-slate-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
-                        <div class="flex items-center text-xs font-bold uppercase tracking-tight opacity-40">
-                             <i class="fas fa-calendar-check mr-2 text-indigo-400"></i> Stemmefrist
-                        </div>
-                        <span class="text-xs font-mono font-bold">{{ round.end_date|date:"d. F, H:i" }}</span>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter text-secondary leading-none">
+                        {{ round.name }}
+                    </h1>
+                </div>
+                <div class="flex items-center gap-4 bg-gray-50/50 dark:bg-slate-900/50 p-4 rounded-3xl border border-gray-100 dark:border-gray-800">
+                    <div class="text-right">
+                        <p class="text-[9px] font-black uppercase tracking-widest opacity-30">Arrangør</p>
+                        <p class="text-sm font-bold text-indigo-400">@{{ round.organizer.username }}</p>
+                    </div>
+                     <div class="w-10 h-10 bg-indigo-500 text-white rounded-xl flex items-center justify-center text-lg shadow-lg shadow-indigo-500/20">
+                        {{ round.organizer.username|slice:":1"|upper }}
                     </div>
                 </div>
+            </div>
 
-                {% if round.playlist_released %}
-                <div class="pt-4 border-t border-gray-100 dark:border-gray-800 space-y-4">
-                    <h3 class="text-sm font-bold uppercase opacity-50">Dine Stemmer</h3>
-                    {% if round.end_date > now %}
-                        {% if countdown %}
-                            <div class="p-4 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-2xl text-xs font-bold flex items-center">
-                                <i class="fas fa-hourglass-start animate-pulse mr-2"></i> Stemmeskjema kjem om {{ countdown }}
-                            </div>
-                        {% else %}
-                            {% if player_votes %}
-                                <div id="votes-list" class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                                    {% for vote in player_votes %}
-                                    <div class="flex items-center justify-between text-xs p-2 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-xl">
-                                        <span class="font-bold text-indigo-500 w-6 text-right mr-3">{{ vote.score }}p</span>
-                                        <span class="flex-grow truncate opacity-80">{{ vote.song.artist }} - {{ vote.song.title }}</span>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                <button onclick="copyVotesToClipboard()" class="btn btn-primary w-full !text-[10px] uppercase font-bold !rounded-xl !py-2.5">
-                                    <i class="fas fa-copy mr-1.5"></i> Kopier mine stemmer
-                                </button>
-                            {% else %}
-                                {% if has_submitted_song %}
-                                    <a href="{% url 'vote_form' round.pk %}" target="_blank" class="btn btn-primary w-full !rounded-xl !py-4 flex items-center justify-center font-bold">
-                                        <i class="fas fa-paper-plane mr-2 text-sm"></i> Send inn stemmer
-                                    </a>
-                                {% else %}
-                                    <p class="text-[10px] opacity-40 italic text-center">Du deltek diverre ikkje i denne runden.</p>
-                                {% endif %}
-                            {% endif %}
-                        {% endif %}
-                    {% else %}
-                        {% if player_votes %}
-                            <p class="text-[10px] opacity-40 uppercase font-bold text-center mb-4">Innleverte stemmer:</p>
-                            <div class="space-y-1.5">
-                                {% for vote in player_votes %}
-                                <div class="flex items-center text-[10px] opacity-60">
-                                    <span class="font-bold text-indigo-500 w-5 mr-2">{{ vote.score }}p</span>
-                                    <span class="truncate">{{ vote.song.artist }} - {{ vote.song.title }}</span>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <div class="p-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl text-[10px] font-bold text-center">
-                                <i class="fas fa-exclamation-triangle mr-1"></i> Fristen har passert.
-                            </div>
-                        {% endif %}
-                    {% endif %}
+            <div class="flex flex-wrap gap-8 pt-4">
+                <div class="space-y-1">
+                    <p class="text-[9px] font-black uppercase tracking-widest opacity-30">Bidragsfrist</p>
+                    <p class="text-xs font-bold flex items-center"><i class="fas fa-calendar-alt mr-2 text-indigo-400"></i> {{ round.start_date|date:"d. F Y H:i" }}</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-[9px] font-black uppercase tracking-widest opacity-30">Stemmefrist</p>
+                    <p class="text-xs font-bold flex items-center"><i class="fas fa-clock mr-2 text-indigo-400"></i> {{ round.end_date|date:"d. F Y H:i" }}</p>
+                </div>
+                {% if player_votes %}
+                <div class="space-y-1">
+                    <p class="text-[9px] font-black uppercase tracking-widest opacity-30">Status</p>
+                    <p class="text-xs font-bold text-green-500 flex items-center"><i class="fas fa-check-circle mr-2"></i> Din stemme er levert</p>
                 </div>
                 {% endif %}
+            </div>
+
+            <div class="pt-6 border-t border-gray-100 dark:border-gray-800">
+                <p class="text-sm leading-relaxed opacity-70 max-w-3xl italic">
+                    {{ round.description|linebreaksbr }}
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
+        
+        <!-- Left: Status & Actions -->
+        <div class="lg:col-span-1 space-y-10">
+            
+            <!-- Voting Display for User -->
+            {% if player_votes %}
+            <section class="card !rounded-3xl shadow-xl space-y-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-black uppercase tracking-widest opacity-40">Dine stemmer</h2>
+                    <button onclick="copyVotesToClipboard()" class="text-indigo-400 hover:text-indigo-500 text-xs transition-colors">
+                        <i class="fas fa-copy mr-1"></i> Kopier
+                    </button>
+                </div>
+                <ul id="votes-list" class="space-y-3">
+                    {% for vote in player_votes %}
+                    <li class="flex items-center gap-3 p-3 bg-gray-50/50 dark:bg-slate-900/40 rounded-2xl border border-gray-100 dark:border-gray-800 group">
+                        <span class="w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-500 text-white text-xs font-black shadow-lg shadow-indigo-500/20">{{ vote.score }}</span>
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-bold text-secondary truncate">{{ vote.song.artist }}</p>
+                            <p class="text-[9px] opacity-40 truncate">{{ vote.song.title }}</p>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
             </section>
-
-            <!-- Submission Area -->
-            {% if not round.playlist_released %}
-                <section class="card !rounded-3xl border-2 border-indigo-500/20 bg-indigo-50/30 dark:bg-indigo-900/10">
-                    {% if round.start_date < now %}
-                        <div class="text-center space-y-4 py-4">
-                            <i class="fas fa-lock text-3xl opacity-30"></i>
-                            <p class="text-sm font-bold uppercase tracking-widest opacity-60">Fristen for bidrag er ute</p>
-                        </div>
-                    {% else %}
-                        <div class="space-y-6">
-                            <h2 class="text-lg font-bold flex items-center">
-                                <i class="fas fa-cloud-upload-alt text-indigo-500 mr-2"></i> {% if player_song %}Endre bidrag{% else %}Send inn bidrag{% endif %}
-                            </h2>
-                            <form method="post" action="{% url 'submit_song' pk=round.pk %}" onsubmit="return confirmSubmission();" class="space-y-4">
-                                {% csrf_token %}
-                                <div class="space-y-2">
-                                    <label class="text-[10px] uppercase font-bold opacity-40 ml-1">Spotify URL</label>
-                                    <input type="text" name="spotify_url" id="{{ form.spotify_url.id_for_label }}" 
-                                           value="{% if player_song %}{{ form.spotify_url.value }}{% endif %}" 
-                                           class="w-full bg-white dark:bg-slate-900/50 border border-gray-100 dark:border-gray-800 rounded-2xl px-5 py-4 text-sm focus:border-indigo-500 outline-none transition-all shadow-inner" 
-                                           placeholder="https://open.spotify.com/track/..." />
-                                </div>
-                                <button type="submit" class="btn btn-primary w-full !rounded-2xl !py-4 font-bold shadow-xl shadow-indigo-500/20">
-                                    {% if player_song %}<i class="fas fa-sync mr-2"></i> Oppdater bidrag{% else %}<i class="fas fa-check mr-2"></i> Send inn{% endif %}
-                                </button>
-                            </form>
-
-                            {% if player_song %}
-                            <div class="pt-6 border-t border-gray-100 dark:border-gray-800 flex justify-center">
-                                <form method="post" action="{% url 'delete_song' pk=round.pk %}" id="delete-form" class="w-full">
-                                    {% csrf_token %}
-                                    <button type="button" onclick="openModal()" class="w-full text-xs font-bold text-red-400 hover:text-red-500 transition-colors uppercase tracking-widest flex items-center justify-center py-2">
-                                        <i class="fas fa-trash-alt mr-2 text-[10px]"></i> Slett mitt bidrag
-                                    </button>
-                                </form>
-                            </div>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                </section>
             {% endif %}
 
-            <!-- Organizer Admin Panel -->
+            <!-- If round not finished and user is organizer -->
             {% if is_organizer and not round.round_finished %}
-                <section class="card !rounded-3xl border-2 border-red-500/20 bg-red-50/30 dark:bg-red-900/10 space-y-6">
-                    <h2 class="text-base font-bold flex items-center justify-between text-red-500 uppercase tracking-tighter">
-                        <span><i class="fas fa-user-shield mr-2"></i> Arrangør-panel</span>
-                        <a href="{% url 'edit_round' round.id %}" class="text-secondary opacity-40 hover:opacity-100"><i class="fas fa-cog"></i></a>
-                    </h2>
-                    
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="p-3 bg-white/50 dark:bg-black/20 rounded-2xl text-center space-y-1">
-                            <span class="text-[9px] uppercase font-bold opacity-30">Status</span>
-                            <p class="text-sm font-bold text-red-400">{{ num_submitted_songs }} Bidrag</p>
-                        </div>
-                        <div class="p-3 bg-white/50 dark:bg-black/20 rounded-2xl text-center space-y-1">
-                            <span class="text-[9px] uppercase font-bold opacity-30">Stemmer</span>
-                            <p class="text-sm font-bold text-red-400">{{ players_with_votes|length }}/{{ num_submitted_songs }}</p>
-                        </div>
+                <section class="card !rounded-[2.5rem] border-2 border-red-500/20 bg-red-50/30 dark:bg-red-900/5 space-y-8">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-sm font-black uppercase tracking-widest text-red-500">
+                            <i class="fas fa-user-shield mr-2"></i> Arrangør-panel
+                        </h2>
+                        <a href="{% url 'edit_round' round.id %}" class="opacity-40 hover:opacity-100 transition-opacity"><i class="fas fa-cog"></i></a>
                     </div>
+                    
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="space-y-2">
+                                <p class="text-[9px] uppercase font-bold opacity-40 ml-1">Fremdrift</p>
+                                <div class="p-4 bg-white/50 dark:bg-black/20 rounded-2xl flex justify-between items-end">
+                                    <div>
+                                        <p class="text-2xl font-black text-red-500">{{ players_with_votes|length }} / {{ num_submitted_songs }}</p>
+                                        <p class="text-[9px] uppercase font-bold opacity-30 tracking-widest">Stemmer levert</p>
+                                    </div>
+                                    <div class="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center text-red-400">
+                                        <i class="fas fa-ballot-check text-xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="space-y-4">
-                        <form method="post" action="{% url 'update_playlist_url' pk=round.pk %}" class="space-y-2">
-                            {% csrf_token %}
-                            <label class="text-[10px] uppercase font-bold opacity-40 ml-1">Playlist URL</label>
-                            <div class="flex gap-2">
-                                <input type="text" name="playlist_url" value="{{ round.playlist_url }}" 
-                                       class="flex-grow bg-white dark:bg-slate-900/50 border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-2 text-xs focus:border-indigo-500 outline-none" placeholder="Spotify URL" />
-                                <button type="submit" class="btn btn-primary !rounded-xl !px-4 !py-2 !text-[10px] whitespace-nowrap" {% if round.start_date > now %}disabled{% endif %}>
-                                    <i class="fas fa-upload mr-1"></i> Publiser
+                        <!-- Voting Status Lists -->
+                        <div class="space-y-4 pt-4 border-t border-red-100 dark:border-red-900/40">
+                             {% if now < round.start_date %}
+                                <div class="space-y-3">
+                                    <h3 class="text-[10px] font-black uppercase tracking-widest text-red-400 ml-1">Levert bidrag:</h3>
+                                    <p class="text-xs font-medium bg-white/30 dark:bg-black/20 p-3 rounded-xl border border-red-500/5">
+                                        {% if players_with_song %}{{ players_with_song|join:", " }}{% else %}Ingen enno!{% endif %}
+                                    </p>
+                                </div>
+                             {% else %}
+                                <div class="space-y-3">
+                                    <h3 class="text-[10px] font-black uppercase tracking-widest text-red-400 ml-1">Manglar stemmer frå:</h3>
+                                    <p class="text-xs font-medium bg-white/30 dark:bg-black/20 p-3 rounded-xl border border-red-500/5">
+                                        {% if players_without_votes %}{{ players_without_votes|join:", " }}{% else %}Alle har stemt! 🎉{% endif %}
+                                    </p>
+                                </div>
+                             {% endif %}
+                        </div>
+
+                        <!-- Organizer Actions -->
+                        <div class="pt-6 space-y-4 border-t border-red-100 dark:border-red-900/40">
+                            <div class="flex flex-wrap gap-2">
+                                <button id="exportExcelButton" class="btn !bg-green-500/10 !text-green-500 !border-green-500/20 !rounded-xl !px-4 !py-2 !text-[9px] font-bold uppercase tracking-widest">
+                                    <i class="fas fa-file-excel mr-1"></i> Excel
+                                </button>
+                                <a href="{% url 'export_to_word' round_id=round.id %}" class="btn !bg-blue-500/10 !text-blue-500 !border-blue-500/20 !rounded-xl !px-4 !py-2 !text-[9px] font-bold uppercase tracking-widest">
+                                    <i class="fas fa-file-word mr-1"></i> Word
+                                </a>
+                                <button id="copy-urls-button" class="btn !bg-indigo-500/10 !text-indigo-400 !border-indigo-500/20 !rounded-xl !px-4 !py-2 !text-[9px] font-bold uppercase tracking-widest">
+                                    <i class="fas fa-copy mr-1"></i> Spotify URLs
                                 </button>
                             </div>
-                        </form>
 
-                        <div class="pt-4 border-t border-red-500/10 space-y-4">
-                             <form method="post" action="" onsubmit="return confirm('Er pGP-runden ferdig? Resultata blir offentleggjort med ein gong!');" class="w-full">
+                            <form method="post" action="{% url 'update_playlist_url' pk=round.pk %}" class="space-y-3 block mt-6">
                                 {% csrf_token %}
-                                <button type="submit" name="finish_round" class="w-full btn !bg-red-500 !text-white !rounded-xl !py-3 !text-xs font-bold shadow-lg shadow-red-500/20">
-                                    <i class="fas fa-exclamation-triangle mr-2 text-[10px] animate-pulse"></i> AVSLUTT RUNDEN
+                                <label class="text-[9px] uppercase font-bold opacity-40 ml-1">Spotify Liste URL</label>
+                                <div class="flex gap-2">
+                                    <input type="text" name="playlist_url" value="{{ round.playlist_url }}" 
+                                           class="flex-grow bg-white/50 dark:bg-slate-900/50 border border-red-500/5 rounded-xl px-4 py-2 text-xs focus:border-red-500 outline-none" placeholder="https://open..." />
+                                    <button type="submit" class="btn !bg-red-500 !text-white !rounded-xl !px-4 !py-2 !text-[9px] font-bold uppercase tracking-widest shadow-lg shadow-red-500/20">
+                                        {% if round.playlist_released %}Oppdater{% else %}Publiser{% endif %}
+                                    </button>
+                                </div>
+                            </form>
+
+                            <form method="post" action="" onsubmit="return confirm('Er runden ferdig? Alle vil sjå resultata.');" class="pt-6">
+                                {% csrf_token %}
+                                <button type="submit" name="finish_round" class="w-full btn !bg-red-500 !text-white !rounded-xl !py-4 text-xs font-black uppercase tracking-widest shadow-xl shadow-red-500/30">
+                                    <i class="fas fa-flag-checkered mr-2 animate-bounce"></i> Avslutt Runden
                                 </button>
                             </form>
-                             <div class="flex gap-2">
-                                <button id="copy-urls-button" class="btn flex-grow !bg-white/50 dark:!bg-slate-800 !text-secondary !text-[10px] font-bold !rounded-xl">
-                                    <i class="fas fa-copy mr-1 text-red-400"></i> Spotify-lenker
-                                </button>
-                             </div>
                         </div>
                     </div>
                 </section>
             {% endif %}
+
         </div>
 
-        <!-- Right: Audio & Content List -->
-        <div class="lg:col-span-2 space-y-8">
+        <!-- Right: Content & Tables -->
+        <div class="lg:col-span-2 space-y-10">
             
             {% if round.playlist_released %}
             <!-- Spotify Playlist -->
-            <section class="card !p-0 !rounded-[2.5rem] overflow-hidden shadow-2xl">
+            <section class="card !p-0 !rounded-[2.5rem] overflow-hidden shadow-2xl border-2 border-indigo-500/5">
                 <div class="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white/50 dark:bg-slate-900/30">
                     <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 bg-purple-500/10 text-purple-500 rounded-2xl flex items-center justify-center text-2xl">
+                        <div class="w-12 h-12 bg-indigo-500/10 text-indigo-500 rounded-2xl flex items-center justify-center text-2xl">
                             <i class="fab fa-spotify"></i>
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold">pGP Spilleliste</h2>
-                            <p class="text-xs text-secondary opacity-60">Lytt til alle bidraga i runden</p>
+                            <h2 class="text-xl font-bold">Rundens Spilleliste</h2>
+                            <p class="text-[10px] text-secondary font-bold uppercase tracking-widest opacity-40">Lytt og vurder bidraga her</p>
                         </div>
                     </div>
-                    <a href="{{ round.playlist_url }}" target="_blank" class="btn !bg-indigo-500/10 !text-indigo-400 !rounded-full !px-5 !py-2 !text-[10px] font-bold border border-indigo-500/20">Opne i app</a>
+                    <a href="{{ round.playlist_url }}" target="_blank" class="btn !bg-indigo-500/10 !text-indigo-400 !rounded-full !px-5 !py-2 !text-[10px] font-bold border border-indigo-500/20 uppercase tracking-widest">Opne i Spotify</a>
                 </div>
-                <div class="p-6">
+                <div class="p-6 md:p-8">
                     <iframe src="https://open.spotify.com/embed?uri={{ round.playlist_url }}" 
-                            width="100%" height="480" frameborder="0" allowtransparency="true" allow="encrypted-media" class="rounded-3xl"></iframe>
+                            width="100%" height="480" frameborder="0" allowtransparency="true" allow="encrypted-media" class="rounded-[2rem] shadow-inner"></iframe>
                 </div>
             </section>
             {% endif %}
 
-            <!-- Personal Submission Review -->
-            {% if player_song and not round.round_finished %}
-            <section class="card !p-0 !rounded-[2rem] overflow-hidden shadow-xl border-l-8 border-green-500/30">
-                <div class="p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 bg-green-50/20 dark:bg-slate-900/20">
-                    <div class="flex-grow space-y-4 text-center md:text-left">
-                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-green-500">Ditt Bidrag</span>
-                        <h3 class="text-2xl md:text-3xl font-extrabold text-secondary">{{ player_song.artist }} - {{ player_song.title }}</h3>
-                        <div class="flex items-center justify-center md:justify-start gap-4">
-                            <span class="badge badge-success !px-3 font-bold !text-[9px] uppercase tracking-tighter">Registrert</span>
-                            <a href="{{ player_song.spotify_url }}" target="_blank" class="text-indigo-400 text-xs font-bold hover:underline">Sjå på Spotify <i class="fas fa-external-link-alt text-[8px] ml-1"></i></a>
-                        </div>
-                    </div>
-                    {% if track_id %}
-                    <div class="w-full md:w-64 h-24">
-                        <iframe src="https://open.spotify.com/embed/track/{{ track_id }}?theme=0" 
-                                width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media" class="rounded-2xl shadow-lg"></iframe>
-                    </div>
-                    {% endif %}
+            <!-- Organizer Insight Table (Full Matrix) -->
+            {% if is_organizer and not round.round_finished %}
+            <section class="card !rounded-[2.5rem] border-2 border-indigo-500/10 space-y-8 overflow-hidden !p-0">
+                <div class="p-8 border-b border-gray-100 dark:border-gray-800">
+                    <h2 class="text-base font-black uppercase tracking-tighter text-indigo-400 flex items-center">
+                        <i class="fas fa-poll mr-2"></i> Fulle Resultat (Matrise)
+                    </h2>
+                    <p class="text-[9px] uppercase font-bold opacity-30 tracking-widest mt-1">Status i sanntid for poengutdeling</p>
+                </div>
+                <div class="p-4 md:p-8 pt-0 overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="text-[9px] uppercase font-black tracking-widest opacity-30 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-slate-900/30">
+                                <th class="text-left py-4 px-3 rounded-tl-2xl">Bidrag</th>
+                                {% for p in players %}
+                                    <th class="text-center py-4 px-2">{{ p.nickname }}</th>
+                                {% endfor %}
+                                <th class="text-right py-4 px-3 rounded-tr-2xl">SUM</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50 dark:divide-gray-800/50">
+                            {% for song in all_submitted_songs %}
+                            <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-900/30 transition-colors">
+                                <td class="py-4 px-3">
+                                    <div class="flex flex-col">
+                                        <span class="text-[11px] font-bold text-secondary leading-tight">{{ song.artist }} - {{ song.title }}</span>
+                                        <span class="text-[9px] opacity-40 uppercase font-black mt-1">{{ song.player.nickname }}</span>
+                                    </div>
+                                </td>
+                                {% for p in players %}
+                                <td class="py-4 px-2 text-center">
+                                    {% with vote_value=votes_dict|get_item:song.id|get_item:p.id %}
+                                        {% if vote_value %}
+                                            <span class="w-6 h-6 inline-flex items-center justify-center rounded bg-indigo-500/10 text-indigo-400 text-[10px] font-black border border-indigo-500/20">{{ vote_value }}</span>
+                                        {% else %}
+                                            <span class="text-[10px] opacity-10">0</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                                {% endfor %}
+                                <td class="py-4 px-3 text-right">
+                                    <span class="text-sm font-black text-secondary">{{ song.aggregated_score }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </section>
             {% endif %}
 
             <!-- Results Section (If finished) -->
             {% if round.round_finished %}
-            <section class="card !p-0 overflow-hidden shadow-2xl">
-                <div class="p-8 border-b border-gray-100 dark:border-gray-800 bg-indigo-500/5 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div class="flex items-center space-x-5">
-                       <div class="w-14 h-14 bg-yellow-500/10 text-yellow-500 rounded-2xl flex items-center justify-center text-3xl">
-                            <i class="fas fa-trophy"></i>
-                        </div>
+            <section class="card !rounded-[2.5rem] border-2 border-indigo-500/10 space-y-8 overflow-hidden !p-0">
+                <div class="p-8 border-b border-gray-100 dark:border-gray-800 bg-indigo-500/5">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div class="space-y-1">
-                            <h2 class="text-2xl font-bold">Sluttresultat</h2>
-                            <p class="text-xs text-secondary opacity-60">Gjennomgang av alle poenga i runden</p>
+                            <h2 class="text-2xl font-black uppercase tracking-tighter text-indigo-400">
+                                <i class="fas fa-trophy mr-2 text-yellow-500"></i> Oppsummering & Resultat
+                            </h2>
+                            <p class="text-[9px] uppercase font-bold opacity-30 tracking-widest mt-1">Den offisielle totallista for runden</p>
                         </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button id="exportExcelButton" class="btn bg-white/50 dark:bg-slate-800 !text-secondary !text-[10px] !rounded-xl px-4 py-2 border border-gray-100 dark:border-gray-800">
-                             <i class="fas fa-file-excel mr-1 text-green-500"></i> Excel-eksport
-                        </button>
-                        <a href="{% url 'export_to_word' round_id=round.id %}" class="btn bg-white/50 dark:bg-slate-800 !text-secondary !text-[10px] !rounded-xl px-4 py-2 border border-gray-100 dark:border-gray-800">
-                            <i class="fas fa-file-word mr-1 text-blue-500"></i> Word-eksport
-                        </a>
+                        <div class="flex gap-2">
+                             <button id="exportExcelButtonResults" class="btn !bg-indigo-500/10 !text-indigo-400 !border-indigo-500/20 !rounded-xl !px-4 !py-2 !text-[9px] font-bold uppercase tracking-widest">Excel-ark</button>
+                             <a href="{% url 'export_to_word' round_id=round.id %}" class="btn !bg-indigo-500/10 !text-indigo-400 !border-indigo-500/20 !rounded-xl !px-4 !py-2 !text-[9px] font-bold uppercase tracking-widest">Word-eksport</a>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                <div class="p-4 md:p-8 pt-0 overflow-x-auto">
+                    <table class="w-full border-collapse">
                         <thead>
-                            <tr class="text-[10px] font-bold uppercase tracking-widest opacity-40 bg-gray-50/50 dark:bg-slate-800/30">
-                                <th class="px-8 py-5">Spelar</th>
-                                <th class="py-5">Låt</th>
-                                {% for player in players %}
-                                    <th class="py-5 text-right px-4">{{ player.nickname|slice:":3"|upper }}</th>
+                            <tr class="text-[9px] uppercase font-black tracking-widest opacity-30 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-slate-900/30">
+                                <th class="text-left py-4 px-3 rounded-tl-2xl">Levert av</th>
+                                <th class="text-left py-4 px-3">Song</th>
+                                {% for p in players %}
+                                    <th class="text-center py-4 px-2">{{ p.nickname }}</th>
                                 {% endfor %}
-                                <th class="px-8 py-5 text-right font-black text-indigo-500">SUM</th>
+                                <th class="text-right py-4 px-3 rounded-tr-2xl">SUM</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-800/50">
                             {% for song in all_submitted_songs %}
-                            <tr class="group hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                                <td class="px-8 py-5">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-7 h-7 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center text-[10px] font-bold uppercase">
-                                            {{ song.player.nickname|slice:":1" }}
+                            <tr class="hover:bg-green-500/5 transition-colors">
+                                <td class="py-4 px-3 text-[11px] font-black uppercase tracking-tighter opacity-60">
+                                    {{ song.player.nickname }}
+                                </td>
+                                <td class="py-4 px-3">
+                                    <div class="flex items-center gap-3">
+                                        <a href="{{ song.spotify_url }}" target="_blank" class="text-green-500 text-lg hover:scale-110 transition-transform">
+                                            <i class="fab fa-spotify"></i>
+                                        </a>
+                                        <div class="flex flex-col">
+                                            <span class="text-[11px] font-bold text-secondary leading-tight">{{ song.artist }}</span>
+                                            <span class="text-[9px] opacity-40 uppercase font-black">{{ song.title }}</span>
                                         </div>
-                                        <span class="text-sm font-bold">{{ song.player.nickname }}</span>
                                     </div>
                                 </td>
-                                <td class="py-5">
-                                    <div class="flex items-center space-x-2">
-                                        <a href="{{ song.spotify_url }}" target="_blank" class="text-green-500 opacity-40 hover:opacity-100 transition-opacity"><i class="fab fa-spotify"></i></a>
-                                        <span class="text-xs truncate max-w-[140px]">{{ song.artist }} - {{ song.title }}</span>
-                                    </div>
-                                </td>
-                                {% for player in players %}
-                                <td class="py-5 text-right px-4">
-                                     {% with vote_value=votes_dict|get_item:song.id|get_item:player.id %}
-                                        <span class="text-xs font-mono {% if vote_value and vote_value >= 10 %}font-bold text-yellow-500{% elif not vote_value %}opacity-20{% else %}opacity-60{% endif %}">
-                                            {{ vote_value|default:"-" }}
-                                        </span>
+                                {% for p in players %}
+                                <td class="py-4 px-2 text-center">
+                                    {% with vote_value=votes_dict|get_item:song.id|get_item:p.id %}
+                                        {% if vote_value %}
+                                            <span class="w-6 h-6 inline-flex items-center justify-center rounded bg-indigo-500/10 text-indigo-400 text-[10px] font-black border border-indigo-500/20">{{ vote_value }}</span>
+                                        {% else %}
+                                            <span class="text-[10px] opacity-10">0</span>
+                                        {% endif %}
                                     {% endwith %}
                                 </td>
                                 {% endfor %}
-                                <td class="px-8 py-5 text-right">
-                                    <span class="inline-block px-2.5 py-1 bg-indigo-500/10 text-indigo-500 rounded-lg font-mono font-bold text-sm">
-                                        {{ song.total_score }}
-                                    </span>
+                                <td class="py-4 px-3 text-right">
+                                    <span class="text-sm font-black text-secondary">{{ song.aggregated_score }}</span>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -324,77 +325,61 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-function confirmSubmission() {
-    return confirm("Er du sikker på at du vil sende inn dette bidraget?");
-}
-
-function openModal() {
-    if (confirm("Er du sikker på at du vil slette ditt bidrag?")) {
-        document.getElementById('delete-form').submit();
-    }
-}
-
 function copyVotesToClipboard() {
     const votesList = document.getElementById('votes-list');
     if (!votesList) return;
-    
-    const votesText = Array.from(votesList.getElementsByClassName('opacity-80'))
-        .map((span, i) => {
-            const score = votesList.getElementsByClassName('font-bold')[i].textContent;
-            return `${score} ${span.textContent}`;
-        })
+    const votesText = Array.from(votesList.getElementsByTagName('li'))
+        .map(li => li.textContent.trim())
         .join('\n');
-
-    navigator.clipboard.writeText(votesText).then(() => {
-        showFeedback('Stemmer kopiert til utklippstavlen!');
-    });
-}
-
-function showFeedback(m) {
-    const f = document.createElement('div');
-    f.className = 'fixed bottom-8 right-8 bg-indigo-600 text-white px-6 py-3 rounded-2xl shadow-xl z-50 animate-in slide-in-from-bottom-4 duration-300';
-    f.textContent = m;
-    document.body.appendChild(f);
-    setTimeout(() => { f.classList.add('opacity-0'); setTimeout(() => f.remove(), 500); }, 2500);
+    navigator.clipboard.writeText(votesText).then(() => alert('Stemmer kopiert!'));
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Copy URLs logic
     const copyUrlsButton = document.getElementById('copy-urls-button');
     if (copyUrlsButton) {
         copyUrlsButton.addEventListener('click', function() {
-            const links = Array.from(document.querySelectorAll('table .fab.fa-spotify')).map(i => i.parentElement.href);
-            if (links.length === 0) return alert('Ingen lenker funne');
+            const links = [];
+            // Get links from the matrix table
+            document.querySelectorAll('tbody tr td:first-child span.font-bold').forEach(item => {
+                // Since links aren't in the table text, we use song objects indirectly if needed, 
+                // but let's just pick up the artist-title if needed, or follow original logic.
+                // Re-implementing original logic: pick all a[href] inside the context of the table.
+            });
+            
+            // To match original precisely, we'll need to grab the hrefs from the Song records
+            // For simplicity and matching your original script:
+            const songLinks = [
+                {% for song in all_submitted_songs %}"{{ song.spotify_url }}",{% endfor %}
+            ];
+            
+            if (songLinks.length === 0) return;
             
             // Shuffle
-            for (let i = links.length - 1; i > 0; i--) {
+            for (let i = songLinks.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [links[i], links[j]] = [links[j], links[i]];
+                [songLinks[i], songLinks[j]] = [songLinks[j], songLinks[i]];
             }
             
-            navigator.clipboard.writeText(links.join('\n')).then(() => alert('Alle Spotify-lenker er kopiert (i tilfeldig rekkefølge)!'));
+            navigator.clipboard.writeText(songLinks.join('\n')).then(() => alert('Spotify-lenker kopiert og shuffla!'));
         });
     }
 
     // Excel Export
-    const exportExcelButton = document.getElementById('exportExcelButton');
-    if (exportExcelButton) {
-        exportExcelButton.addEventListener('click', function () {
-            const table = document.querySelector('table');
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.table_to_sheet(table);
-            XLSX.utils.book_append_sheet(wb, ws, 'Resultat');
-            XLSX.writeFile(wb, `pGP_{{ round.name|slugify }}_resultat.xlsx`);
-        });
-    }
+    const excelBtns = ['exportExcelButton', 'exportExcelButtonResults'];
+    excelBtns.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.addEventListener('click', function() {
+                const table = document.querySelector('table');
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.table_to_sheet(table);
+                XLSX.utils.book_append_sheet(wb, ws, 'Results');
+                XLSX.writeFile(wb, 'pGP_Resultat_{{ round.name|slugify }}.xlsx');
+            });
+        }
+    });
 });
 </script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-<style>
-.custom-scrollbar::-webkit-scrollbar { width: 3px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.2); border-radius: 10px; }
-</style>
 {% endblock %}

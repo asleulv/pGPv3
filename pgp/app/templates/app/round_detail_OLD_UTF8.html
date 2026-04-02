@@ -1,0 +1,531 @@
+﻿{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}pGP: {{ round.name }}{% endblock %}
+
+{% block head %}
+    {{ block.super }} 
+    <meta property="og:title" content="pGP: {{ round.name }}" />
+    <meta property="og:description" content="{{ round.description|truncatewords:20 }}" />
+    <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+    <meta property="og:type" content="website" />
+{% endblock %}
+
+{% block content %}
+
+<div class="container mx-auto my-8 px-4">
+    <h1 class="text-2xl uppercase mb-5 font-bold text-center">{{ round.name }}</h1>
+
+    <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-white p-2 shadow-md">Om runden:</h2>
+    <div class="p-4 shadow-lg mb-8 bg-white">
+        <p class="mb-2"><strong>Oppg├Ñvetekst:</strong><br> {{ round.description|linebreaksbr }}</p>
+        
+        <hr class="my-4 border-gray-300">
+        
+        <p class="mb-2"><strong>Bidrag innan:</strong> {{ round.start_date|date:"d. F Y H:i" }}</p>
+        
+        <hr class="my-4 border-gray-300">
+        
+        <p class="mb-2"><strong>Stemmefrist:</strong> {{ round.end_date|date:"d. F Y H:i" }}</p>
+        
+        <hr class="my-4 border-gray-300">
+        
+        {% if round.playlist_released %}
+            <p class="mb-2">
+                <strong>pGP-liste:</strong> 
+                <a href="{{ round.playlist_url }}" class="text-blue-500 underline" target="_blank">{{ round.name }}</a>
+            </p>
+            <hr class="my-4 border-gray-300">
+        {% endif %}
+        
+
+        <p class="mb-2 mt-6">
+            <strong>Arrang├©r:</strong> 
+            {% if user == round.organizer %}
+                <span class="bg-red-500 text-white font-bold py-1 px-2 rounded">DEG, {{ round.organizer.username }}­ƒÆÇ</span>
+            {% else %}
+                {{ round.organizer.username }}
+            {% endif %}
+        </p>
+        
+        {% if user == round.organizer and not round.round_finished %}
+        <hr class="my-4 border-gray-300">
+            <p class="mt-2">
+                <strong>Rediger runde:</strong> 
+                <a href="{% url 'edit_round' round.id %}" class="text-blue-500 hover:text-blue-700">ÔÜÖ´©Å</a>
+            </p>
+        {% endif %}
+        
+        <hr class="my-4 border-gray-300">
+        
+        <p class="mb-2">
+            <strong>
+                {% if player_votes %}
+                    Dine poeng:
+                {% else %}
+                    Send inn stemmer:
+                {% endif %}
+            </strong>
+            {% if round.playlist_released %}
+                {% if round.end_date > now %}
+                    {% if countdown %}
+                        Ôîø´©Å Stemmeskjema blir lagt ut om {{ countdown }}
+                    {% else %}
+                        {% if player_votes %}
+                            <ul id="votes-list">
+                                {% for vote in player_votes %}
+                                    <li>{{ vote.score }}: {{ vote.song.artist }} - {{ vote.song.title }}</li>
+                                {% endfor %}
+                            </ul>
+                            <button 
+                                type="button" 
+                                class="bg-blue-500 text-white px-2 py-1 rounded-full" 
+                                onclick="copyVotesToClipboard()"
+                                aria-label="Kopier stemmer"
+                            >
+                                <i class="fas fa-copy"></i> <!-- Font Awesome copy icon -->
+                            </button>
+                        {% else %}
+                            {% if has_submitted_song %}
+                                <a href="{% url 'vote_form' round.pk %}" class="text-blue-500 underline" target="_blank">Skjema</a>
+                            {% else %}
+                                Du deltar ikkje denne runden...
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    {% if player_votes %}
+                        
+                        <ul id="votes-list">
+                            {% for vote in player_votes %}
+                                <li>{{ vote.score }}: {{ vote.song.artist }} - {{ vote.song.title }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        ­ƒôà Stemmefristen har passert Ôÿ╣´©Å
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                ÔÅ▒
+            {% endif %}
+        </p>
+        
+        
+        
+    </div>
+    {% load i18n %}
+
+    {% if round.playlist_released %}
+    <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-400 text-white p-2 shadow-md">pGP-liste:</h2>
+    <div class="p-4 shadow-lg mb-8 bg-white">
+        <iframe src="https://open.spotify.com/embed?uri={{ round.playlist_url }}" 
+                width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media">
+        </iframe>
+    </div>
+
+    <!-- Show current player's submission -->
+    {% if player_song %}
+    <h2 class="text-2xl font-bold  bg-gradient-to-r from-green-600 to-green-400 text-white p-2 shadow-md">Ditt bidrag</h3>
+    <div class="p-4 shadow-lg  mb-8 bg-white">
+        <p class="text-gray-700 ">
+            <strong>{{ player_song.artist }} - {{ player_song.title }}</strong>
+        </p>
+        
+        <!-- Spotify Embed Player for the current song -->
+        <div class="mt-4">
+            {% if track_id %}
+            <div class="p-4  mb-8 bg-white">
+                    <iframe src="https://open.spotify.com/embed/track/{{ track_id }}" 
+                            width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media">
+                    </iframe>
+                </div>
+            {% else %}
+                <p class="text-gray-500">Ingen sporlenke tilgjengelig.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    {% if round.start_date >= now %}
+        <p>Du har ikkje sendt inn noko bidrag enda.</p>
+        {% endif %}
+    {% endif %}
+{% else %}
+{% if round.start_date < now %}
+    <div class="p-4 mb-4 bg-red-500 text-white font-bold text-center shadow-md">
+        ­ƒÿû Fristen for ├Ñ levere bidrag har passert
+    </div>
+{% endif %}
+
+{% if round.start_date >= now and not round.round_finished %}
+    <h2 class="text-2xl font-bold bg-green-500 text-white p-2 shadow-md">
+        {% if player_song %}Endre bidrag:{% else %}Send inn bidrag:{% endif %}
+    </h2>
+    <div class="p-4 mb-8 bg-white shadow-lg">
+        <form method="post" action="{% url 'submit_song' pk=round.pk %}" onsubmit="return confirmSubmission();">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="{{ form.spotify_url.id_for_label }}" class="block text-gray-700">Spotify-lenke:</label>
+                <input type="text" name="spotify_url" id="{{ form.spotify_url.id_for_label }}" 
+                       value="{% if player_song %}{{ form.spotify_url.value }}{% else %}""{% endif %}" 
+                       class="w-full p-2 text-base border rounded-lg" />
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
+                {% if player_song %}­ƒñá Endre bidrag{% else %}­ƒÿÄ Send inn bidrag{% endif %}
+            </button>
+        </form>
+    
+
+
+        
+        {% if player_song %}
+        <form method="post" action="{% url 'delete_song' pk=round.pk %}" id="delete-form">
+            {% csrf_token %}
+            <button type="button" class="bg-red-500 hover:bg-red-700 mt-2 text-white font-bold py-1 px-2 rounded" onclick="openModal()">
+                Ôÿó´©Å Slett bidrag
+            </button>
+        </form>
+        {% endif %}
+         
+        <hr class="my-4 border-gray-300">
+        {% endif %}  
+        {% if player_song %}
+            <div class="mt-8">
+                <h3 class="text-lg font-semibold mb-2">Registrert bidrag:</h3>
+                <p><strong>{{ player_song.artist }} - {{ player_song.title }}</strong></p>
+                
+                <div class="mt-4">
+                    {% if track_id %}
+                    <div class="relative" style="height: 100px; width: 100%;">
+                        <iframe class="absolute top-0 left-0 w-full h-full" src="https://open.spotify.com/embed/track/{{ track_id }}" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    </div>
+                    {% else %}
+                        <p>No track URL available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+
+{% if round.round_finished %}
+<h2 class="text-2xl font-bold bg-gradient-to-r from-pink-600 to-pink-400 text-white p-2 shadow-md">
+    Oppsummering av runde:
+</h2>
+<div class="p-4 text-black bg-white shadow-lg">
+    <p class="mb-4">Antall bidrag: {{ num_submitted_songs }}</p>
+
+    <button id="exportExcelButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-700">
+        Excel-eksport
+    </button>
+    <button id="exportButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-700">
+        <a href="{% url 'export_to_word' round_id=round.id %}" class="text-white">Word-eksport</a>
+    </button>
+    <hr class="border-red-300">
+
+    <div style="overflow-y: auto; overflow-x: auto;"> <!-- Allow horizontal scrolling -->
+        <table class="table-auto w-full border-collapse border border-gray-400">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border border-gray-400 p-2">Innsendar</th> <!-- New column for player name -->
+                    <th class="border border-gray-400 p-2">Sang</th>
+                    {% for player in players %}
+                        <th class="border border-gray-400 p-2">{{ player.nickname }}</th>
+                    {% endfor %}
+                    <th class="border border-gray-400 p-2">SUM:</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for song in all_submitted_songs %}
+                    <tr>
+                        <td class="border border-gray-400 p-2">
+                            {{ song.player.nickname }} <!-- Display the player's nickname -->
+                        </td>
+                        <td class="border border-gray-400 p-2">
+                            <strong>
+                                <a href="{{ song.spotify_url }}" target="_blank" class="text-green-500 hover:text-green-700">
+                                    <i class="fab fa-spotify"></i>
+                                </a>
+                                {{ song.artist }} - {{ song.title }}
+                            </strong>
+                        </td>
+                        {% for player in players %}
+                            <td class="border border-gray-400 p-2">
+                                {% with vote_value=votes_dict|get_item:song.id|get_item:player.id %}
+                                    {% if vote_value %}
+                                        {{ vote_value }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                        {% endfor %}
+                        <td class="border border-gray-400 p-2">
+                            {{ song.total_score }} <!-- Directly display total score -->
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endif %}
+
+
+{% if is_organizer and not round.round_finished %}
+<h2 class="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-400 text-white mt-8 p-2 shadow-md">
+    Kun for arrang├©r:
+</h2>
+
+<div class="p-4 text-black bg-white shadow-lg">
+    <p class="mb-0 font-bold">Antall bidrag: {{ num_submitted_songs }}</p>
+
+    {% if now < round.start_date %}
+        <h3 class="font-bold">Har levert bidrag:</h3>
+        <p>
+            {% if players_with_song %}
+                {{ players_with_song|join:", " }}
+            {% else %}
+                Ingen!
+            {% endif %}
+        </p>
+
+        <h3 class="font-bold">Har ikkje levert bidrag:</h3>
+        <p>
+            {% if players_without_song %}
+                {{ players_without_song|join:", " }}
+            {% else %}
+                Ingen!
+            {% endif %}
+        </p>
+    {% else %}
+        <h3 class="font-bold">Har stemt:</h3>
+        <p>
+            {% if players_with_votes %}
+                {{ players_with_votes|join:", " }}
+            {% else %}
+                Ingen!
+            {% endif %}
+        </p>
+
+        <h3 class="font-bold">Manglar stemmer fr├Ñ:</h3>
+        <p>
+            {% if players_without_votes %}
+                {{ players_without_votes|join:", " }}
+            {% else %}
+                Ingen!
+            {% endif %}
+        </p>
+    {% endif %}
+</div>
+<br>
+    <button id="exportExcelButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-700">
+        Excel-eksport
+    </button>
+    <button id="exportWordButton" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-700">
+        <a href="{% url 'export_to_word' round_id=round.id %}" class="text-white">Word-eksport</a>
+    </button>
+    <hr class="border-red-300">
+
+    <div style="overflow-y: auto; overflow-x: auto;"> <!-- Allow horizontal scrolling -->
+        <table class="table-auto w-full border-collapse border border-gray-400">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border border-gray-400 p-2">Innsendar</th>
+                    <th class="border border-gray-400 p-2">Sang</th>
+                    {% for player in players %}
+                        <th class="border border-gray-400 p-2">{{ player.nickname }}</th>
+                    {% endfor %}
+                    <th class="border border-gray-400 p-2">SUM:</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for song in all_submitted_songs %}
+                    <tr>
+                        <td class="border border-gray-400 p-2">
+                            {{ song.player.nickname }} <!-- Display the player's nickname -->
+                        </td>
+                        <td class="border border-gray-400 p-2">
+                            <strong>
+                                <a href="{{ song.spotify_url }}" target="_blank" class="text-green-500 hover:text-green-700">
+                                    <i class="fab fa-spotify"></i>
+                                </a>
+                                {{ song.artist }} - {{ song.title }}
+                            </strong>
+                        </td>
+                        {% for player in players %}
+                            <td class="border border-gray-400 p-2">
+                                {% with vote_value=votes_dict|get_item:song.id|get_item:player.id %}
+                                    {% if vote_value %}
+                                        {{ vote_value }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                        {% endfor %}
+                        <td class="border border-gray-400 p-2">
+                            {{ song.aggregated_score }} <!-- Display the aggregated score -->
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+
+        <hr class="my-4 border-red-300">
+        <button id="copy-urls-button" class="bg-red-500 text-white px-4 py-1 rounded-full hover:bg-blue-700">
+            ­ƒÆ½ Kopier Spotify-lenker til utklippstavle
+        </button>
+        <p>
+            <strong>NB:</strong> P├Ñ datamaskin kan du lime inn alle l├Ñtene i ei tom Spotify-liste.
+        </p>
+        <hr class="my-4 border-red-300">
+        <form method="post" action="{% url 'update_playlist_url' pk=round.pk %}">
+            {% csrf_token %}
+            <label for="playlist_url" class="block text-gray-700 font-bold mb-2">Spotify-liste URL:</label>
+            <input type="text" name="playlist_url" id="playlist_url" 
+                   value="{{ round.playlist_url }}" 
+                   class="w-full p-2 text-base border" 
+                   placeholder="Skriv inn Spotify-liste URL" />
+                   
+            {% if round.start_date > now %}
+                <button type="submit" class="bg-gray-400 text-white font-bold py-1 px-2 rounded-full" disabled>
+                    ­ƒôñ Venter p├Ñ bidragsfrist
+                </button>
+            {% else %}
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded-full">
+                    {% if round.playlist_released %}­ƒöä Oppdater liste{% else %}­ƒôñ Publiser liste{% endif %}
+                </button>
+            {% endif %}
+        </form>
+    </div>
+        {% if not round_finished %}
+        <div class="bg-gradient-to-r from-red-600 to-red-500 p-8 mt-6 rounded-lg text-center">
+            <div class="border-t-4 border-red-800 my-4"></div>
+            <p class="text-white font-bold text-xl mb-5 uppercase">
+                Ôÿó´©Å Tenk deg om no d├Ñ... Resultata blir lagt ut s├Ñ hugs ├Ñ k├©yre sending f├©rst!
+            </p>
+        
+            <form method="post" action="" onsubmit="return confirm('Er pGP-runden ferdig? Alle vil sj├Ñ resultata om du fortsetter...');">
+                {% csrf_token %}
+                <button type="submit" name="finish_round" class="bg-white text-red-600 border-2 border-red-800 hover:bg-red-500 hover:text-white font-bold py-3 px-6 rounded mt-4 transition-colors shadow-lg transform hover:scale-105">
+                    ÔÜá´©Å Avslutt runden
+                </button>
+            </form>
+        </div>
+        
+        
+{% else %}
+<div class="mt-10 text-center text-2xl font-bold">
+    Runden er avlutta
+</div>
+{% endif %}
+    </div>
+{% endif %}
+</div>
+</div>
+</div>
+    
+</div>
+</div>
+
+<script>
+function confirmSubmission() {
+    return confirm("Er du sikker p├Ñ at du vil sende inn dette bidraget?");
+}
+
+function openModal() {
+    const confirmation = confirm("Er du sikker p├Ñ at du vil slette ditt bidrag?");
+    if (confirmation) {
+        document.getElementById('delete-form').submit();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Copy URLs button - only if it exists
+    const copyUrlsButton = document.getElementById('copy-urls-button');
+    if (copyUrlsButton) {
+        copyUrlsButton.addEventListener('click', function() {
+            const songLinks = [];
+            const rows = document.querySelectorAll('table tbody tr');
+
+            rows.forEach(function(row) {
+                const link = row.querySelector('td:nth-child(2) a');
+                if (link) {
+                    songLinks.push(link.href); 
+                }
+            });
+
+            if (songLinks.length === 0) {
+                alert('Ingen Spotify-lenker ├Ñ kopiere!');
+                return;
+            }
+
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            shuffleArray(songLinks);
+
+            navigator.clipboard.writeText(songLinks.join('\n')).then(function() {
+                alert('Spotify-lenkene er kopiert til utklippstavlen!');
+            }).catch(function(error) {
+                console.error('Feil ved kopiering: ', error);
+            });
+        });
+    }
+
+    const roundName = "{{ round.name|escapejs }}";
+
+    // Excel Export Functionality - only if button exists
+    const exportExcelButton = document.getElementById('exportExcelButton');
+    if (exportExcelButton) {
+        exportExcelButton.addEventListener('click', function () {
+            const table = document.querySelector('table');
+            if (!table) {
+                alert('Ingen tabell ├Ñ eksportere!');
+                return;
+            }
+            
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.table_to_sheet(table);
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Songs');
+
+            const sanitizedRoundName = roundName.replace(/[<>:"/\\|?*]/g, '');
+            XLSX.writeFile(workbook, `${sanitizedRoundName}_resultat.xlsx`);
+        });
+    }
+});
+
+function copyVotesToClipboard() {
+    const votesList = document.getElementById('votes-list');
+    if (!votesList) {
+        alert('Ingen stemmer ├Ñ kopiere!');
+        return;
+    }
+    
+    const votesText = Array.from(votesList.getElementsByTagName('li'))
+        .map(li => li.textContent)
+        .join('\n');
+
+    navigator.clipboard.writeText(votesText)
+        .then(() => {
+            alert('Stemmer kopiert til utklippstavlen!');
+        })
+        .catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+}
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+
+{% endblock %}
