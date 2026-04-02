@@ -1,183 +1,172 @@
 {% extends 'base.html' %}
 
-{% block title %}🧸 Min profil - pGP beta2{% endblock %}
+{% block title %}pGP - Min Profil{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
-    <!-- Header -->
-    <div class="bg-white shadow-lg rounded-lg p-6 mb-8 mx-4 md:mx-8">
-        <h1 class="text-3xl font-bold mb-2 text-gray-800">🧸 Min profil</h1>
-    </div>
+<div class="max-w-7xl mx-auto space-y-12 px-4 md:px-0 py-10">
+    
+    <!-- Hero Header -->
+    <header class="flex flex-col md:flex-row items-center gap-8 md:gap-12 text-center md:text-left">
+        <div class="relative">
+            <div class="absolute -inset-4 bg-indigo-500/20 blur-3xl rounded-full"></div>
+            <div class="w-32 h-32 md:w-40 md:h-40 bg-white dark:bg-slate-800 rounded-[2.5rem] md:rounded-[3.5rem] flex items-center justify-center text-5xl md:text-6xl text-indigo-500 shadow-2xl relative border-4 border-indigo-500/10 transition-transform hover:scale-105 duration-300">
+                {{ user.username|slice:":1"|upper }}
+            </div>
+        </div>
+        <div class="space-y-3">
+            <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter text-secondary leading-none">
+                {{ user.username }}
+            </h1>
+            <div class="flex flex-wrap justify-center md:justify-start gap-4">
+               <span class="badge badge-success !px-3 !py-1 !text-[10px] uppercase font-bold tracking-widest border border-green-500/20 bg-green-500/5">Brukar sidan {{ user.date_joined|date:"M 'y" }}</span>
+               <span class="badge !bg-indigo-500/10 !text-indigo-400 !px-3 font-bold !text-[10px] uppercase border border-indigo-500/20">{% if player %}{{ player.nickname }}{% else %}Spelar profil manglar{% endif %}</span>
+            </div>
+        </div>
+    </header>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Left Column: Profile Form + Stats -->
-        <div class="lg:col-span-2 space-y-8">
-            <!-- Profile Form -->
-            <div class="bg-white shadow-lg rounded-lg p-6 mx-4 md:mx-8">
-                <form method="post" class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
+        
+        <!-- Left: Forms & Settings -->
+        <div class="lg:col-span-2 space-y-10">
+            <!-- Account Settings Card -->
+            <section class="card !rounded-[3rem] shadow-2xl border-2 border-indigo-500/10 space-y-8">
+                <h2 class="text-lg font-black uppercase tracking-widest opacity-40 flex items-center">
+                    <i class="fas fa-id-card mr-3 text-indigo-500 text-base"></i> Kontoinformasjon
+                </h2>
+                <form method="post" class="space-y-8">
                     {% csrf_token %}
-                    
-                    <div>
-                        <h3 class="text-lg font-bold text-blue-800 border-b-2 border-gray-200 pb-2 mb-4">
-                            👤 Kontoinformasjon
-                        </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">
-                                    Brukarnamn
-                                </label>
-                                {{ form.username }}
-                                <p class="text-xs text-gray-500 mt-1">{{ form.username.help_text }}</p>
-                            </div>
-                            
-                            <div>
-                                <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700">
-                                    E-postadresse
-                                </label>
-                                {{ form.email }}
-                                <p class="text-xs text-gray-500 mt-1">{{ form.email.help_text }}</p>
-                                {% if form.email.errors %}
-                                    <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
-                                {% endif %}
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-3">
+                            <label for="{{ form.username.id_for_label }}" class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-2">Brukarnamn</label>
+                            {{ form.username }}
+                            <p class="text-[9px] opacity-30 uppercase font-bold ml-2">{{ form.username.help_text|striptags }}</p>
+                        </div>
+                        <div class="space-y-3">
+                            <label for="{{ form.email.id_for_label }}" class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-2">E-postadresse</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <p class="text-[9px] text-red-500 font-bold uppercase ml-2 mt-1">{{ form.email.errors.0 }}</p>
+                            {% endif %}
                         </div>
                     </div>
-
-                    <div class="flex justify-between items-center pt-4 border-t border-gray-200">
-                        <a href="/" class="text-blue-600 hover:text-blue-800 font-medium">
-                            ← Tilbake til heimesida
+                    <div class="pt-6 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                        <a href="/" class="text-[10px] font-black uppercase tracking-widest text-secondary opacity-40 hover:opacity-100 transition-opacity">
+                            <i class="fas fa-chevron-left mr-1"></i> Tilbake
                         </a>
-                        <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded-full hover:bg-blue-700 transition duration-200 font-medium">
-                            💾 Lagre endringar
+                        <button type="submit" class="btn btn-primary !rounded-2xl !px-10 !py-4 text-xs font-black tracking-widest uppercase shadow-xl shadow-indigo-500/30">
+                            Lagre endringar
                         </button>
                     </div>
                 </form>
-            </div>
+            </section>
 
-            <!-- Ranking Chart with Scrolling -->
+            <!-- Ranking History Chart -->
             {% if chart_data and player %}
-            <div class="bg-white shadow-lg rounded-lg p-6 mx-4 md:mx-8">
-                <h3 class="text-lg font-bold text-blue-800 border-b-2 border-gray-200 pb-2 mb-4">
-                    🏆 Plassering over tid
-                </h3>
-                <p class="text-sm text-gray-600 mb-2">Din plassering i alle rundar (1. plass = topp)</p>
-                <div class="flex items-center justify-between mb-4">
-                    <p class="text-xs text-gray-500">💡 Dra for å skrolle gjennom rundane • Rul for å zoome</p>
-                    <div class="flex space-x-2">
-                        <button onclick="resetChart()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
-                            🔄 Reset
-                        </button>
-                        <button onclick="showLatest()" class="text-xs px-3 py-1 bg-blue-100 hover:bg-blue-200 rounded-md transition-colors">
-                            ⏮️ Nyaste
-                        </button>
+            <section class="card !rounded-[3rem] shadow-xl space-y-8">
+                <div class="flex items-center justify-between gap-4 flex-col md:flex-row">
+                    <div class="space-y-1 text-center md:text-left">
+                        <h2 class="text-lg font-black uppercase tracking-widest opacity-40 flex items-center justify-center md:justify-start">
+                            <i class="fas fa-chart-line mr-3 text-indigo-500 text-base"></i> Plassering Over Tid
+                        </h2>
+                        <p class="text-[9px] font-bold uppercase tracking-widest opacity-30">Historisk oversikt over dine plasseringar i pGP</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="resetChart()" class="btn !bg-gray-100 dark:!bg-slate-800 !text-secondary !text-[10px] font-bold !rounded-xl !px-4 !py-2 border border-gray-200 dark:border-gray-700">Nullstill</button>
+                        <button onclick="showLatest()" class="btn !bg-indigo-500/10 !text-indigo-400 !text-[10px] font-bold !rounded-xl !px-4 !py-2 border border-indigo-500/20">Nyaste 10</button>
                     </div>
                 </div>
-                <div style="height: 350px; position: relative;">
+                <div class="h-80 w-full bg-gray-50/30 dark:bg-slate-900/40 rounded-[2rem] p-6 relative">
                     <canvas id="rankingChart"></canvas>
                 </div>
-            </div>
-            {% endif %}
-
-            <!-- Competition Stats -->
-            {% if player and player.stats %}
-            <div class="bg-white shadow-lg rounded-lg p-6 mx-4 md:mx-8">
-                <h3 class="text-lg font-bold text-blue-800 border-b-2 border-gray-200 pb-2 mb-4">
-                    🎵 pGP-statistikk
-                </h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="text-center bg-blue-50 p-4 rounded-lg">
-                        <div class="text-xl font-bold text-blue-600">{{ player.stats.total_points }}</div>
-                        <div class="text-sm text-gray-600">Totale poeng</div>
-                    </div>
-                    <div class="text-center bg-green-50 p-4 rounded-lg">
-                        <div class="text-xl font-bold text-green-600">{{ player.stats.rounds_played }}</div>
-                        <div class="text-sm text-gray-600">Rundar spelt</div>
-                    </div>
-                    <div class="text-center bg-yellow-50 p-4 rounded-lg">
-                        <div class="text-xl font-bold text-yellow-600">{{ player.stats.wins }}</div>
-                        <div class="text-sm text-gray-600">Sigrar</div>
-                    </div>
-                    <div class="text-center bg-purple-50 p-4 rounded-lg">
-                        <div class="text-xl font-bold text-purple-600">{{ player.stats.average_points_per_round }}</div>
-                        <div class="text-sm text-gray-600">Snitt per runde</div>
-                    </div>
-                </div>
-            </div>
+            </section>
             {% endif %}
         </div>
 
-        <!-- Right Column: Account Info + Organizer Rounds -->
-        <div class="space-y-8">
-            <!-- Account Status -->
-            <div class="bg-white shadow-lg rounded-lg p-6 mx-4 md:mx-8">
-                <h3 class="text-lg font-bold text-blue-800 border-b-2 border-gray-200 pb-2 mb-4">
-                    📊 Kontostatus
-                </h3>
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Registrert</label>
-                        <p class="bg-gray-50 p-2 rounded text-gray-600 text-sm">{{ user.date_joined|date:"d.m.Y" }}</p>
-                    </div>
-                    
-                    {% if player %}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">pGP-kallenamn</label>
-                        <p class="bg-gray-50 p-2 rounded text-gray-600 text-sm">{{ player.nickname }}</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
+        <!-- Right: Stats & History -->
+        <div class="lg:col-span-1 space-y-10">
+            <!-- Stats Grid -->
+            {% if player and player.stats %}
+            <section class="grid grid-cols-2 gap-4">
+                 <div class="card !p-6 text-center space-y-2 !rounded-3xl hover:border-indigo-500 transition-colors shadow-lg">
+                    <div class="text-2xl font-black text-indigo-500 leading-none">{{ player.stats.total_points }}</div>
+                    <span class="text-[9px] uppercase font-bold opacity-40 leading-tight">Totale poeng</span>
+                 </div>
+                 <div class="card !p-6 text-center space-y-2 !rounded-3xl hover:border-green-500 transition-colors shadow-lg">
+                    <div class="text-2xl font-black text-green-500 leading-none">{{ player.stats.rounds_played }}</div>
+                    <span class="text-[9px] uppercase font-bold opacity-40 leading-tight">Rundar spela</span>
+                 </div>
+                 <div class="card !p-6 text-center space-y-2 !rounded-3xl hover:border-yellow-500 transition-colors shadow-lg border-2 border-yellow-500/10">
+                    <div class="text-2xl font-black text-yellow-500 leading-none">{{ player.stats.wins }}</div>
+                    <span class="text-[9px] uppercase font-bold opacity-40 leading-tight">Totale sigrar</span>
+                 </div>
+                 <div class="card !p-6 text-center space-y-2 !rounded-3xl hover:border-blue-500 transition-colors shadow-lg">
+                    <div class="text-2xl font-black text-blue-500 leading-none">{{ player.stats.average_points_per_round|floatformat:1 }}</div>
+                    <span class="text-[9px] uppercase font-bold opacity-40 leading-tight">Snittper runde</span>
+                 </div>
+            </section>
+            {% endif %}
 
-            <!-- Organizer Rounds -->
+            <!-- My History (Organizer) -->
             {% if organizer_rounds %}
-            <div class="bg-white shadow-lg rounded-lg p-6 mx-4 md:mx-8">
-                <h3 class="text-lg font-bold text-blue-800 border-b-2 border-gray-200 pb-2 mb-4">
-                    🎪 Mine rundar som arrangør
-                </h3>
+            <section class="card !rounded-[2.5rem] shadow-xl space-y-6">
+                <h2 class="text-[11px] font-black uppercase tracking-widest opacity-40 border-b border-gray-50 dark:border-gray-800 pb-4">
+                    Mine rundar som arrangør
+                </h2>
                 <div class="space-y-3">
                     {% for round in organizer_rounds|slice:":5" %}
-                    <div class="bg-gray-50 p-3 rounded-lg">
-                        <a href="{% url 'round_detail' round.id %}" class="font-medium text-blue-600 hover:text-blue-800">
-                            {{ round.name }}
-                        </a>
-                        <p class="text-sm text-gray-500 mt-1">
+                    <a href="{% url 'round_detail' round.id %}" class="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-slate-900/40 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-indigo-500 transition-all group">
+                         <div class="min-w-0 pr-4">
+                            <p class="text-xs font-bold truncate group-hover:text-indigo-400 leading-tight transition-colors">{{ round.name }}</p>
+                            <p class="text-[9px] opacity-40 font-bold uppercase tracking-tight">{{ round.start_date|date:"F Y" }}</p>
+                         </div>
+                         <div class="flex-shrink-0">
                             {% if round.round_finished %}
-                                ✅ Ferdig
-                            {% elif round.playlist_released %}
-                                🎵 Spilleliste publisert
+                                <span class="bg-gray-100 dark:bg-slate-800 text-secondary text-[8px] font-black uppercase px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700 opacity-60">Ferdig</span>
                             {% else %}
-                                ⏳ Pågår
+                                <span class="bg-indigo-500/10 text-indigo-400 text-[8px] font-black uppercase px-2 py-1 rounded-lg border border-indigo-500/20">Aktiv</span>
                             {% endif %}
-                        </p>
-                        <p class="text-xs text-gray-400">{{ round.start_date|date:"d.m.Y" }}</p>
-                    </div>
+                         </div>
+                    </a>
                     {% endfor %}
                     
                     {% if organizer_rounds|length > 5 %}
-                    <div class="text-center">
-                        <a href="{% url 'round_list' %}" class="text-blue-600 hover:text-blue-800 text-sm">
-                            Vis alle ({{ organizer_rounds|length }})
-                        </a>
+                    <div class="pt-2 text-center">
+                        <a href="{% url 'round_list' %}" class="text-[10px] font-black uppercase tracking-widest text-indigo-400 opacity-60 hover:opacity-100 transition-opacity">Sjå heile historia ({{ organizer_rounds|length }})</a>
                     </div>
                     {% endif %}
                 </div>
-            </div>
+            </section>
             {% endif %}
         </div>
     </div>
 </div>
 
-<!-- Chart.js Script with Scrolling/Panning -->
+<style>
+    /* Styling for Django-injected fields */
+    .lg\:col-span-2 input[type="text"], 
+    .lg\:col-span-2 input[type="email"] {
+        width: 100%;
+        background-color: rgba(var(--bg-app), 0.5);
+        border: 1px solid rgba(var(--text-primary), 0.05);
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        font-size: 0.875rem;
+        transition: all 0.3s;
+        box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+    }
+    .dark .lg\:col-span-2 input { background: rgba(15, 23, 42, 0.5) !important; color: white !important; }
+    .lg\:col-span-2 input:focus { border-color: #6366f1; outline: none; }
+</style>
+
 {% if chart_data %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const isDark = document.documentElement.classList.contains('dark');
     const ctx = document.getElementById('rankingChart').getContext('2d');
     const chartData = {{ chart_data|safe }};
-    
-    // Calculate initial display window (show 10 rounds at a time)
     const maxVisible = 10;
     const totalRounds = chartData.labels.length;
     const startIndex = Math.max(0, totalRounds - maxVisible);
@@ -187,19 +176,18 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
             labels: chartData.labels,
             datasets: [{
-                label: 'Plassering',
                 data: chartData.data,
-                borderColor: 'rgb(34, 197, 94)',
-                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: function(context) {
-                    const value = context.parsed.y;
-                    if (value === 1) return '#FFD700';  // Gold
-                    if (value === 2) return '#C0C0C0';  // Silver  
-                    if (value === 3) return '#CD7F32';  // Bronze
-                    return 'rgb(34, 197, 94)';          // Green for others
+                pointBackgroundColor: (c) => {
+                    const v = c.parsed.y;
+                    if (v === 1) return '#f59e0b';
+                    if (v === 2) return '#94a3b8';
+                    if (v === 3) return '#b45309';
+                    return '#6366f1';
                 },
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2,
@@ -210,119 +198,50 @@ document.addEventListener('DOMContentLoaded', function() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            },
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
                 tooltip: {
+                    backgroundColor: isDark ? '#1e293b' : '#fff',
+                    titleColor: isDark ? '#fff' : '#1e293b',
+                    bodyColor: isDark ? '#94a3b8' : '#475569',
+                    borderColor: 'rgba(99, 102, 241, 0.1)',
+                    borderWidth: 1,
+                    padding: 12,
+                    cornerRadius: 12,
                     callbacks: {
-                        label: function(context) {
-                            const rank = context.parsed.y;
-                            let suffix = 'plass';
-                            if (rank === 1) suffix = '🥇 Førsteplass!';
-                            else if (rank === 2) suffix = '🥈 Andreplass';
-                            else if (rank === 3) suffix = '🥉 Tredjeplass';
-                            else suffix = '. plass';
-                            
-                            return rank + suffix;
+                        label: (c) => {
+                            const r = c.parsed.y;
+                            let s = (r === 1) ? ' 🥇 Vinnar!' : (r === 2) ? ' 🥈 Sølv' : (r === 3) ? ' 🥉 Bronse' : '. plass';
+                            return r + s;
                         }
                     }
                 },
-                zoom: {
-                    pan: {
-                        enabled: true,
-                        mode: 'x',
-                        modifierKey: null,  // No modifier key needed
-                        onPanComplete: function({chart}) {
-                            // Optional: Add feedback when panning completes
-                        }
-                    },
-                    zoom: {
-                        wheel: {
-                            enabled: true,
-                            speed: 0.1
-                        },
-                        pinch: {
-                            enabled: true
-                        },
-                        mode: 'x',
-                        onZoomComplete: function({chart}) {
-                            // Optional: Add feedback when zoom completes
-                        }
-                    },
-                    limits: {
-                        x: {
-                            min: 0,
-                            max: totalRounds - 1,
-                            minRange: 3  // Minimum of 3 rounds visible
-                        }
-                    }
-                }
+                zoom: { pan: { enabled: true, mode: 'x' }, zoom: { wheel: { enabled: true }, mode: 'x' } }
             },
             scales: {
                 y: {
                     reverse: true,
-                    beginAtZero: false,
                     min: 1,
-                    max: chartData.max_rank,
-                    ticks: {
-                        stepSize: 1,
-                        callback: function(value) {
-                            return value + '.';
-                        }
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    },
-                    title: {
-                        display: true,
-                        text: 'Plassering'
-                    }
+                    max: chartData.max_rank || 15,
+                    ticks: { font: { size: 9, weight: 'bold' }, color: '#6366f1', stepSize: 1 },
+                    grid: { color: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }
                 },
                 x: {
-                    min: startIndex,  // Start showing from most recent rounds
+                    min: startIndex,
                     max: totalRounds - 1,
-                    grid: {
-                        display: false
-                    },
-                    title: {
-                        display: true,
-                        text: 'pGP-rundar'
-                    },
-                    ticks: {
-                        maxRotation: 45,
-                        minRotation: 0
-                    }
+                    ticks: { font: { size: 9 }, color: isDark ? '#475569' : '#94a3b8' },
+                    grid: { display: false }
                 }
             }
-        },
-        plugins: [{
-            id: 'chartjs-plugin-zoom'
-        }]
+        }
     });
 });
 
-// Utility functions for chart control
-function resetChart() {
-    if (window.rankingChart) {
-        window.rankingChart.resetZoom();
-    }
-}
-
+function resetChart() { if (window.rankingChart) window.rankingChart.resetZoom(); }
 function showLatest() {
     if (window.rankingChart) {
-        const totalRounds = window.rankingChart.data.labels.length;
-        const maxVisible = 10;
-        const startIndex = Math.max(0, totalRounds - maxVisible);
-        
-        window.rankingChart.zoomScale('x', {
-            min: startIndex,
-            max: totalRounds - 1
-        }, 'default');
+        const total = window.rankingChart.data.labels.length;
+        window.rankingChart.zoomScale('x', { min: Math.max(0, total - 10), max: total - 1 }, 'default');
     }
 }
 </script>

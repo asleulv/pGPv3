@@ -1,195 +1,148 @@
 {% extends "base.html" %}
 
-{% block title %}Totallista{% endblock %}
+{% block title %}pGP - Totallista{% endblock %}
 
 {% block content %}
-<div class="container mx-auto my-8">
-    <div class="flex flex-col items-center mb-4">
-        <h1 class="text-2xl font-bold">Totallista</h1>
-        <div id="totalSongsDisplay" class="text-lg font-medium text-center">
-            <!-- Total songs display -->
+<div class="max-w-7xl mx-auto space-y-10 px-4 md:px-0">
+    
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="space-y-1 text-center md:text-left">
+            <h1 class="text-3xl md:text-4xl font-extrabold flex items-center justify-center md:justify-start">
+                <i class="fas fa-archive text-indigo-500 mr-4"></i>
+                Totallista
+            </h1>
+            <p id="totalSongsDisplay" class="text-xs font-bold uppercase tracking-widest text-secondary opacity-40">
+                Laster oversikt...
+            </p>
         </div>
-    </div>
-    
-    <!-- Reset Button -->
-    <div class="mb-4 text-center">
-        <button id="resetButton" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors">
-            Nullstill
-        </button>
-    </div>
-    
-    <div class="overflow-x-auto sm:rounded-lg">
-        <table id="songsTable" class="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
-            <thead>
-                <tr class="bg-gray-100">
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Dato</th>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Artist</th>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Tittel</th>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Levert av</th>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Tema</th>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Spotify</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                <!-- DataTables will populate these rows dynamically -->
-            </tbody>
-        </table>
-    </div>
+        <div class="flex items-center justify-center gap-3">
+             <button id="resetButton" class="btn bg-white dark:bg-slate-800 border border-gray-100 dark:border-gray-800 !rounded-full px-6 py-2.5 !text-xs font-bold hover:shadow-lg transition-all">
+                <i class="fas fa-undo-alt mr-2 text-indigo-500"></i> Nullstill filter
+            </button>
+        </div>
+    </header>
+
+    <!-- Table Card -->
+    <section class="card !p-0 overflow-hidden shadow-2xl">
+        <div class="p-6 md:p-8 bg-gray-50/50 dark:bg-slate-900/30 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-xs font-bold uppercase tracking-tighter opacity-40">
+                <i class="fas fa-filter mr-2"></i> Finn songar i arkivet
+            </div>
+            <!-- Search will be injected here by DataTables or we style the default one -->
+        </div>
+
+        <div class="overflow-x-auto p-4 md:p-8">
+            <table id="songsTable" class="w-full text-left border-separate border-spacing-y-2">
+                <thead>
+                    <tr class="text-[10px] font-bold uppercase tracking-widest opacity-40">
+                        <th class="px-4 py-3">Dato</th>
+                        <th class="px-4 py-3">Artist</th>
+                        <th class="px-4 py-3">Tittel</th>
+                        <th class="px-4 py-3">Levert av</th>
+                        <th class="px-4 py-3">Tema</th>
+                        <th class="px-4 py-3 text-right">Spotify</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    <!-- DataTables will populate -->
+                </tbody>
+            </table>
+        </div>
+    </section>
 </div>
 
-<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<!-- DataTables Stuff -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
 <script>
     $(document).ready(function() {
         var table = $('#songsTable').DataTable({
             processing: true,
             serverSide: true,
-            searchDelay: 400,  // ✅ ADD: Prevent search on every keystroke
             ajax: {
                 url: "{% url 'combined_song_data_view' %}",
                 type: "GET",
                 data: function (d) {
-                    // ✅ ADD: Don't search on very short terms (less than 3 characters)
-                    if (d.search && d.search.value && d.search.value.length > 0 && d.search.value.length < 3) {
-                        d.search.value = '';
-                    }
-                    
+                    if (d.search && d.search.value && d.search.value.length < 3) d.search.value = '';
                     d.page = Math.ceil(d.start / d.length) + 1;
                     d.pageSize = d.length;
                     if (d.order && d.order.length > 0) {
                         d.orderColumn = d.columns[d.order[0].column].data;
                         d.orderDir = d.order[0].dir;
                     }
-                },
-                dataSrc: function(json) {
-                    return json.data;
-                },
-                // ✅ ADD: Error handling for failed requests
-                error: function(xhr, error, code) {
-                    console.log('Error loading data:', error);
-                    alert('Feil ved lasting av data. Prøv igjen.');
                 }
             },
             columns: [
-                { data: 'dato' },
-                { data: 'artist' },
-                { data: 'tittel' },
-                { data: 'levert_av' },
-                { data: 'tema' },
+                { data: 'dato', render: function(data) { return `<span class="font-mono text-[11px] opacity-60">${data}</span>`; } },
+                { data: 'artist', render: function(data) { return `<span class="font-bold text-secondary">${data}</span>`; } },
+                { data: 'tittel', render: function(data) { return `<span class="opacity-80 italic">${data}</span>`; } },
+                { data: 'levert_av', render: function(data) { 
+                    return `<div class="flex items-center space-x-2"><div class="w-5 h-5 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center text-[9px] font-bold">${data.slice(0,1).toUpperCase()}</div><span class="text-xs font-semibold">${data}</span></div>`; 
+                }},
+                { data: 'tema', render: function(data) { return `<span class="text-[10px] bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded-lg opacity-60 font-medium">${data || 'Generelt'}</span>`; } },
                 { data: 'spotify', render: function(data) {
-                    return `<a href="${data}" target="_blank" class="text-blue-500 hover:underline">🎵 Låt</a>`;
+                    return `<div class="text-right"><a href="${data}" target="_blank" class="text-green-500 hover:text-green-400 text-xl"><i class="fab fa-spotify"></i></a></div>`;
                 }}
             ],
             order: [[0, 'desc']],
-            paging: true,
-            searching: true,
-            ordering: true,
             pageLength: 10,
-            // ✅ ADD: More page length options for users
-            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            lengthMenu: [[10, 25, 50], [10, 25, 50]],
             language: {
-                processing: "Laster...",
-                search: "Søk:",
-                searchPlaceholder: "Søk i artist, tittel, tema...", // ✅ ADD: Helpful placeholder
-                lengthMenu: "Vis _MENU_ bidrag per side",
-                info: "Viser _START_ til _END_ av _TOTAL_ bidrag", 
-                infoEmpty: "Ingen bidrag tilgjengeleg", 
-                infoFiltered: "(filtrert frå _MAX_ totale bidrag)", 
-                paginate: {
-                    first: "Første",
-                    last: "Siste",
-                    next: "Neste",
-                    previous: "Førre"
-                },
-                zeroRecords: "Ingen bidrag funne. Prøv eit anna søkeord."
+                search: "",
+                searchPlaceholder: "Søk i arkivet (min. 3 teikn)...",
+                lengthMenu: "_MENU_ per side",
+                info: "Visar _START_ til _END_ av _TOTAL_",
+                paginate: { next: '<i class="fas fa-chevron-right"></i>', previous: '<i class="fas fa-chevron-left"></i>' }
             },
-            drawCallback: function(settings) {
+            drawCallback: function(json) {
                 var api = this.api();
-                var json = api.ajax.json();
-
-                // Display the total number of songs
-                var totalSongs = json.recordsTotal;
-                var filteredSongs = json.recordsFiltered;
-                
-                // ✅ IMPROVED: Show both total and filtered count
-                if (totalSongs === filteredSongs) {
-                    $('#totalSongsDisplay').text(`Totalt antall bidrag: ${totalSongs}`);
-                } else {
-                    $('#totalSongsDisplay').text(`Visar ${filteredSongs} av ${totalSongs} bidrag`);
-                }
-            },
-            // ✅ ADD: Loading state improvements
-            initComplete: function() {
-                console.log('DataTable loaded successfully');
-                
-                // Add search hint
-                $('.dataTables_filter input').attr('placeholder', 'Søk (minimum 3 bokstavar)...');
+                var data = api.ajax.json();
+                if (data) $('#totalSongsDisplay').text(`Totalt antall bidrag: ${data.recordsTotal}`);
             }
         });
 
-        // ✅ IMPROVED: Reset button with feedback
         $('#resetButton').on('click', function() {
-            $(this).text('Nullstiller...').prop('disabled', true);
-            
-            table.search('').columns().search('').draw();
-            
-            setTimeout(() => {
-                $(this).text('Nullstill').prop('disabled', false);
-            }, 500);
-        });
-        
-        // ✅ ADD: Keyboard shortcut for search focus
-        $(document).on('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'f') {
-                e.preventDefault();
-                $('.dataTables_filter input').focus();
-            }
+            table.search('').draw();
         });
     });
 </script>
 
 <style>
-    .overflow-x-auto .dataTables_filter input {
-        border: 1px solid #ccc;
-        border-radius: 4px;  /* ✅ IMPROVED: Better border radius */
-        padding: 0.5em;
-        background-color: white;
-        min-width: 250px;  /* ✅ ADD: Wider search box */
+    /* DataTables Overrides */
+    .dataTables_wrapper .dataTables_filter { float: none; text-align: center; margin-bottom: 0; }
+    .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid rgba(0,0,0,0.05) !important;
+        background: rgba(255,255,255,0.5) !important;
+        border-radius: 100px !important;
+        padding: 12px 24px !important;
+        width: 300px !important;
+        font-size: 13px !important;
+        transition: all 0.3s !important;
+        outline: none !important;
     }
-
-    .dataTables_wrapper .dataTables_length select {
-        border: 1px solid #aaa;
-        border-radius: 3px;
-        padding: 5px;
-        background-color: white;
+    .dark .dataTables_wrapper .dataTables_filter input {
+        background: rgba(15, 23, 42, 0.5) !important;
+        border-color: rgba(255,255,255,0.05) !important;
+        color: white !important;
+    }
+    .dataTables_wrapper .dataTables_filter input:focus { border-color: #6366f1 !important; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border-radius: 10px !important;
+        font-size: 11px !important;
+        font-weight: bold !important;
+        border: none !important;
+        background: transparent !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #6366f1 !important;
+        color: white !important;
     }
     
-    /* ✅ ADD: Better loading state */
-    .dataTables_processing {
-        background: rgba(255, 255, 255, 0.9) !important;
-        border: 1px solid #ddd !important;
-        border-radius: 4px !important;
-    }
-    
-    /* ✅ ADD: Search hint styling */
-    .dataTables_filter {
-        margin-bottom: 1rem;
-    }
-    
-    .dataTables_filter::after {
-        content: "💡 Trykk Ctrl+F for rask søk";
-        display: block;
-        font-size: 0.75rem;
-        color: #666;
-        margin-top: 0.25rem;
-    }
-    
-    /* ✅ ADD: Better button styling */
-    #resetButton:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+    table.dataTable.no-footer { border-bottom: none !important; }
+    table.dataTable tbody tr { background-color: transparent !important; }
 </style>
 {% endblock %}

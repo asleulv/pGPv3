@@ -1,73 +1,75 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}Ny pGP-runde{% endblock %}
+{% block title %}pGP - {% if 'edit' in request.path %}Rediger{% else %}Ny{% endif %} Runde{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto bg-white shadow-lg p-8 mt-12">
-    <h1 class="text-2xl font-bold mb-6">🧙‍♂️ {% trans "Start ny pGP-runde" %}</h1>
-    <form method="post">
+<div class="max-w-2xl mx-auto px-4 md:px-0 py-10">
+    
+    <header class="text-center mb-12 space-y-2">
+        <div class="w-16 h-16 bg-indigo-500/10 text-indigo-500 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-4">
+            <i class="fas fa-magic"></i>
+        </div>
+        <h1 class="text-3xl font-black uppercase tracking-tight">
+            {% if 'edit' in request.path %}Rediger pGP-runde{% else %}Start ny pGP-runde{% endif %}
+        </h1>
+        <p class="text-xs font-bold uppercase tracking-widest opacity-40">Definer rammene for den musikalske kampen</p>
+    </header>
+
+    <form method="post" class="space-y-8">
         {% csrf_token %}
-        <div class="space-y-4">
+        
+        <div class="card space-y-8 !p-8 md:!p-12 !rounded-[2.5rem] shadow-2xl border-2 border-indigo-500/10 mb-20">
             <!-- Round Name -->
-            <div class="flex flex-col">
-                <label for="{{ form.name.id_for_label }}" class="text-gray-700 font-medium">{% trans "Rundenavn:" %}</label>
-                <div class="mt-1">
-                    <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" value="{{ form.name.value|default_if_none:''  }}"  placeholder="pGP#??? - Ditt tema" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                </div>
-                {% if form.name.help_text %}
-                    <p class="mt-1 text-sm text-gray-500">{{ form.name.help_text }}</p>
-                {% endif %}
-                {% for error in form.name.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
-                {% endfor %}
+            <div class="space-y-3">
+                <label for="{{ form.name.id_for_label }}" class="text-xs font-black uppercase tracking-widest opacity-50 ml-1">Rundenavn</label>
+                <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" 
+                       value="{{ form.name.value|default_if_none:'' }}" 
+                       placeholder="pGP #??? - Mitt Tema" 
+                       class="w-full bg-gray-50/50 dark:bg-slate-900/50 border border-gray-100 dark:border-gray-800 rounded-2xl px-6 py-4 text-sm focus:border-indigo-500 outline-none transition-all shadow-inner font-medium" />
+                {% for error in form.name.errors %}<p class="text-[10px] text-red-500 font-bold ml-1 uppercase letter-spacing-1">{{ error }}</p>{% endfor %}
             </div>
 
             <!-- Description -->
-            <div class="flex flex-col">
-                <label for="{{ form.description.id_for_label }}" class="text-gray-700 font-medium">{% trans "Beskrivelse av tema:" %}</label>
-                <div class="mt-1">
-                    <textarea name="{{ form.description.name }}" id="{{ form.description.id_for_label }}" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">{{ form.description.value|default_if_none:'' }}</textarea>
-                </div>
-                {% if form.description.help_text %}
-                    <p class="mt-1 text-sm text-gray-500">{{ form.description.help_text }}</p>
-                {% endif %}
-                {% for error in form.description.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
-                {% endfor %}
+            <div class="space-y-3">
+                <label for="{{ form.description.id_for_label }}" class="text-xs font-black uppercase tracking-widest opacity-50 ml-1">Oppgåvetekst / Tema</label>
+                <textarea name="{{ form.description.name }}" id="{{ form.description.id_for_label }}" 
+                          rows="5"
+                          placeholder="Fortell kva slags musikk vi leiter etter denne gongen..."
+                          class="w-full bg-gray-50/50 dark:bg-slate-900/50 border border-gray-100 dark:border-gray-800 rounded-2xl px-6 py-4 text-sm focus:border-indigo-500 outline-none transition-all shadow-inner font-medium">{{ form.description.value|default_if_none:'' }}</textarea>
+                {% for error in form.description.errors %}<p class="text-[10px] text-red-500 font-bold ml-1 uppercase">{{ error }}</p>{% endfor %}
             </div>
 
-            <!-- Start Date and Time -->
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium">{% trans "Frist for å leve bidrag:" %}</label>
-                <div class="mt-1 flex space-x-2">
-                    <select name="start_date" id="start_date" class="block w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                        <!-- Start date options will be dynamically filled -->
-                    </select>
-                    <select name="start_time" id="start_time" class="block w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                        <!-- Time options -->
-                    </select>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-gray-100 dark:border-gray-800">
+                <!-- Start Date and Time -->
+                <div class="space-y-4">
+                    <label class="text-xs font-black uppercase tracking-widest opacity-50 ml-1">Frist for bidrag</label>
+                    <div class="space-y-2">
+                        <select name="start_date" id="start_date" class="w-full bg-gray-50/50 dark:bg-slate-900/50 border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-3 text-xs focus:border-indigo-500 outline-none"></select>
+                        <select name="start_time" id="start_time" class="w-full bg-gray-50/50 dark:bg-slate-900/50 border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-3 text-xs focus:border-indigo-500 outline-none"></select>
+                    </div>
+                </div>
+
+                <!-- End Date and Time -->
+                <div class="space-y-4">
+                    <label class="text-xs font-black uppercase tracking-widest opacity-50 ml-1">Frist for stemmer</label>
+                    <div class="space-y-2">
+                        <select name="end_date" id="end_date" class="w-full bg-gray-50/50 dark:bg-slate-900/50 border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-3 text-xs focus:border-indigo-500 outline-none"></select>
+                        <select name="end_time" id="end_time" class="w-full bg-gray-50/50 dark:bg-slate-900/50 border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-3 text-xs focus:border-indigo-500 outline-none"></select>
+                    </div>
                 </div>
             </div>
 
-            <!-- End Date and Time -->
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium">{% trans "Frist for å gi poeng:" %}</label>
-                <div class="mt-1 flex space-x-2">
-                    <select name="end_date" id="end_date" class="block w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                        <!-- End date options will be dynamically filled -->
-                    </select>
-                    <select name="end_time" id="end_time" class="block w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                        <!-- Time options -->
-                    </select>
+            <div class="pt-8">
+                <button type="submit" class="btn btn-primary w-full !rounded-2xl !py-5 text-base font-black shadow-2xl shadow-indigo-500/30 tracking-widest uppercase">
+                    {% if 'edit' in request.path %}Oppdater runden{% else %}Slipp laus runden!{% endif %}
+                </button>
+                <div class="mt-6 flex justify-center">
+                    <a href="{% url 'round_list' %}" class="text-[10px] font-bold uppercase tracking-widest text-secondary opacity-40 hover:opacity-100 transition-opacity">Avbryt og gå tilbake</a>
                 </div>
             </div>
         </div>
-        <div class="flex justify-center">
-            <button type="submit" class="bg-blue-600 text-white py-2 px-4 mt-6">
-                {% trans "🚀Start runde!" %}
-            </button>
-        </div>    </form>
+    </form>
 </div>
 
 <script>
@@ -77,17 +79,14 @@
         const startTimeSelect = document.getElementById('start_time');
         const endTimeSelect = document.getElementById('end_time');
 
-        // Function to format date as "3. september 2024" in Norwegian
         function formatDate(date) {
-            const options = { day: 'numeric', month: 'long', year: 'numeric' };
-            return new Intl.DateTimeFormat('nb-NO', options).format(date);
+            return new Intl.DateTimeFormat('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
         }
 
-        // Function to generate dates based on a start date
         function getNext10Dates(startDate) {
             const dates = [];
             const start = new Date(startDate);
-            for (let i = 1; i <= 10; i++) {
+            for (let i = 1; i <= 14; i++) {
                 const nextDate = new Date(start);
                 nextDate.setDate(start.getDate() + i);
                 dates.push(nextDate);
@@ -95,7 +94,6 @@
             return dates;
         }
 
-        // Populate the start date options
         function populateStartDateOptions() {
             const today = new Date();
             const next10Dates = getNext10Dates(today);
@@ -107,10 +105,9 @@
             });
         }
 
-        // Update end date options based on selected start date
         function updateEndDateOptions() {
             const selectedStartDate = startDateSelect.value;
-            endDateSelect.innerHTML = ''; // Clear existing options
+            endDateSelect.innerHTML = '';
             if (selectedStartDate) {
                 const next10Dates = getNext10Dates(selectedStartDate);
                 next10Dates.forEach(date => {
@@ -122,9 +119,8 @@
             }
         }
 
-        // Generate time options (1-24 hours)
         function populateTimeOptions() {
-            for (let hour = 1; hour <= 24; hour++) {
+            for (let hour = 0; hour < 24; hour++) {
                 const option = document.createElement('option');
                 const hourString = hour < 10 ? `0${hour}` : `${hour}`;
                 option.value = `${hourString}:00`;
@@ -134,20 +130,17 @@
             }
         }
 
-        // Set default time for both start and end time dropdowns
-        function setDefaultTimes() {
-            startTimeSelect.value = '10:00';
-            endTimeSelect.value = '10:00';
-        }
-
-        // Attach change event listener to the start date select
         startDateSelect.addEventListener('change', updateEndDateOptions);
-
-        // Initial population of start and end date options
         populateStartDateOptions();
         updateEndDateOptions();
         populateTimeOptions();
-        setDefaultTimes(); // Set default time
+        
+        // Initial values if editing
+        const initialStartDate = "{{ form.instance.start_date|date:'Y-m-d' }}";
+        if (initialStartDate) startDateSelect.value = initialStartDate;
+        
+        startTimeSelect.value = '21:00';
+        endTimeSelect.value = '21:00';
     });
 </script>
 {% endblock %}

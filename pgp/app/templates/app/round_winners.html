@@ -1,38 +1,68 @@
 {% extends 'base.html' %}
 
-{% block title %}pGP-vinnarar{% endblock %}
+{% block title %}pGP - Vinnarar{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-12">
-    <h1 class="text-2xl font-bold mb-6 text-gray-800">Vinnere av pGP-rundar:</h1>
+<div class="max-w-5xl mx-auto space-y-12 px-4 md:px-0">
+    
+    <!-- Hero Header -->
+    <header class="text-center space-y-4">
+        <div class="relative inline-block">
+            <div class="absolute -inset-4 bg-yellow-500/20 blur-2xl rounded-full"></div>
+            <i class="fas fa-trophy text-5xl md:text-6xl text-yellow-500 relative"></i>
+        </div>
+        <h1 class="text-3xl md:text-5xl font-extrabold uppercase tracking-widest text-secondary">
+            pGP Hall of Fame
+        </h1>
+        <p class="text-sm font-bold uppercase tracking-widest opacity-40">Dei historiske vinnarane av pGP-rundane</p>
+    </header>
 
-    <div class="grid grid-cols-1 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pb-20">
         {% for winner in winners %}
-            <!-- Winner Card -->
-            <div class="bg-gray-50 border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-200 ease-in-out">
-                <div class="font-bold text-xl mb-2 text-gray-700">{{ winner.round_name }}</div>
-
-                <div class="text-sm text-gray-500 mb-4">
-                    <strong>Arrangør:</strong> {{ winner.organizer }} <br>
-                    <strong>Dato lagt til:</strong> {{ winner.date_added }}
+        <div class="card !p-0 !rounded-[2.5rem] overflow-hidden group hover:scale-[1.02] transition-transform duration-300 shadow-xl dark:shadow-2xl">
+            <div class="p-8 pb-0 space-y-1">
+                <small class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-500 opacity-60">{{ winner.date_added|date:"F Y" }}</small>
+                <h2 class="text-2xl font-black text-secondary">{{ winner.round_name }}</h2>
+            </div>
+            
+            <div class="p-8 space-y-8 flex flex-col h-full">
+                <div class="space-y-1">
+                    <span class="text-[10px] font-bold uppercase tracking-widest opacity-40">Vinnar</span>
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-yellow-500/10 text-yellow-500 rounded-full flex items-center justify-center font-bold text-xs">
+                            {{ winner.winning_player_nickname|slice:":1"|upper }}
+                        </div>
+                        <p class="text-lg font-bold text-secondary">{{ winner.winning_player_nickname }}</p>
+                    </div>
                 </div>
 
-                <div class="flex-grow">
-                    <div class="text-sm text-gray-500 mb-2">
-                        <strong>Vinnar:</strong> {{ winner.winning_player_nickname }}
+                <div class="bg-gray-50/50 dark:bg-slate-900/30 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 space-y-4">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-bold uppercase tracking-widest opacity-40">Sigerslåt</span>
+                        <p class="text-sm md:text-base font-bold text-indigo-400 italic">"{{ winner.song_title }}"</p>
+                        <p class="text-xs opacity-60 font-medium">Laget av: <span class="font-bold opacity-100">{{ winner.artist }}</span></p>
                     </div>
-                    <div class="text-lg font-semibold text-gray-800 mb-2">
-                        {{ winner.artist }} - 
-                        <a href="{{ winner.spotify_url }}" class="text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-150 ease-in-out" target="_blank">
-                            {{ winner.song_title }}
-                        </a>
-                    </div>
+                    <a href="{{ winner.spotify_url }}" target="_blank" class="btn !bg-green-500/10 !text-green-500 !border-green-500/20 w-full !text-xs font-bold !rounded-2xl">
+                        <i class="fab fa-spotify mr-2"></i> Lytt på Spotify
+                    </a>
+                </div>
+
+                <div class="pt-6 mt-auto border-t border-gray-50 dark:border-gray-800 flex items-center justify-between">
+                   <div class="text-[10px] uppercase font-bold opacity-30">
+                        Arrangør: <span class="opacity-100 text-secondary">{{ winner.organizer }}</span>
+                   </div>
+                   <div class="w-8 h-8 flex items-center justify-center text-yellow-500/20 group-hover:text-yellow-500 transition-colors">
+                        <i class="fas fa-medal text-xl"></i>
+                   </div>
                 </div>
             </div>
+        </div>
         {% empty %}
-            <div class="text-center col-span-1 text-gray-500">
-                Det finnes ingen vinnere.
-            </div>
+        <div class="col-span-full py-20 text-center opacity-30">
+            <i class="fas fa-ghost text-6xl mb-4"></i>
+            <p class="text-xl font-bold">Ingen vinnarar enno...</p>
+            <p class="text-sm">Kampane er framleis i gang.</p>
+        </div>
         {% endfor %}
     </div>
 </div>

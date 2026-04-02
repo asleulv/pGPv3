@@ -1,223 +1,169 @@
 {% extends "base.html" %}
+
+{% block title %}pGP - Avstemming{% endblock %}
+
 {% block content %}
-<div class="container-md"><br>
-  <div id="all-songs" class="box">
-    <h4>pGP-bidrag:</h4>
-    <form method="post">
-      {% csrf_token %}
-
-      {% for song in songs %}
-      
-      <pre>{{ song.votes }}</pre>
-
-      <div class="field-with-border {% cycle 'bg-gray-100' 'bg-white' %} p-2">
-        <div>
-          <div class="flex justify-between items-center">
-            <label for="track-{{ song.id }}">{{ song.artist }} - {{ song.title }}</label>
-            <select name="track-{{ song.id }}" data-song-name="{{ song.title }}" class="ml-auto">
-              <option value="">0</option>
-              {% for i in score_range %}
-              <option value="{{ i }}">{{ i }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          
-          {% if form.track_id.errors %}
-          <ul>
-            {% for error in form.track_id.errors %}
-            <li>{{ error }}</li>
-            {% endfor %}
-          </ul>
-          {% endif %}
+<div class="max-w-4xl mx-auto px-4 md:px-0 py-10 space-y-10">
+    
+    <!-- Header -->
+    <header class="text-center space-y-4">
+        <div class="w-16 h-16 bg-purple-500/10 text-purple-500 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-4">
+            <i class="fas fa-list-ol"></i>
         </div>
-      </div>
-      {% endfor %}
-      <div id="selected-values" class="box">
-        <h4>Dine poeng:</h4>
-        <ul id="selected-list"></ul>
-      </div>
+        <h1 class="text-3xl font-black uppercase tracking-tight">Avstemming</h1>
+        <p class="text-xs font-bold uppercase tracking-widest opacity-40">Fordel poeng til dine 10 favorittar</p>
+        <div class="p-4 bg-indigo-500/5 rounded-2xl inline-block border border-indigo-500/10">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-indigo-400">Reglar: Du må velge nøyaktig 10 ulike songar og poengsummar.</p>
+        </div>
+    </header>
 
-      <!-- New "Lever Stemmer" button -->
-      <div id="submit-section" class="box" style="display: none;">
-        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-green-300">
-          🚀 Send inn stemmer
-        </button>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <!-- Main Form -->
+        <div class="lg:col-span-2 space-y-4">
+            <form method="post" id="voteForm">
+                {% csrf_token %}
+                <div class="space-y-3">
+                    {% for song in songs %}
+                    <div class="vote-row card !p-4 !rounded-2xl transition-all duration-200 border-l-4 border-transparent hover:border-indigo-500">
+                        <div class="flex items-center justify-between gap-4">
+                            <div class="min-w-0 flex-grow">
+                                <label for="track-{{ song.id }}" class="block text-sm font-bold truncate">{{ song.artist }}</label>
+                                <span class="text-xs opacity-50 truncate block">{{ song.title }}</span>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <select name="track-{{ song.id }}" id="track-{{ song.id }}" data-song-name="{{ song.title }}" data-song-artist="{{ song.artist }}"
+                                        class="bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-2.5 text-xs font-bold focus:border-indigo-500 outline-none w-20 text-center cursor-pointer transition-colors">
+                                    <option value="">0</option>
+                                    {% for i in score_range %}
+                                    <option value="{{ i }}">{{ i }}</p>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Sticky Mobile Submit (Visible only when 10 selected) -->
+                <div id="submit-section" class="mt-10 animate-in fade-in slide-in-from-bottom-4 duration-500" style="display: none;">
+                    <button type="submit" class="btn btn-primary w-full !rounded-2xl !py-6 text-lg font-black tracking-widest uppercase shadow-2xl shadow-indigo-500/40">
+                        🚀 Send inn mine stemmer!
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sidebar: Point Summary -->
+        <div class="lg:col-span-1 space-y-6 lg:sticky lg:top-24">
+            <section class="card !rounded-3xl border-2 border-indigo-500/20 shadow-2xl">
+                <h3 class="text-xs font-black uppercase tracking-widest opacity-50 mb-6 border-b border-gray-100 dark:border-gray-800 pb-4 flex items-center justify-between">
+                    <span>Poengfordeling</span>
+                    <span id="score-counter" class="text-indigo-500">0/10</span>
+                </h3>
+                
+                <div id="selected-list" class="space-y-2 min-h-[400px]">
+                    <div id="empty-state" class="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-20">
+                        <i class="fas fa-music text-3xl"></i>
+                        <p class="text-[10px] uppercase font-bold tracking-widest">Ingen poeng satt enno</p>
+                    </div>
+                    <!-- JS will inject items here -->
+                </div>
+
+                 <div id="active-submit" class="hidden pt-6 border-t border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-300">
+                    <p class="text-[9px] font-bold text-green-500 uppercase tracking-widest text-center mb-4">🏆 Klar til innsending!</p>
+                </div>
+            </section>
+        </div>
     </div>
-    </form>
-  </div>
-
-  {% for line in new_order %}
-  {% with song_title=line.0 song_artist=line.1 score=line.2 %}
-  <output>{{ score }}: {{ song_artist }} - {{ song_title }}</output><br>
-  {% endwith %}
-  {% endfor %}
 </div>
 
-<style>
-  .select-option-disabled {
-    color: #ccc;
-    font-style: italic;
-  }
-
-  .box {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 16px;
-    margin-top: 20px;
-    background-color: #f9f9f9;
-  }
-
-  #selected-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  #selected-list li {
-    padding: 8px 0;
-    border-bottom: 1px solid #ddd;
-  }
-
-  #selected-list li:last-child {
-    border-bottom: none;
-  }
-
-  .field-with-border {
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
-  }
-
-  .field-with-border:last-child {
-    border-bottom: none;
-  }
-
-  .info-text {
-    font-size: 14px;
-    color: #555;
-  }
-
-  /* Mobile adjustments */
-  @media (max-width: 768px) {
-    .box {
-      padding: 12px;
-    }
-
-    form div {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 10px;
-    }
-
-    label {
-      font-size: 14px;
-      margin-bottom: 4px;
-    }
-
-    select {
-      font-size: 14px;
-      padding: 8px;
-      width: 100%; /* Make dropdown full width on mobile */
-    }
-
-    .song-item {
-      flex-direction: column; /* Stack items vertically on mobile */
-      align-items: flex-start;
-    }
-
-    #selected-list li {
-      font-size: 14px;
-    }
-
-    h4 {
-      font-size: 18px;
-    }
-  }
-</style>
-
-<script type="text/javascript">
+<script>
 (() => {
-    const elems = document.querySelectorAll('select[name^="track-"]');
+    const selects = document.querySelectorAll('select[name^="track-"]');
     const selectedList = document.getElementById('selected-list');
     const submitSection = document.getElementById('submit-section');
+    const activeSubmit = document.getElementById('active-submit');
+    const emptyState = document.getElementById('empty-state');
+    const counter = document.getElementById('score-counter');
 
-    // This array keeps track of all selected values globally
     const selectedScores = {};
 
-    const updateSelectedList = () => {
-      const selectedItems = Array.from(elems)
-        .map(e => {
-          const selectedOption = e.options[e.selectedIndex];
-          const songArtist = e.closest('.field-with-border').querySelector('label').textContent.split(' - ')[0]; // Get artist name from label
-          const songTitle = e.closest('.field-with-border').querySelector('label').textContent.split(' - ')[1]; // Get title from label
-          return {
-            value: selectedOption?.value || '',
-            name: songTitle || 'Unknown',
-            artist: songArtist || 'Unknown'
-          };
-        })
-        .filter(item => item.value !== '')
-        .sort((a, b) => b.value - a.value); // Sort in descending order
+    const syncVotes = () => {
+        const items = Array.from(selects)
+            .map(s => ({
+                val: s.value,
+                title: s.dataset.songName,
+                artist: s.dataset.songArtist,
+                id: s.id
+            }))
+            .filter(i => i.val !== '')
+            .sort((a,b) => b.val - a.val);
 
-      selectedList.innerHTML = '';
-      selectedItems.forEach(item => {
-        const li = document.createElement('li');
-        li.textContent = `${item.value}: ${item.artist} - ${item.name}`; // Include both artist and title
-        selectedList.appendChild(li);
-      });
-
-      // Show "Lever Stemmer" button if exactly 10 points are selected
-      const allPointsSelected = selectedItems.length === 10;
-      submitSection.style.display = allPointsSelected ? 'block' : 'none';
-    };
-
-    const disableSelectedScores = () => {
-      // Reset all options first
-      elems.forEach(sel => {
-        Array.from(sel.options).forEach(opt => {
-          opt.disabled = false;
-          opt.classList.remove('select-option-disabled');
-        });
-      });
-
-      // Then disable the selected scores across all elements
-      Object.keys(selectedScores).forEach(selectedValue => {
-        elems.forEach(sel => {
-          const selectedSongId = sel.name.split('-')[1];
-          if (selectedScores[selectedValue] !== selectedSongId) {
-            Array.from(sel.options).forEach(opt => {
-              if (opt.value == selectedValue) {
-                opt.disabled = true;
-                opt.classList.add('select-option-disabled');
-              }
+        selectedList.innerHTML = '';
+        if (items.length > 0) {
+            emptyState.style.display = 'none';
+            items.forEach(i => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 bg-indigo-500/5 rounded-2xl border border-indigo-500/10 animate-in slide-in-from-right-2 duration-300';
+                div.innerHTML = `
+                    <span class="text-xs font-black text-indigo-500 w-8">${i.val}p</span>
+                    <div class="flex-grow min-w-0 pr-2">
+                        <p class="text-[10px] font-bold truncate text-secondary">${i.artist}</p>
+                        <p class="text-[9px] opacity-40 truncate italic">${i.title}</p>
+                    </div>
+                `;
+                selectedList.appendChild(div);
             });
-          }
-        });
-      });
+        } else {
+            selectedList.appendChild(emptyState);
+            emptyState.style.display = 'flex';
+        }
+
+        const full = items.length === 10;
+        submitSection.style.display = full ? 'block' : 'none';
+        activeSubmit.classList.toggle('hidden', !full);
+        counter.textContent = `${items.length}/10`;
+        counter.className = full ? 'text-green-500 font-black' : 'text-indigo-500';
     };
 
-    elems.forEach(elem => {
-      const songId = elem.name.split('-')[1]; // Get the song ID from the select name
+    const recomputeDisabled = () => {
+        selects.forEach(s => {
+            const currentVal = s.value;
+            const songId = s.id;
+            Array.from(s.options).forEach(opt => {
+                const optVal = opt.value;
+                if (optVal === "") return opt.disabled = false;
+                
+                const usedBy = Object.keys(selectedScores).find(val => val === optVal);
+                opt.disabled = !!(usedBy && selectedScores[usedBy] !== songId);
+                opt.style.opacity = opt.disabled ? "0.3" : "1";
+            });
+        });
+    };
 
-      elem.addEventListener('change', evt => {
-        const val = evt.target.value;
-
-        // Remove the previous selection for this song if one existed
-        const previousSelectedValue = Object.keys(selectedScores).find(key => selectedScores[key] === songId);
-        if (previousSelectedValue) {
-          delete selectedScores[previousSelectedValue];
-        }
-
-        // Add the new selection if a score is selected
-        if (val !== '') {
-          selectedScores[val] = songId;
-        }
-
-        // Disable selected scores globally and update the displayed list
-        disableSelectedScores();
-        updateSelectedList();
-      });
+    selects.forEach(s => {
+        const songId = s.id;
+        s.addEventListener('change', e => {
+             const prevVal = Object.keys(selectedScores).find(k => selectedScores[k] === songId);
+             if (prevVal) delete selectedScores[prevVal];
+             if (e.target.value) selectedScores[e.target.value] = songId;
+             
+             recomputeDisabled();
+             syncVotes();
+             
+             // Highlight row
+             const row = e.target.closest('.vote-row');
+             if (e.target.value) {
+                row.classList.add('!bg-indigo-500/5', 'border-indigo-500');
+             } else {
+                row.classList.remove('!bg-indigo-500/5', 'border-indigo-500');
+             }
+        });
     });
 })();
 </script>
 
+<style>
+.vote-row { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+</style>
 {% endblock %}
