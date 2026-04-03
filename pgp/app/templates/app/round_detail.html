@@ -193,43 +193,68 @@
         <!-- Right: Content & Tables -->
         <div class="lg:col-span-2 space-y-10">
             
-            <!-- Song Submission Form (Hidden if submission deadline passed) -->
+            <!-- Song Submission Phase -->
             {% if round.start_date >= now and not round.round_finished %}
-            <section class="card !rounded-[2.5rem] border-4 border-green-500/10 bg-green-500/[0.02] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div class="flex items-center justify-between">
-                    <div class="space-y-1">
-                        <h2 class="text-3xl font-black uppercase tracking-tighter text-green-500 italic">
-                            {% if player_song %}Oppdater bidrag{% else %}Lever din låt!{% endif %}
-                        </h2>
-                        <p class="text-[10px] font-black uppercase tracking-widest opacity-30 italic">Fristen går ut {{ round.start_date|date:"d. F H:i" }}</p>
-                    </div>
-                    <div class="w-14 h-14 bg-green-500 text-white rounded-[1.5rem] flex items-center justify-center text-2xl shadow-xl shadow-green-500/20">
-                        <i class="fas fa-upload"></i>
-                    </div>
-                </div>
+            <div class="space-y-6">
                 
-                <form method="post" action="{% url 'submit_song' pk=round.pk %}" class="space-y-6">
-                    {% csrf_token %}
-                    <div class="space-y-4">
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Spotify URL</label>
-                            <input type="text" name="spotify_url" value="{{ player_song.spotify_url|default:'' }}" 
-                                   required class="w-full bg-white dark:bg-slate-900/50 border-2 border-gray-100 dark:border-gray-800 rounded-2xl px-6 py-5 text-sm focus:border-green-500 outline-none transition-all shadow-inner font-medium" 
-                                   placeholder="https://open.spotify.com/track/...">
+                <!-- PREVIEW of currently submitted song -->
+                {% if player_song %}
+                <section class="card !rounded-[2.5rem] border-2 border-indigo-500/20 bg-indigo-50/30 dark:bg-slate-900/40 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div class="flex items-center justify-between px-2">
+                        <div class="space-y-1">
+                            <h3 class="text-xs font-black uppercase tracking-widest text-indigo-500 italic">Ditt registrerte bidrag</h3>
+                            <p class="text-[11px] font-bold text-secondary">Dette er låta du deltar med akkurat no</p>
                         </div>
-                        <div class="p-4 bg-white/50 dark:bg-black/20 rounded-2xl border border-green-500/5">
-                            <p class="text-[10px] opacity-60 leading-relaxed font-medium">
-                                <i class="fas fa-info-circle mr-1 text-green-500"></i> 
-                                Lim inn Spotify-lenka til bidraget ditt over. Du kan endre songen din så mange gonger du vil heilt fram til fristen går ut.
-                            </p>
+                        <div class="w-10 h-10 bg-indigo-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                            <i class="fas fa-check"></i>
                         </div>
                     </div>
+                    
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-indigo-500/5">
+                        <div class="flex flex-col md:flex-row gap-6 items-center">
+                            <div class="flex-grow space-y-1 text-center md:text-left">
+                                <p class="text-2xl font-black text-secondary leading-tight">{{ player_song.artist }}</p>
+                                <p class="text-base font-bold opacity-40 uppercase tracking-widest italic">{{ player_song.title }}</p>
+                            </div>
+                            <div class="w-full md:w-64">
+                                <iframe src="https://open.spotify.com/embed?uri={{ player_song.spotify_url }}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media" class="rounded-2xl shadow-lg"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                {% endif %}
 
-                    <button type="submit" class="w-full btn !bg-green-500 !text-white !rounded-[1.5rem] !py-5 text-sm font-black uppercase tracking-widest shadow-2xl shadow-green-500/40 hover:-translate-y-1 active:scale-95 transition-all">
-                        {% if player_song %}Gjennomfør Endring{% else %}Send inn bidraget mitt!{% endif %}
-                    </button>
-                </form>
-            </section>
+                <!-- Submission/Update Form -->
+                <section class="card !rounded-[2.5rem] border-4 border-green-500/10 bg-green-500/[0.02] space-y-8">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <h2 class="text-3xl font-black uppercase tracking-tighter text-green-500 italic">
+                                {% if player_song %}Endre bidrag?{% else %}Lever din låt!{% endif %}
+                            </h2>
+                            <p class="text-[10px] font-black uppercase tracking-widest opacity-30 italic">Fristen går ut {{ round.start_date|date:"d. F H:i" }}</p>
+                        </div>
+                        <div class="w-14 h-14 {% if player_song %}bg-indigo-500{% else %}bg-green-500{% endif %} text-white rounded-[1.5rem] flex items-center justify-center text-2xl shadow-xl shadow-green-500/20">
+                            <i class="fas {% if player_song %}fa-sync-alt{% else %}fa-upload{% endif %}"></i>
+                        </div>
+                    </div>
+                    
+                    <form method="post" action="{% url 'submit_song' pk=round.pk %}" class="space-y-6">
+                        {% csrf_token %}
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Spotify URL</label>
+                                <input type="text" name="spotify_url" value="{{ player_song.spotify_url|default:'' }}" 
+                                       required class="w-full bg-white dark:bg-slate-900/50 border-2 border-gray-100 dark:border-gray-800 rounded-2xl px-6 py-5 text-sm focus:border-green-500 outline-none transition-all shadow-inner font-medium" 
+                                       placeholder="https://open.spotify.com/track/...">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full btn !bg-green-500 !text-white !rounded-[1.5rem] !py-5 text-sm font-black uppercase tracking-widest shadow-2xl shadow-green-500/40 hover:-translate-y-1 active:scale-95 transition-all">
+                            {% if player_song %}Oppdater mitt bidrag{% else %}Send inn bidraget mitt!{% endif %}
+                        </button>
+                    </form>
+                </section>
+            </div>
             {% endif %}
 
             {% if round.playlist_released %}
