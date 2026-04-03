@@ -64,9 +64,11 @@
     </section>
 
     <!-- Main Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
+    {% with has_sidebar=player_votes or is_organizer and not round.round_finished or player_song and round.playlist_released and round.end_date > now and not round.round_finished %}
+    <div class="grid grid-cols-1 {% if has_sidebar %}lg:grid-cols-3{% else %}lg:grid-cols-1{% endif %} gap-10 items-start">
         
         <!-- Left: Status & Actions -->
+        {% if has_sidebar %}
         <div class="lg:col-span-1 space-y-10">
             
             <!-- Voting Display for User -->
@@ -189,9 +191,10 @@
             {% endif %}
 
         </div>
+        {% endif %}
 
         <!-- Right: Content & Tables -->
-        <div class="lg:col-span-2 space-y-10">
+        <div class="{% if has_sidebar %}lg:col-span-2{% else %}lg:col-span-3{% endif %} space-y-10">
             
             <!-- Song Submission Phase -->
             {% if round.start_date >= now and not round.round_finished %}
@@ -401,6 +404,7 @@
 
         </div>
     </div>
+    {% endwith %}
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
