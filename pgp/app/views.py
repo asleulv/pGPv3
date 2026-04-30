@@ -585,8 +585,31 @@ def edit_round(request, round_id):
         # Handle form submission for editing the round
         form = RoundForm(request.POST, instance=round_instance)
         if form.is_valid():
-            form.save()
-            return redirect('round_detail', pk=round_instance.id)  # Ensure to use 'pk' here
+            start_date_str = request.POST.get('start_date')
+            end_date_str = request.POST.get('end_date')
+            start_time_str = request.POST.get('start_time', '00:00')
+            end_time_str = request.POST.get('end_time', '00:00')
+
+            try:
+                if start_date_str and start_time_str:
+                    start_datetime = datetime.combine(
+                        datetime.strptime(start_date_str, '%Y-%m-%d').date(),
+                        datetime.strptime(start_time_str, '%H:%M').time()
+                    )
+                    round_instance.start_date = start_datetime
+                
+                if end_date_str and end_time_str:
+                    end_datetime = datetime.combine(
+                        datetime.strptime(end_date_str, '%Y-%m-%d').date(),
+                        datetime.strptime(end_time_str, '%H:%M').time()
+                    )
+                    round_instance.end_date = end_datetime
+
+                form.save()
+                return redirect('round_detail', pk=round_instance.id)
+            except ValueError:
+                messages.error(request, 'Ugyldig dato eller tid format.')
+                return render(request, 'app/edit_round.html', {'form': form, 'round': round_instance})
     else:
         form = RoundForm(instance=round_instance)
 
