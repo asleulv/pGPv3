@@ -33,19 +33,21 @@
         </div>
 
         <div class="flex justify-center order-1 lg:order-2">
-            <div class="vinyl-record">
-                <div class="vinyl-grooves"></div>
-                <div class="vinyl-label">
-                    <div class="label-text">pGP</div>
-                    <div class="label-subtext">
+            <div class="vinyl-container">
+                <div class="vinyl-disc">
+                    <div class="vinyl-grooves"></div>
+                    <div class="vinyl-label">
+                        <div class="label-brand">pGP</div>
                         {% if active_rounds %}
-                            {{ active_rounds.0.organizer.username|upper }}
+                            <div class="label-theme" title="{{ active_rounds.0.name }}">{{ active_rounds.0.name }}</div>
+                            <div class="label-subtext"><i class="fas fa-crown text-[7px] mr-0.5 text-amber-300"></i>{{ active_rounds.0.organizer.username|upper }}</div>
                         {% else %}
-                            STEREO 33
+                            <div class="label-theme">STEREO 33</div>
+                            <div class="label-subtext">pGP BETA</div>
                         {% endif %}
                     </div>
+                    <div class="vinyl-center"></div>
                 </div>
-                <div class="vinyl-center"></div>
             </div>
         </div>
     </section>

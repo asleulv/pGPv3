@@ -236,21 +236,53 @@ nav {
 }
 
 /* --- Premium Vinyl Record Component --- */
-.vinyl-record {
+.vinyl-container {
     width: 280px;
     height: 280px;
-    background: #080808;
     border-radius: 50%;
     position: relative;
     box-shadow: 
         0 30px 60px -12px rgba(0,0,0,0.5),
-        0 18px 36px -18px rgba(0,0,0,0.6),
-        inset 0 2px 4px rgba(255,255,255,0.1);
-    animation: vinyl-spin 6s linear infinite;
+        0 18px 36px -18px rgba(0,0,0,0.6);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10;
+}
+
+/* Static Gloss Reflection overlay (does NOT rotate) */
+.vinyl-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0%,
+        rgba(255,255,255,0.06) 10%,
+        transparent 20%,
+        rgba(255,255,255,0.06) 45%,
+        transparent 50%,
+        rgba(255,255,255,0.06) 60%,
+        transparent 70%,
+        rgba(255,255,255,0.06) 90%,
+        transparent 100%
+    );
+    z-index: 8;
+    pointer-events: none;
+}
+
+/* Spinning Disc */
+.vinyl-disc {
+    width: 100%;
+    height: 100%;
+    background: #080808;
+    border-radius: 50%;
+    position: relative;
+    animation: vinyl-spin 14s linear infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Grooves & Material Texture */
@@ -270,61 +302,58 @@ nav {
     -webkit-mask-image: radial-gradient(circle, black 35%, transparent 35%, transparent 40%, black 40%);
 }
 
-/* Realistic Shine/Reflections */
-.vinyl-record::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: conic-gradient(
-        from 0deg,
-        transparent 0%,
-        rgba(255,255,255,0.03) 10%,
-        transparent 20%,
-        rgba(255,255,255,0.03) 45%,
-        transparent 50%,
-        rgba(255,255,255,0.03) 60%,
-        transparent 70%,
-        rgba(255,255,255,0.03) 90%,
-        transparent 100%
-    );
-    z-index: 2;
-    pointer-events: none;
-}
-
-/* The Central Label */
+/* The Central Label (pGP Indigo/Purple Brand Gradient) */
 .vinyl-label {
     position: relative;
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+    width: 105px;
+    height: 105px;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
     border-radius: 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 5;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: inset 0 0 12px rgba(0,0,0,0.4);
+    border: 2px solid rgba(255,255,255,0.25);
+    padding: 8px;
+    text-align: center;
+    overflow: hidden;
 }
 
-.label-text {
+.label-brand {
     font-family: 'Outfit', sans-serif;
     font-weight: 900;
-    color: white;
-    font-size: 18px;
-    letter-spacing: -0.05em;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    color: #ffffff;
+    font-size: 13px;
+    letter-spacing: 0.05em;
     line-height: 1;
+    opacity: 0.9;
+}
+
+.label-theme {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    color: #ffffff;
+    font-size: 10px;
+    line-height: 1.1;
+    max-width: 85px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    margin: 3px 0;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
 
 .label-subtext {
-    font-size: 9px;
+    font-size: 8px;
     text-transform: uppercase;
     font-weight: 800;
-    color: rgba(255,255,255,0.9);
-    letter-spacing: 0.1em;
-    margin-top: 4px;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 0.08em;
+    line-height: 1;
 }
 
 /* The Pin Hole */
@@ -344,21 +373,28 @@ nav {
 }
 
 @media (max-width: 768px) {
-    .vinyl-record {
-        width: 180px;
-        height: 180px;
+    .vinyl-container {
+        width: 190px;
+        height: 190px;
     }
     .vinyl-label {
-        width: 60px;
-        height: 60px;
+        width: 70px;
+        height: 70px;
+        padding: 4px;
     }
-    .label-text { font-size: 10px; }
+    .label-brand { font-size: 10px; }
+    .label-theme { font-size: 8px; max-width: 60px; }
+    .label-subtext { font-size: 7px; }
 }
 
-[data-theme='dark'] .vinyl-record {
+[data-theme='dark'] .vinyl-container {
     box-shadow: 
         0 40px 80px -15px rgba(0,0,0,0.8),
-        0 0 40px rgba(99, 102, 241, 0.15),
-        inset 0 0 1px rgba(255,255,255,0.2);
-    border: 1px solid rgba(255,255,255,0.05);
+        0 0 40px rgba(99, 102, 241, 0.2);
 }
+
+
+
+
+
+

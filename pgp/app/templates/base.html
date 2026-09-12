@@ -156,6 +156,10 @@
 
 
     <script>
+      // Clean up any legacy terminal_mode preference
+      localStorage.removeItem('terminal_mode');
+      document.documentElement.classList.remove('terminal-mode');
+
       // Theme Management
       const doc = document.documentElement;
       const themeToggle = document.getElementById('theme-toggle');

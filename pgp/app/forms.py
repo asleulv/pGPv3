@@ -69,7 +69,7 @@ class DynamicVoteForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         used_scores = []
-        for field_name, score in cleaned_data.items():
+        for field_name, score in list(cleaned_data.items()):
             if score:
                 if score in used_scores:
                     self.add_error(field_name, f"Score {score} has already been used")

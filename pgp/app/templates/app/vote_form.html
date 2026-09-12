@@ -3,7 +3,7 @@
 {% block title %}pGP - Avstemming{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 md:px-0 py-10 space-y-10">
+<div class="max-w-4xl mx-auto px-4 md:px-0 py-10 space-y-8">
     
     <!-- Header -->
     <header class="text-center space-y-4">
@@ -17,12 +17,24 @@
         </div>
     </header>
 
+    <!-- View Mode Switcher -->
+    <div class="flex items-center justify-center p-1.5 bg-gray-200/80 dark:bg-slate-800/90 rounded-2xl max-w-sm mx-auto border border-gray-300/50 dark:border-gray-700/60 shadow-inner">
+        <button type="button" id="mode-dropdown-btn" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-md">
+            <i class="fas fa-list-ul"></i> Dropdown
+        </button>
+        <button type="button" id="mode-drag-btn" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+            <i class="fas fa-grip-vertical"></i> Dra og slipp
+        </button>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <!-- Main Form -->
         <div class="lg:col-span-2 space-y-4">
             <form method="post" id="voteForm">
                 {% csrf_token %}
-                <div class="space-y-3">
+                
+                <!-- View 1: Standard Dropdown View -->
+                <div id="dropdown-view" class="space-y-3">
                     {% for song in songs %}
                     <div class="vote-row card !p-4 !rounded-2xl transition-all duration-200 border-l-4 border-transparent hover:border-indigo-500">
                         <div class="flex items-center justify-between gap-4">
@@ -35,13 +47,67 @@
                                         class="bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-2.5 text-xs font-bold focus:border-indigo-500 outline-none w-20 text-center cursor-pointer transition-colors">
                                     <option value="">0</option>
                                     {% for i in score_range %}
-                                    <option value="{{ i }}">{{ i }}</p>
+                                    <option value="{{ i }}">{{ i }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                         </div>
                     </div>
                     {% endfor %}
+                </div>
+
+                <!-- View 2: Drag & Drop View -->
+                <div id="drag-view" class="hidden space-y-6">
+                    <!-- Helper Instruction banner -->
+                    <div class="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-between gap-3 text-xs">
+                        <span class="flex items-center gap-2 text-indigo-400 font-medium">
+                            <i class="fas fa-info-circle text-indigo-500"></i>
+                            Dra låtane inn på poengtavla. Eksisterande låtar forskyv seg automatisk!
+                        </span>
+                        <button type="button" id="clear-all-drag-btn" class="text-[11px] font-bold text-red-400 hover:text-red-300 underline cursor-pointer">
+                            Tøm alle
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Left Panel: Available Songs -->
+                        <div class="space-y-3 card !p-4 !rounded-3xl border border-gray-200 dark:border-gray-800">
+                            <div class="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-gray-800">
+                                <h3 class="text-xs font-black uppercase tracking-widest opacity-60">Sanger / Låtar</h3>
+                                <span id="drag-unassigned-count" class="text-[11px] font-bold text-indigo-400">0 tilgjengelege</span>
+                            </div>
+                            <!-- Search box -->
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-3 top-2.5 text-xs opacity-40"></i>
+                                <input type="text" id="drag-song-search" placeholder="Søk låt eller artist..." 
+                                       class="w-full pl-8 pr-3 py-2 text-xs rounded-xl bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-gray-800 focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <!-- Songs Pool Container -->
+                            <div id="drag-songs-pool" class="space-y-2 max-h-[520px] overflow-y-auto pr-1">
+                                <!-- JS injects song cards here -->
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Point Ladder -->
+                        <div class="space-y-3 card !p-4 !rounded-3xl border border-indigo-500/20">
+                            <div class="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-gray-800">
+                                <h3 class="text-xs font-black uppercase tracking-widest opacity-60 flex items-center gap-2">
+                                    <i class="fas fa-trophy text-amber-400"></i> Poengtavle
+                                </h3>
+                                <span id="drag-assigned-count" class="text-[11px] font-bold text-indigo-400">0/10 satt</span>
+                            </div>
+                            <!-- Point Slots Container -->
+                            <div id="drag-point-ladder" class="space-y-2 max-h-[570px] overflow-y-auto pr-1">
+                                <!-- JS injects 10 point slots here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toast notification for shifted songs -->
+                <div id="drag-toast" class="hidden fixed bottom-6 right-6 z-50 p-4 bg-slate-900 text-white text-xs font-bold rounded-2xl shadow-2xl border border-slate-700 animate-in fade-in slide-in-from-bottom-3 duration-300 flex items-center gap-3">
+                    <i class="fas fa-info-circle text-indigo-400 text-base"></i>
+                    <span id="drag-toast-msg">Notifikasjon</span>
                 </div>
 
                 <!-- Sticky Mobile Submit (Visible only when 10 selected) -->
@@ -86,7 +152,126 @@
     const emptyState = document.getElementById('empty-state');
     const counter = document.getElementById('score-counter');
 
+    const modeDropdownBtn = document.getElementById('mode-dropdown-btn');
+    const modeDragBtn = document.getElementById('mode-drag-btn');
+    const dropdownView = document.getElementById('dropdown-view');
+    const dragView = document.getElementById('drag-view');
+    const dragSongsPool = document.getElementById('drag-songs-pool');
+    const dragPointLadder = document.getElementById('drag-point-ladder');
+    const dragSongSearch = document.getElementById('drag-song-search');
+    const dragUnassignedCount = document.getElementById('drag-unassigned-count');
+    const dragAssignedCount = document.getElementById('drag-assigned-count');
+    const clearAllDragBtn = document.getElementById('clear-all-drag-btn');
+    const dragToast = document.getElementById('drag-toast');
+    const dragToastMsg = document.getElementById('drag-toast-msg');
+
+    const scoreRange = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
     const selectedScores = {};
+
+    let toastTimeout = null;
+    const showShiftToast = (msg) => {
+        if (!dragToast || !dragToastMsg) return;
+        dragToastMsg.textContent = msg;
+        dragToast.classList.remove('hidden');
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+            dragToast.classList.add('hidden');
+        }, 3500);
+    };
+
+    // Collect all song objects from selects
+    const allSongs = Array.from(selects).map(s => {
+        const id = s.id.replace('track-', '');
+        return {
+            id: id,
+            title: s.dataset.songName || '',
+            artist: s.dataset.songArtist || '',
+            selectEl: s
+        };
+    });
+
+// Array of 10 fixed slots corresponding to scoreRange [12, 10, 8, 7, 6, 5, 4, 3, 2, 1]
+    let placedSongs = new Array(10).fill(null);
+
+    // Mode state
+    let activeMode = localStorage.getItem('pgp_vote_mode') || 'dropdown';
+
+    const setMode = (mode) => {
+        activeMode = mode;
+        localStorage.setItem('pgp_vote_mode', mode);
+
+        if (mode === 'drag') {
+            dropdownView.classList.add('hidden');
+            dragView.classList.remove('hidden');
+            modeDragBtn.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-md';
+            modeDropdownBtn.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white';
+            renderDragView();
+        } else {
+            dragView.classList.add('hidden');
+            dropdownView.classList.remove('hidden');
+            modeDropdownBtn.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-md';
+            modeDragBtn.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white';
+        }
+    };
+
+    modeDropdownBtn.addEventListener('click', () => setMode('dropdown'));
+    modeDragBtn.addEventListener('click', () => setMode('drag'));
+
+    // Reads selects and populates placedSongs
+    const syncFromSelectsToPlaced = () => {
+        placedSongs.fill(null);
+        allSongs.forEach(song => {
+            const val = parseInt(song.selectEl.value, 10);
+            if (!isNaN(val)) {
+                const idx = scoreRange.indexOf(val);
+                if (idx !== -1) {
+                    placedSongs[idx] = song.id;
+                }
+            }
+        });
+    };
+
+    const syncPlacedToSelects = () => {
+        // Reset all selects
+        allSongs.forEach(s => {
+            if (s.selectEl.value !== '') {
+                s.selectEl.value = '';
+            }
+        });
+
+        // Set select values for placedSongs (idx maps to scoreRange)
+        placedSongs.forEach((songId, idx) => {
+            if (songId && idx < scoreRange.length) {
+                const song = allSongs.find(s => s.id === songId);
+                if (song) {
+                    song.selectEl.value = scoreRange[idx].toString();
+                }
+            }
+        });
+
+        // Update selectedScores
+        Object.keys(selectedScores).forEach(k => delete selectedScores[k]);
+        allSongs.forEach(s => {
+            if (s.selectEl.value) {
+                selectedScores[s.selectEl.value] = s.selectEl.id;
+            }
+        });
+
+        recomputeDisabled();
+        syncVotes();
+
+        // Update dropdown row highlights
+        selects.forEach(s => {
+            const row = s.closest('.vote-row');
+            if (row) {
+                if (s.value) {
+                    row.classList.add('!bg-indigo-500/5', 'border-indigo-500');
+                } else {
+                    row.classList.remove('!bg-indigo-500/5', 'border-indigo-500');
+                }
+            }
+        });
+    };
 
     const syncVotes = () => {
         const items = Array.from(selects)
@@ -128,7 +313,6 @@
 
     const recomputeDisabled = () => {
         selects.forEach(s => {
-            const currentVal = s.value;
             const songId = s.id;
             Array.from(s.options).forEach(opt => {
                 const optVal = opt.value;
@@ -158,8 +342,278 @@
              } else {
                 row.classList.remove('!bg-indigo-500/5', 'border-indigo-500');
              }
+
+             // Update placed array and D&D view if active
+             syncFromSelectsToPlaced();
+             if (activeMode === 'drag') {
+                 renderDragView();
+             }
         });
     });
+
+    // -------------------------------------------------------------
+    // DRAG & DROP AND SHIFTING LOGIC
+    // -------------------------------------------------------------
+
+    // Places songId directly at targetIndex (0 to 9).
+    // If targetIndex is occupied, shifts occupied slots downwards!
+    const placeSongInSlot = (songId, targetIndex) => {
+        if (targetIndex < 0 || targetIndex >= 10) return;
+
+        // 1. Remove song from its current slot if it's already on the ladder
+        const existingIndex = placedSongs.indexOf(songId);
+        if (existingIndex !== -1) {
+            placedSongs[existingIndex] = null;
+        }
+
+        // 2. If target slot is empty, place it directly!
+        if (placedSongs[targetIndex] === null) {
+            placedSongs[targetIndex] = songId;
+        } else {
+            // Target slot is occupied! Shift items from targetIndex downwards
+            let bumpedSong = null;
+            let currentToInsert = songId;
+
+            for (let i = targetIndex; i < 10; i++) {
+                const temp = placedSongs[i];
+                placedSongs[i] = currentToInsert;
+                currentToInsert = temp;
+                if (currentToInsert === null) {
+                    break; // Empty slot found, stop shifting!
+                }
+            }
+
+            // If an item was pushed off the 10th slot (1 point)
+            if (currentToInsert !== null) {
+                bumpedSong = allSongs.find(s => s.id === currentToInsert);
+            }
+
+            if (bumpedSong) {
+                showShiftToast(`"${bumpedSong.artist} - ${bumpedSong.title}" vart forskyvd ut av poengtavla`);
+            }
+        }
+
+        syncPlacedToSelects();
+        renderDragView();
+    };
+
+    const removeSongFromSlot = (slotIndex) => {
+        if (slotIndex < 0 || slotIndex >= 10) return;
+        placedSongs[slotIndex] = null;
+        
+        syncPlacedToSelects();
+        renderDragView();
+    };
+
+    clearAllDragBtn.addEventListener('click', () => {
+        placedSongs.fill(null);
+        syncPlacedToSelects();
+        renderDragView();
+    });
+
+    dragSongSearch.addEventListener('input', () => {
+        renderDragView();
+    });
+
+    // Render Drag & Drop view (Pool + Point Ladder)
+    const renderDragView = () => {
+        syncFromSelectsToPlaced();
+
+        const query = dragSongSearch.value.toLowerCase().trim();
+        const assignedIds = new Set(placedSongs.filter(id => id !== null));
+        
+        // Render Pool (Left Side)
+        dragSongsPool.innerHTML = '';
+        let unassignedCount = 0;
+
+        allSongs.forEach(song => {
+            const isAssigned = assignedIds.has(song.id);
+            const matchesQuery = !query || song.artist.toLowerCase().includes(query) || song.title.toLowerCase().includes(query);
+            
+            if (!matchesQuery) return;
+            if (!isAssigned) unassignedCount++;
+
+            const card = document.createElement('div');
+            card.className = `p-3 rounded-2xl border transition-all duration-200 flex items-center justify-between gap-3 ${
+                isAssigned 
+                ? 'bg-gray-100/50 dark:bg-slate-900/40 border-gray-200 dark:border-gray-800/50 opacity-60' 
+                : 'bg-gray-50 dark:bg-slate-900/90 border-gray-200/80 dark:border-gray-800 hover:border-indigo-500 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md'
+            }`;
+            
+            card.draggable = true;
+            card.dataset.songId = song.id;
+
+            const placedIdx = placedSongs.indexOf(song.id);
+            const placedScore = placedIdx !== -1 ? scoreRange[placedIdx] : null;
+
+            card.innerHTML = `
+                <div class="flex items-center gap-2.5 min-w-0 flex-grow">
+                    <i class="fas fa-grip-vertical text-xs opacity-30"></i>
+                    <div class="min-w-0 flex-grow">
+                        <p class="text-xs font-bold truncate text-secondary">${song.artist}</p>
+                        <p class="text-[10px] opacity-50 truncate italic">${song.title}</p>
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
+                    ${isAssigned 
+                        ? `<span class="px-2 py-0.5 text-[10px] font-black rounded-full bg-indigo-500/20 text-indigo-400 flex items-center gap-1"><i class="fas fa-check text-[8px]"></i> ${placedScore}p</span>`
+                        : `<button type="button" class="add-to-top-btn px-2.5 py-1 text-[10px] font-bold bg-indigo-500/10 text-indigo-500 hover:bg-indigo-600 hover:text-white rounded-xl transition-colors">+ Sett inn</button>`
+                    }
+                </div>
+            `;
+
+            // Drag event from pool
+            card.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', song.id);
+                e.dataTransfer.setData('source', 'pool');
+                card.classList.add('opacity-40');
+            });
+
+            card.addEventListener('dragend', () => {
+                card.classList.remove('opacity-40');
+            });
+
+            // Click button to place in first empty slot
+            const addBtn = card.querySelector('.add-to-top-btn');
+            if (addBtn) {
+                addBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const firstEmptyIdx = placedSongs.findIndex(id => id === null);
+                    const targetIdx = firstEmptyIdx !== -1 ? firstEmptyIdx : 0;
+                    placeSongInSlot(song.id, targetIdx);
+                });
+            }
+
+            // Click card row fallback
+            if (!isAssigned) {
+                card.addEventListener('click', () => {
+                    const firstEmptyIdx = placedSongs.findIndex(id => id === null);
+                    const targetIdx = firstEmptyIdx !== -1 ? firstEmptyIdx : 0;
+                    placeSongInSlot(song.id, targetIdx);
+                });
+            }
+
+            dragSongsPool.appendChild(card);
+        });
+
+        dragUnassignedCount.textContent = `${unassignedCount} tilgjengelege`;
+        dragAssignedCount.textContent = `${assignedIds.size}/10 satt`;
+
+        // Render Point Ladder (Right Side)
+        dragPointLadder.innerHTML = '';
+
+        scoreRange.forEach((score, idx) => {
+            const songId = placedSongs[idx];
+            const song = songId ? allSongs.find(s => s.id === songId) : null;
+
+            const slot = document.createElement('div');
+            slot.dataset.slotIndex = idx;
+            slot.dataset.score = score;
+
+            // Medal / rank badge formatting
+            let badgeStyle = 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-gray-400';
+            let badgeText = `${score}p`;
+
+            if (score === 12) {
+                badgeStyle = 'bg-amber-400/20 text-amber-500 border border-amber-400/30';
+                badgeText = `🥇 12p`;
+            } else if (score === 10) {
+                badgeStyle = 'bg-slate-300/20 text-slate-300 border border-slate-300/30';
+                badgeText = `🥈 10p`;
+            } else if (score === 8) {
+                badgeStyle = 'bg-amber-700/20 text-amber-600 border border-amber-700/30';
+                badgeText = `🥉 8p`;
+            }
+
+            slot.className = `p-3 rounded-2xl border transition-all duration-200 min-h-[58px] flex items-center justify-between gap-3 ${
+                song 
+                ? 'bg-indigo-500/5 dark:bg-indigo-500/10 border-indigo-500/30 shadow-sm cursor-grab active:cursor-grabbing' 
+                : 'bg-gray-50/50 dark:bg-slate-900/40 border-dashed border-gray-200 dark:border-gray-800 opacity-80'
+            }`;
+
+            if (song) {
+                slot.draggable = true;
+                slot.innerHTML = `
+                    <div class="flex items-center gap-3 min-w-0 flex-grow">
+                        <span class="text-[11px] font-black px-2.5 py-1 rounded-xl flex-shrink-0 ${badgeStyle}">${badgeText}</span>
+                        <i class="fas fa-grip-vertical text-xs opacity-30 flex-shrink-0"></i>
+                        <div class="min-w-0 flex-grow">
+                            <p class="text-xs font-bold truncate text-secondary">${song.artist}</p>
+                            <p class="text-[10px] opacity-50 truncate italic">${song.title}</p>
+                        </div>
+                    </div>
+                    <button type="button" class="remove-slot-btn text-xs text-red-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors flex-shrink-0">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+
+                slot.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', song.id);
+                    e.dataTransfer.setData('source', 'slot');
+                    e.dataTransfer.setData('sourceIndex', idx.toString());
+                    slot.classList.add('opacity-40');
+                });
+
+                slot.addEventListener('dragend', () => {
+                    slot.classList.remove('opacity-40');
+                });
+
+                const removeBtn = slot.querySelector('.remove-slot-btn');
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        removeSongFromSlot(idx);
+                    });
+                }
+            } else {
+                slot.innerHTML = `
+                    <div class="flex items-center gap-3 min-w-0 flex-grow opacity-40">
+                        <span class="text-[11px] font-black px-2.5 py-1 rounded-xl flex-shrink-0 ${badgeStyle}">${badgeText}</span>
+                        <span class="text-xs italic tracking-wide truncate">Slepp ein song her for ${score}p...</span>
+                    </div>
+                `;
+            }
+
+            // Dragover & Drop handlers on slot target
+            slot.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                slot.classList.add('border-indigo-500', 'bg-indigo-500/20', 'scale-[1.01]');
+            });
+
+            slot.addEventListener('dragleave', () => {
+                slot.classList.remove('border-indigo-500', 'bg-indigo-500/20', 'scale-[1.01]');
+            });
+
+            slot.addEventListener('drop', (e) => {
+                e.preventDefault();
+                slot.classList.remove('border-indigo-500', 'bg-indigo-500/20', 'scale-[1.01]');
+                const droppedSongId = e.dataTransfer.getData('text/plain');
+                if (droppedSongId) {
+                    placeSongInSlot(droppedSongId, idx);
+                }
+            });
+
+            dragPointLadder.appendChild(slot);
+        });
+    };
+
+    // Drop on unassigned pool to remove from slot
+    dragSongsPool.addEventListener('dragover', (e) => {
+        e.preventDefault();
+    });
+
+    dragSongsPool.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const source = e.dataTransfer.getData('source');
+        const sourceIndex = parseInt(e.dataTransfer.getData('sourceIndex'), 10);
+        if (source === 'slot' && !isNaN(sourceIndex)) {
+            removeSongFromSlot(sourceIndex);
+        }
+    });
+
+    // Initialize mode and view
+    syncFromSelectsToPlaced();
+    setMode(activeMode);
 })();
 </script>
 
