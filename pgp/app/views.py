@@ -19,7 +19,7 @@ from docx import Document
 import logging
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
-from .utils import get_combined_song_data, get_round_winners, LoggedInPlayerStats, get_user_chart_data
+from .utils import get_combined_song_data, get_round_winners, LoggedInPlayerStats, get_user_chart_data, get_form_chart_data
 from django.core.paginator import Paginator, EmptyPage
 from django.http import JsonResponse
 import json
@@ -60,12 +60,16 @@ def home(request):
             logged_in_player_stats = None
             chart_data = None
 
+    form_data = get_form_chart_data(limit=10)
+
     return render(request, 'app/home.html', {
         'players': players,
         'active_rounds': active_rounds,
         'stats': stats,
         'logged_in_player_stats': logged_in_player_stats,
         'chart_data': json.dumps(chart_data) if chart_data else None,
+        'form_data': form_data,
+        'form_chart_json': json.dumps(form_data['chart_data']) if form_data else None,
     })
 
 
@@ -399,7 +403,16 @@ def vote_view(request, pk):
     round_instance = get_object_or_404(Round, pk=pk)
     player = Player.objects.get(user=request.user)
     player_song = Song.objects.filter(round=round_instance, player=player).first()
-    songs = Song.objects.filter(round=round_instance).exclude(player=player).order_by('artist', 'title')
+    
+    # Exclude songs submitted by current user/player
+    songs = Song.objects.filter(round=round_instance).exclude(
+        player__user=request.user
+    ).exclude(
+        player=player
+    ).order_by('artist', 'title')
+
+    if player_song:
+        songs = songs.exclude(pk=player_song.pk)
 
     if request.method == 'POST':
         form = DynamicVoteForm(request.POST, songs=songs)
@@ -414,6 +427,11 @@ def vote_view(request, pk):
                     song_id = field_name.split('-')[1]
                     song = get_object_or_404(Song, pk=song_id)
                     
+                    # Extra safety check: prevent voting for own song
+                    if song.player == player or song.player.user == request.user or (player_song and song.pk == player_song.pk):
+                        logger.warning(f"Self-vote attempt blocked: Player {player.nickname}, Song {song.title}")
+                        continue
+
                     # Check if the player has already voted for this song
                     if not Vote.objects.filter(player=player, song=song).exists():
                         Vote.objects.create(player=player, song=song, score=int(score))

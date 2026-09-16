@@ -213,3 +213,103 @@ def get_user_chart_data(player):
     
     return None
 
+
+def get_form_chart_data(limit=10):
+    """
+    Generate form statistics and chart data over the last `limit` finished rounds.
+    Returns a dict with 'num_rounds', 'leaderboard', and 'chart_data'.
+    """
+    finished_rounds = list(Round.objects.filter(round_finished=True).order_by('-start_date')[:limit])
+    
+    # Fallback for dev/test environments where rounds have songs but round_finished is not set True yet
+    if not finished_rounds:
+        finished_rounds = list(Round.objects.filter(song__isnull=False).distinct().order_by('-start_date')[:limit])
+
+    if not finished_rounds:
+        return None
+
+    # Chronological order (oldest to newest among last `limit` rounds)
+    finished_rounds.reverse()
+
+    round_ids = [r.id for r in finished_rounds]
+    round_labels = [r.name[:15] for r in finished_rounds]
+
+    # Map (player_id, round_id) -> score
+    songs = Song.objects.filter(round_id__in=round_ids).select_related('player', 'round')
+    
+    player_scores = {}  # player_id -> {round_id -> score}
+    players_dict = {}   # player_id -> Player object
+
+    for song in songs:
+        p_id = song.player_id
+        r_id = song.round_id
+        if p_id not in player_scores:
+            player_scores[p_id] = {}
+            players_dict[p_id] = song.player
+        player_scores[p_id][r_id] = song.total_score
+
+    if not player_scores:
+        return None
+
+    # Calculate form stats for each player
+    leaderboard = []
+    for p_id, rounds_map in player_scores.items():
+        player = players_dict[p_id]
+        scores_list = [rounds_map.get(r_id, None) for r_id in round_ids]
+        valid_scores = [s for s in scores_list if s is not None]
+        total_points = sum(valid_scores)
+        rounds_played = len(valid_scores)
+        avg_points = round(total_points / rounds_played, 1) if rounds_played > 0 else 0
+
+        leaderboard.append({
+            'player_id': p_id,
+            'nickname': player.nickname,
+            'user_id': player.user_id,
+            'total_points': total_points,
+            'rounds_played': rounds_played,
+            'avg_points': avg_points,
+            'scores_history': scores_list,
+            'recent_scores': valid_scores[-5:],
+        })
+
+    # Sort leaderboard by total_points descending, then avg_points
+    leaderboard.sort(key=lambda x: (x['total_points'], x['avg_points']), reverse=True)
+
+    # Colors palette for Chart.js datasets
+    colors = [
+        '#6366f1', # Indigo
+        '#10b981', # Emerald
+        '#f59e0b', # Amber
+        '#ec4899', # Pink
+        '#8b5cf6', # Purple
+        '#06b6d4', # Cyan
+        '#ef4444', # Red
+        '#3b82f6', # Blue
+    ]
+
+    top_players = leaderboard[:8]
+    datasets = []
+    for idx, p_stat in enumerate(top_players):
+        color = colors[idx % len(colors)]
+        datasets.append({
+            'label': f"@{p_stat['nickname']}",
+            'data': p_stat['scores_history'],
+            'borderColor': color,
+            'backgroundColor': color + '20',
+            'borderWidth': 3,
+            'tension': 0.35,
+            'pointRadius': 4,
+            'pointHoverRadius': 7,
+            'spanGaps': True,
+        })
+
+    return {
+        'num_rounds': len(finished_rounds),
+        'leaderboard': leaderboard,
+        'chart_data': {
+            'labels': round_labels,
+            'datasets': datasets,
+        }
+    }
+
+
